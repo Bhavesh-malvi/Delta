@@ -1,5 +1,4 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -45,6 +44,9 @@ app.use('/api/careers', careerRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/enrolls', enrollRoutes);
 
+app.get('/', (req, res) => {
+    res.send('Welcome to the Home Page');
+});
 // MongoDB connection
 connectDB();
 
