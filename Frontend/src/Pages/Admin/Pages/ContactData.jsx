@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ContactData.css';
+import { API_BASE_URL } from '../../../config/api';
+
+const API_ENDPOINT = `${API_BASE_URL}/api/contacts`;
 
 const ContactData = () => {
     const [contacts, setContacts] = useState([]);
@@ -10,7 +13,7 @@ const ContactData = () => {
     // Fetch contacts
     const fetchContacts = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/contacts');
+            const response = await axios.get(API_ENDPOINT);
             setContacts(response.data.data);
             setLoading(false);
         } catch (error) {
@@ -22,7 +25,7 @@ const ContactData = () => {
     // Delete contact
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/contacts/${id}`);
+            await axios.delete(`${API_ENDPOINT}/${id}`);
             setContacts(contacts.filter(contact => contact._id !== id));
         } catch (error) {
             setError('Error deleting contact');

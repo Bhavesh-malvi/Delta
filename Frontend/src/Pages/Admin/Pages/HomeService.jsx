@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './HomeService.css';
 import axios from 'axios';
+import { API_BASE_URL, UPLOADS_BASE_URL } from '../../../config/api';
 
-
-const API_BASE_URL = 'http://localhost:5000/api/homeservices';
-const UPLOADS_BASE_URL = 'http://localhost:5000/uploads/services';
+const API_ENDPOINT = `${API_BASE_URL}/api/homeservices`;
+const UPLOADS_ENDPOINT = `${UPLOADS_BASE_URL}/services`;
 
 const HomeService = () => {
     const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const HomeService = () => {
     // Fetch existing services
     const fetchServices = async () => {
         try {
-            const response = await axios.get(API_BASE_URL);
+            const response = await axios.get(API_ENDPOINT);
             setServices(response.data.data);
         } catch (err) {
             setError('Failed to fetch services');
@@ -83,7 +83,7 @@ const HomeService = () => {
             description: service.description,
             image: null
         });
-        setPreviewImage(`${UPLOADS_BASE_URL}/${service.image}`);
+        setPreviewImage(`${UPLOADS_ENDPOINT}/${service.image}`);
         window.scrollTo(0, 0);
     };
 
@@ -108,14 +108,14 @@ const HomeService = () => {
 
             if (editingId) {
                 // Update existing service
-                await axios.put(`${API_BASE_URL}/${editingId}`, formDataToSend, {
+                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
             } else {
                 // Create new service
-                await axios.post(API_BASE_URL, formDataToSend, {
+                await axios.post(API_ENDPOINT, formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -139,7 +139,7 @@ const HomeService = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_BASE_URL}/${id}`);
+            await axios.delete(`${API_ENDPOINT}/${id}`);
             fetchServices();
         } catch (err) {
             setError('Failed to delete service');
@@ -235,7 +235,7 @@ const HomeService = () => {
                                 {service.image && (
                                     <div className="service-image-container">
                                         <img 
-                                            src={`${UPLOADS_BASE_URL}/${service.image}`}
+                                            src={`${UPLOADS_ENDPOINT}/${service.image}`}
                                             alt={service.title}
                                         />
                                     </div>

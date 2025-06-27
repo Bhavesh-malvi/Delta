@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './EnrollForm.css';
+import { API_BASE_URL } from '../../config/api';
+
+const API_ENDPOINT = `${API_BASE_URL}/api/enrolls`;
 
 const EnrollForm = () => {
     const [formData, setFormData] = useState({
@@ -23,7 +26,7 @@ const EnrollForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5000/api/enrolls', formData);
+            const response = await axios.post(API_ENDPOINT, formData);
             if (response.data.success) {
                 setStatus({ type: 'success', message: 'Enrollment submitted successfully!' });
                 setFormData({ name: '', email: '', phone: '', course: '', message: '' });

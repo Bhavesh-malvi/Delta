@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './HomeContent.css';
 import axios from 'axios';
+import { API_BASE_URL, UPLOADS_BASE_URL } from '../../../config/api';
 
-
-const API_BASE_URL = 'http://localhost:5000/api/homecontent';
-const UPLOADS_BASE_URL = 'http://localhost:5000/uploads/content';
+const API_ENDPOINT = `${API_BASE_URL}/api/homecontent`;
+const UPLOADS_ENDPOINT = `${UPLOADS_BASE_URL}/content`;
 
 const HomeContent = () => {
     const [formData, setFormData] = useState({
@@ -23,7 +23,7 @@ const HomeContent = () => {
     const fetchContent = async () => {
         setContentLoading(true);
         try {
-            const response = await axios.get(API_BASE_URL);
+            const response = await axios.get(API_ENDPOINT);
             console.log('Fetched content:', response.data.data);
             setContent(response.data.data || []);
         } catch (err) {
@@ -86,7 +86,7 @@ const HomeContent = () => {
             title: item.title,
             image: null
         });
-        setPreviewImage(`${UPLOADS_BASE_URL}/${item.image}`);
+        setPreviewImage(`${UPLOADS_ENDPOINT}/${item.image}`);
         window.scrollTo(0, 0);
     };
 
@@ -110,7 +110,7 @@ const HomeContent = () => {
 
             if (editingId) {
                 // Update existing content
-                await axios.put(`${API_BASE_URL}/${editingId}`, formDataToSend, {
+                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -118,7 +118,7 @@ const HomeContent = () => {
                 setMessage({ text: 'Content updated successfully!', type: 'success' });
             } else {
                 // Create new content
-                await axios.post(API_BASE_URL, formDataToSend, {
+                await axios.post(API_ENDPOINT, formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -145,7 +145,7 @@ const HomeContent = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_BASE_URL}/${id}`);
+            await axios.delete(`${API_ENDPOINT}/${id}`);
             setMessage({ text: 'Content deleted successfully!', type: 'success' });
             fetchContent();
         } catch (err) {
@@ -243,7 +243,7 @@ const HomeContent = () => {
                                     {item.image && (
                                         <div className="content-image-container">
                                             <img 
-                                                src={`${UPLOADS_BASE_URL}/${item.image}`}
+                                                src={`${UPLOADS_ENDPOINT}/${item.image}`}
                                                 alt={item.title}
                                                 onError={(e) => {
                                                     console.error('Error loading image:', e);

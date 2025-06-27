@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import './AutoSlider.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
+
+const API_ENDPOINT = `${API_BASE_URL}/api/homecontent`;
 
 const AutoSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -13,7 +16,7 @@ const AutoSlider = () => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/homecontent');
+        const response = await axios.get(API_ENDPOINT);
         console.log('Fetched data:', response.data);
         if (response.data && response.data.success && Array.isArray(response.data.data)) {
           setContent(response.data.data);

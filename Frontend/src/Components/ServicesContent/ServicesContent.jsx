@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './ServicesContent.css';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
+
+const API_ENDPOINT = `${API_BASE_URL}/api/servicecontent`;
 
 const ServicesContent = () => {
     const [content, setContent] = useState([]);
@@ -11,7 +14,7 @@ const ServicesContent = () => {
     useEffect(() => {
         const fetchContent = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/servicecontent');
+                const response = await axios.get(API_ENDPOINT);
                 console.log('Fetched service content:', response.data);
                 if (response.data && Array.isArray(response.data)) {
                     setContent(response.data);

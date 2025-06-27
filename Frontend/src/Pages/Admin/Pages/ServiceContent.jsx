@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './ServiceContent.css';
 import axios from 'axios';
+import { API_BASE_URL, UPLOADS_BASE_URL } from '../../../config/api';
 
-
-const API_BASE_URL = 'http://localhost:5000/api/servicecontent';
-const UPLOADS_BASE_URL = 'http://localhost:5000/uploads/services';
+const API_ENDPOINT = `${API_BASE_URL}/api/servicecontent`;
+const UPLOADS_ENDPOINT = `${UPLOADS_BASE_URL}/services`;
 
 const ServiceContent = () => {
     const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const ServiceContent = () => {
 
     const fetchServices = async () => {
         try {
-            const response = await axios.get(API_BASE_URL);
+            const response = await axios.get(API_ENDPOINT);
             setServices(response.data.data);
         } catch (error) {
             console.error('Error fetching services:', error);
@@ -111,14 +111,14 @@ const ServiceContent = () => {
             });
 
             if (editingId) {
-                await axios.put(`${API_BASE_URL}/${editingId}`, formDataToSend, {
+                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
                 setMessage({ text: 'Service content updated successfully', type: 'success' });
             } else {
-                await axios.post(API_BASE_URL, formDataToSend, {
+                await axios.post(API_ENDPOINT, formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -155,13 +155,13 @@ const ServiceContent = () => {
             image: null,
             points: [...service.points, ...Array(Math.max(0, 4 - service.points.length)).fill('')]
         });
-        setPreviewImage(`${UPLOADS_BASE_URL}/${service.image}`);
+        setPreviewImage(`${UPLOADS_ENDPOINT}/${service.image}`);
         setEditingId(service._id);
     };
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_BASE_URL}/${id}`);
+            await axios.delete(`${API_ENDPOINT}/${id}`);
             setMessage({ text: 'Service content deleted successfully', type: 'success' });
             fetchServices();
         } catch (error) {
@@ -303,7 +303,7 @@ const ServiceContent = () => {
                                 {service.image && (
                                     <div className="service-image-container">
                                         <img 
-                                            src={`${UPLOADS_BASE_URL}/${service.image}`}
+                                            src={`${UPLOADS_ENDPOINT}/${service.image}`}
                                             alt={service.title}
                                         />
                                     </div>

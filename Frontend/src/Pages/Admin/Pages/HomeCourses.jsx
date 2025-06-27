@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './HomeCourses.css';
 import axios from 'axios';
+import { API_BASE_URL } from '../../../config/api';
 
-const API_BASE_URL = 'http://localhost:5000/api/homecourses';
+const API_ENDPOINT = `${API_BASE_URL}/api/homecourses`;
 
 const HomeCourses = () => {
     const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ const HomeCourses = () => {
 
     const fetchCourses = async () => {
         try {
-            const response = await axios.get(API_BASE_URL);
+            const response = await axios.get(API_ENDPOINT);
             setCourses(response.data);
         } catch (error) {
             console.error('Error fetching courses:', error);
@@ -42,10 +43,10 @@ const HomeCourses = () => {
 
         try {
             if (editingId) {
-                await axios.put(`${API_BASE_URL}/${editingId}`, formData);
+                await axios.put(`${API_ENDPOINT}/${editingId}`, formData);
                 setMessage({ text: 'Course updated successfully', type: 'success' });
             } else {
-                await axios.post(API_BASE_URL, formData);
+                await axios.post(API_ENDPOINT, formData);
                 setMessage({ text: 'Course added successfully', type: 'success' });
             }
 
@@ -78,7 +79,7 @@ const HomeCourses = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_BASE_URL}/${id}`);
+            await axios.delete(`${API_ENDPOINT}/${id}`);
             setMessage({ text: 'Course deleted successfully', type: 'success' });
             fetchCourses();
         } catch (error) {

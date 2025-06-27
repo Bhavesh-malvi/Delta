@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './CareerCoursesSection.css';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 
-const API_BASE_URL = 'http://localhost:5000/api/careers';
+const API_ENDPOINT = `${API_BASE_URL}/api/careers`;
 
 function CareerCoursesSection() {
     const [expandedCards, setExpandedCards] = useState({});
@@ -16,7 +17,7 @@ function CareerCoursesSection() {
 
     const fetchCareers = async () => {
         try {
-            const response = await axios.get(API_BASE_URL);
+            const response = await axios.get(API_ENDPOINT);
             console.log('Fetched careers:', response.data);
             if (response.data && Array.isArray(response.data)) {
                 setCareers(response.data);

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './Career.css';
 import axios from 'axios';
+import { API_BASE_URL, UPLOADS_BASE_URL } from '../../../config/api';
 
-
-const API_BASE_URL = 'http://localhost:5000/api/careers';
-const UPLOADS_BASE_URL = 'http://localhost:5000/uploads/careers';
+const API_ENDPOINT = `${API_BASE_URL}/api/careers`;
+const UPLOADS_ENDPOINT = `${UPLOADS_BASE_URL}/careers`;
 
 const Career = () => {
     const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const Career = () => {
 
     const fetchCareers = async () => {
         try {
-            const response = await axios.get(API_BASE_URL);
+            const response = await axios.get(API_ENDPOINT);
             setCareers(response.data?.data || []);
         } catch (error) {
             console.error('Error fetching careers:', error);
@@ -125,14 +125,14 @@ const Career = () => {
             });
 
             if (editingId) {
-                await axios.put(`${API_BASE_URL}/${editingId}`, formDataToSend, {
+                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
                 setMessage({ text: 'Career course updated successfully', type: 'success' });
             } else {
-                await axios.post(API_BASE_URL, formDataToSend, {
+                await axios.post(API_ENDPOINT, formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -170,14 +170,14 @@ const Career = () => {
             image: null,
             points: [...career.points, ...Array(Math.max(0, 4 - career.points.length)).fill('')]
         });
-        setPreviewImage(`${UPLOADS_BASE_URL}/${career.image}`);
+        setPreviewImage(`${UPLOADS_ENDPOINT}/${career.image}`);
         setPointCount(Math.max(4, career.points.length));
         setEditingId(career._id);
     };
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_BASE_URL}/${id}`);
+            await axios.delete(`${API_ENDPOINT}/${id}`);
             setMessage({ text: 'Career course deleted successfully', type: 'success' });
             fetchCareers();
         } catch (error) {
@@ -320,7 +320,7 @@ const Career = () => {
                                 {career.image && (
                                     <div className="career-image-container">
                                         <img 
-                                            src={`${UPLOADS_BASE_URL}/${career.image}`} 
+                                            src={`${UPLOADS_ENDPOINT}/${career.image}`} 
                                             alt={career.title} 
                                             className="career-image"
                                             onError={(e) => {

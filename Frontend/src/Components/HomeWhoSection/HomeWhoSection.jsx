@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './HomeWhoSection.css';
+import { API_BASE_URL } from '../../config/api';
+
+const API_ENDPOINT = `${API_BASE_URL}/api/homecourses`;
 
 const HomeWhoSection = () => {
     const [courses, setCourses] = useState([]);
@@ -10,7 +13,7 @@ const HomeWhoSection = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/homecourses');
+                const response = await axios.get(API_ENDPOINT);
                 console.log('Fetched courses:', response.data);
                 if (response.data && Array.isArray(response.data)) {
                     setCourses(response.data);

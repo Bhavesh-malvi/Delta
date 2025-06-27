@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './HomeServiceSection.css';
+import { API_BASE_URL } from '../../config/api';
+
+const API_ENDPOINT = `${API_BASE_URL}/api/homeservices`;
 
 const HomeServiceSection = () => {
     const [services, setServices] = useState([]);
@@ -10,7 +13,7 @@ const HomeServiceSection = () => {
     useEffect(() => {
         const fetchServices = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/homeservices');
+                const response = await axios.get(API_ENDPOINT);
                 console.log('Fetched services:', response.data);
                 if (response.data && response.data.success && Array.isArray(response.data.data)) {
                     setServices(response.data.data);

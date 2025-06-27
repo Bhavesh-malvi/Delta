@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesSlider.css';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
+
+const API_ENDPOINT = `${API_BASE_URL}/api/homecontent`;
 
 function ServicesSlider() {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -13,7 +16,7 @@ function ServicesSlider() {
     useEffect(() => {
         const fetchContent = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/homecontent');
+                const response = await axios.get(API_ENDPOINT);
                 console.log('Fetched content:', response.data);
                 if (response.data && Array.isArray(response.data)) {
                     setContent(response.data);
