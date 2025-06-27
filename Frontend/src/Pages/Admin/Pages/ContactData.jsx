@@ -1,70 +1,65 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance, { ENDPOINTS } from '../../../config/api';
 import './ContactData.css';
-import { API_BASE_URL } from '../../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/contacts`;
 
 const ContactData = () => {
     const [contacts, setContacts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Fetch contacts
-    const fetchContacts = async () => {
-        try {
-            const response = await axios.get(API_ENDPOINT);
-            setContacts(response.data.data);
-            setLoading(false);
-        } catch (error) {
-            setError('Error fetching contacts');
-            setLoading(false);
-        }
-    };
-
-    // Delete contact
-    const handleDelete = async (id) => {
-        try {
-            await axios.delete(`${API_ENDPOINT}/${id}`);
-            setContacts(contacts.filter(contact => contact._id !== id));
-        } catch (error) {
-            setError('Error deleting contact');
-        }
-    };
-
     useEffect(() => {
         fetchContacts();
     }, []);
 
-    if (loading) return <div className="loading">Loading...</div>;
-    if (error) return <div className="error">{error}</div>;
+    const fetchContacts = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.get(ENDPOINTS.CONTACT);
+            setContacts(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching contacts:', err);
+            setError(err.userMessage || 'Failed to fetch contacts');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return <div className="loading">Loading contacts...</div>;
+    }
+
+    if (error) {
+        return (
+            <div className="error">
+                {error}
+                <button onClick={fetchContacts}>Retry</button>
+            </div>
+        );
+    }
 
     return (
-        <div className="contact-data">
-            <h2>Contact Submissions</h2>
-            <div className="contact-list">
-                {contacts.length === 0 ? (
-                    <div className="no-data">No contact submissions found</div>
-                ) : (
-                    contacts.map(contact => (
-                        <div key={contact._id} className="contact-card">
-                            <div className="contact-info">
-                                <h3>{contact.name}</h3>
-                                <p><strong>Email:</strong> {contact.email}</p>
-                                <p><strong>Phone:</strong> {contact.phone}</p>
-                                <p><strong>Message:</strong> {contact.message}</p>
-                                <p><strong>Date:</strong> {new Date(contact.createdAt).toLocaleDateString()}</p>
-                            </div>
-                            <button 
-                                className="delete-btn"
-                                onClick={() => handleDelete(contact._id)}
-                                title="Delete"
-                            >
-                                <i className="fas fa-trash-alt"></i>
-                            </button>
+        <div className="contacts-container">
+            <h2>Contact Inquiries</h2>
+            <div className="contacts-grid">
+                {contacts.map(contact => (
+                    <div key={contact._id} className="contact-card">
+                        <div className="contact-header">
+                            <h3>{contact.name}</h3>
+                            <span className="contact-date">
+                                {new Date(contact.createdAt).toLocaleDateString()}
+                            </span>
                         </div>
-                    ))
-                )}
+                        <div className="contact-info">
+                            <p><strong>Email:</strong> {contact.email}</p>
+                            <p><strong>Phone:</strong> {contact.phone}</p>
+                            <p><strong>Message:</strong> {contact.message}</p>
+                        </div>
+                        <div className="contact-actions">
+                            <button className="delete-btn">Delete</button>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

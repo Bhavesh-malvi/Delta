@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './HomeContent.css';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
 
 const API_ENDPOINT = `${API_BASE_URL}/api/homecontent`;
 
@@ -63,16 +64,16 @@ const HomeContent = () => {
     const compressImage = async (file) => {
         return new Promise((resolve) => {
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
                 const img = new Image();
+                img.src = event.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
                     let width = img.width;
                     let height = img.height;
-
-                    // Max dimensions
-                    const MAX_WIDTH = 1000;
-                    const MAX_HEIGHT = 1000;
 
                     if (width > height) {
                         if (width > MAX_WIDTH) {
@@ -88,69 +89,50 @@ const HomeContent = () => {
 
                     canvas.width = width;
                     canvas.height = height;
-
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Convert to blob with quality 0.7 (70%)
                     canvas.toBlob((blob) => {
                         resolve(new File([blob], file.name, {
                             type: 'image/jpeg',
-                            lastModified: Date.now(),
+                            lastModified: Date.now()
                         }));
                     }, 'image/jpeg', 0.7);
                 };
-                img.src = e.target.result;
             };
-            reader.readAsDataURL(file);
         });
     };
 
     const handleImageChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            if (file.type.startsWith('image/')) {
-                try {
-                    // Show loading state for compression
-                    setMessage({ text: 'Optimizing image...', type: 'info' });
-                    
-                    // Compress image
-                    const compressedFile = await compressImage(file);
-                    
-                    setFormData(prev => ({
-                        ...prev,
-                        image: compressedFile
-                    }));
+        if (!file) return;
 
-                    // Create preview URL
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setPreviewImage(reader.result);
-                        setMessage({ text: '', type: '' });
-                    };
-                    reader.readAsDataURL(compressedFile);
-                } catch (error) {
-                    setMessage({ text: 'Error processing image', type: 'error' });
-                    e.target.value = '';
-                }
-            } else {
-                setMessage({ text: 'Please upload an image file', type: 'error' });
-                e.target.value = '';
-            }
+        try {
+            // Show preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+
+            // Compress image
+            const compressedFile = await compressImage(file);
+            setFormData(prev => ({ ...prev, image: compressedFile }));
+        } catch (error) {
+            console.error('Error processing image:', error);
+            setMessage({
+                text: 'Error processing image. Please try again.',
+                type: 'error'
+            });
         }
     };
 
     const resetForm = () => {
-        setFormData({
-            title: '',
-            image: null
-        });
+        setFormData({ title: '', image: null });
         setPreviewImage(null);
         setEditingId(null);
         setUploadProgress(0);
-        // Reset file input
-        const fileInput = document.getElementById('image');
-        if (fileInput) fileInput.value = '';
+        setMessage({ text: '', type: '' });
     };
 
     const handleEdit = (item) => {
@@ -160,48 +142,49 @@ const HomeContent = () => {
             image: null
         });
         setPreviewImage(item.image);
-        window.scrollTo(0, 0);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (!editingId && !formData.image) {
             setMessage({ text: 'Please select an image', type: 'error' });
             return;
         }
 
-        setLoading(true);
-        setMessage({ text: '', type: '' });
-        setUploadProgress(0);
-
         try {
-            // Create FormData object
-            const formDataToSend = new FormData();
-            formDataToSend.append('title', formData.title);
-            if (formData.image instanceof File) {
-                formDataToSend.append('image', formData.image);
+            setLoading(true);
+            setMessage({ text: '', type: '' });
+
+            const data = new FormData();
+            data.append('title', formData.title);
+            if (formData.image) {
+                data.append('image', formData.image);
             }
 
             const config = {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
                 onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadProgress(percentCompleted);
-                },
-                timeout: 60000 // 60 second timeout
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(progress);
+                }
             };
 
+            let response;
             if (editingId) {
-                // Update existing content
-                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, config);
-                setMessage({ text: 'Content updated successfully!', type: 'success' });
+                response = await axiosInstance.put(
+                    `${ENDPOINTS.HOME_CONTENT}/${editingId}`,
+                    data,
+                    config
+                );
+                setMessage({ text: 'Content updated successfully', type: 'success' });
             } else {
-                // Create new content
-                const response = await axios.post(API_ENDPOINT, formDataToSend, config);
-                setMessage({ text: 'Content added successfully!', type: 'success' });
-                console.log('Server response:', response.data);
+                response = await axiosInstance.post(
+                    ENDPOINTS.HOME_CONTENT,
+                    data,
+                    config
+                );
+                setMessage({ text: 'Content added successfully', type: 'success' });
             }
 
             // Reset form
@@ -212,12 +195,35 @@ const HomeContent = () => {
         } catch (error) {
             console.error('Error:', error);
             setMessage({ 
-                text: error.response?.data?.message || 'Error processing your request',
+                text: error.userMessage || 'Error processing your request',
                 type: 'error'
             });
         } finally {
             setLoading(false);
             setUploadProgress(0);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            setLoading(true);
+            await axiosInstance.delete(`${ENDPOINTS.HOME_CONTENT}/${id}`);
+            
+            setMessage({
+                text: 'Content deleted successfully',
+                type: 'success'
+            });
+            
+            // Refresh the content list
+            fetchContent();
+        } catch (error) {
+            console.error('Error deleting content:', error);
+            setMessage({
+                text: error.userMessage || 'Failed to delete content',
+                type: 'error'
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -366,7 +372,7 @@ const HomeContent = () => {
                                         alt={item.title}
                                         onError={(e) => {
                                             e.target.onerror = null;
-                                            e.target.src = 'placeholder-image.jpg';
+                                            e.target.src = '/placeholder-image.jpg';
                                         }}
                                     />
                                 </div>

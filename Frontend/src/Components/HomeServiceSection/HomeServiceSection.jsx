@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
 import './HomeServiceSection.css';
-import { API_BASE_URL } from '../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/homeservices`;
 
 const HomeServiceSection = () => {
     const [services, setServices] = useState([]);
@@ -13,17 +10,16 @@ const HomeServiceSection = () => {
     useEffect(() => {
         const fetchServices = async () => {
             try {
-                const response = await axios.get(API_ENDPOINT);
-                console.log('Fetched services:', response.data);
-                if (response.data && response.data.success && Array.isArray(response.data.data)) {
-                    setServices(response.data.data);
+                const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
+                if (response.data && Array.isArray(response.data)) {
+                    setServices(response.data);
                 } else {
                     setError('Invalid data format received');
                 }
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching services:', err);
-                setError('Failed to fetch services: ' + err.message);
+                setError(err.userMessage || 'Failed to fetch services');
                 setLoading(false);
             }
         };
@@ -63,9 +59,13 @@ const HomeServiceSection = () => {
                     <div className="service-card" key={service._id}>
                         <div className="service-image-container">
                             <img 
-                                src={`http://localhost:5000/uploads/services/${service.image}`} 
+                                src={`${UPLOAD_URLS.SERVICES}/${service.image}`}
                                 alt={service.title} 
-                                className="service-image" 
+                                className="service-image"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = '/placeholder-service.jpg';
+                                }}
                             />
                             <div className="image-overlay"></div>
                         </div>

@@ -21,6 +21,13 @@ export const ENDPOINTS = {
     HEALTH: '/api/health'
 };
 
+// Upload URLs
+export const UPLOAD_URLS = {
+    SERVICES: `${API_BASE_URL}/uploads/services`,
+    CAREERS: `${API_BASE_URL}/uploads/careers`,
+    CONTENT: `${API_BASE_URL}/uploads/content`
+};
+
 // Default headers
 export const DEFAULT_HEADERS = {
     'Content-Type': 'application/json'
@@ -38,10 +45,9 @@ export const ERROR_MESSAGES = {
     DEFAULT: 'An unexpected error occurred.'
 };
 
-// Configure axios defaults
+// Configure axios instance
 import axios from 'axios';
 
-// Configure axios instance
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: API_TIMEOUT,
@@ -70,7 +76,5 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-
-export const UPLOADS_BASE_URL = `${API_BASE_URL}/uploads`;
 
 export default axiosInstance; 
