@@ -256,49 +256,42 @@ const HomeService = () => {
             </form>
 
             <div className="services-list">
-                <h3>
-                    Existing Services
-                    <button 
-                        className="refresh-btn"
-                        onClick={fetchServices}
-                        disabled={loading}
-                    >
-                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
-                    </button>
-                </h3>
-
-                {loading ? (
-                    <div className="loading">
-                        <i className="fas fa-spinner fa-spin"></i>
-                        Loading services...
-                    </div>
-                ) : services.length === 0 ? (
-                    <div className="no-services">
-                        <i className="fas fa-inbox"></i>
-                        <p>No services available</p>
-                    </div>
-                ) : (
-                    <div className="services-grid">
-                        {services.map(service => (
-                            <div key={service._id} className="service-card">
-                                <div className="service-image">
-                                    <img 
-                                        src={`${UPLOAD_URLS.SERVICES}/${service.image}`}
-                                        alt={service.title}
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = '/placeholder-service.jpg';
-                                        }}
-                                    />
-                                </div>
+                <h3>Existing Services</h3>
+                <div className="services-grid">
+                    {loading ? (
+                        <div className="loading">
+                            <i className="fas fa-spinner fa-spin"></i>
+                            Loading services...
+                        </div>
+                    ) : services.length === 0 ? (
+                        <div className="no-services">
+                            <i className="fas fa-inbox"></i>
+                            <p>No services available</p>
+                        </div>
+                    ) : (
+                        services.map(service => (
+                            <div key={service._id} className="service-item">
                                 <div className="service-content">
                                     <h4>{service.title}</h4>
+                                    {service.image && (
+                                        <div className="service-image-container">
+                                            <img 
+                                                src={`${UPLOAD_URLS.SERVICES}/${service.image}`}
+                                                alt={service.title}
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = '/placeholder-service.jpg';
+                                                }}
+                                            />
+                                        </div>
+                                    )}
                                     <p>{service.description}</p>
                                 </div>
                                 <div className="service-actions">
                                     <button
                                         onClick={() => handleEdit(service)}
                                         className="edit-btn"
+                                        title="Edit"
                                         disabled={loading}
                                     >
                                         <i className="fas fa-edit"></i>
@@ -306,15 +299,16 @@ const HomeService = () => {
                                     <button
                                         onClick={() => handleDelete(service._id)}
                                         className="delete-btn"
+                                        title="Delete"
                                         disabled={loading}
                                     >
                                         <i className="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                )}
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -20,7 +20,7 @@ const ServiceContent = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get(ENDPOINTS.SERVICE_CONTENT);
-            setContents(response.data);
+            setContents(response.data.data);
             setError(null);
         } catch (err) {
             console.error('Error fetching contents:', err);
