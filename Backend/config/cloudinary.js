@@ -21,7 +21,7 @@ export const uploadToCloudinary = async (file) => {
                 { quality: 'auto:good' }, // Auto optimize quality
                 { fetch_format: 'auto' } // Auto select best format
             ],
-            timeout: 60000 // Increase timeout to 60 seconds
+            timeout: 10000 // Increase timeout to 10 seconds
         });
         
         return uploadResponse.secure_url;

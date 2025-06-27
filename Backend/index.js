@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import connectDB from './db/db.js';
+import debug from 'debug';
 // Import routes
 import homeCourseRoutes from './Routes/homeCourseRoutes.js';
 import homeContentRoutes from './Routes/homeContentRoutes.js';
@@ -13,6 +14,8 @@ import careerRoutes from './Routes/careerRoutes.js';
 import contactRoutes from './Routes/contactRoutes.js';
 import enrollRoutes from './Routes/enrollRoutes.js';
 
+const log = debug('app:server');
+
 // Load environment variables
 dotenv.config();
 
@@ -20,6 +23,21 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Validate required environment variables
+const requiredEnvVars = [
+    'MONGODB_URI',
+    'CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET'
+];
+
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+    console.error('Error: Missing required environment variables:');
+    missingEnvVars.forEach(envVar => console.error(`- ${envVar}`));
+    process.exit(1);
+}
 
 const app = express();
 
@@ -32,6 +50,7 @@ app.use(cors({
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Log static file requests
 app.use('/uploads', (req, res, next) => {
@@ -56,10 +75,11 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({ 
-        message: 'Internal Server Error',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    console.error('Global error handler:', err);
+    res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? err.message : 'An unexpected error occurred'
     });
 });
 
@@ -69,7 +89,8 @@ const startServer = async () => {
         await connectDB();
         const PORT = process.env.PORT || 5000;
         app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
+            log(`Server running on port ${PORT}`);
+            console.log(`Server running on port ${PORT}`);
         });
     } catch (err) {
         console.error('Failed to start server:', err);
