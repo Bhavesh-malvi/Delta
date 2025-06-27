@@ -1,32 +1,16 @@
 import HomeService from '../models/HomeService.js';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
-// Configure multer for file upload
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = 'uploads/services';
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
     fileFilter: function (req, file, cb) {
         const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
         const mimetype = allowedTypes.test(file.mimetype);
 
-        if (extname && mimetype) {
+        if (mimetype) {
             return cb(null, true);
         } else {
             cb('Error: Images only!');
@@ -95,18 +79,19 @@ export const createHomeService = async (req, res) => {
             const { title, description } = req.body;
             
             if (!title || !description) {
-                // Delete uploaded file if validation fails
-                fs.unlinkSync(req.file.path);
                 return res.status(400).json({
                     success: false,
                     message: 'Title and description are required'
                 });
             }
 
+            // Upload to Cloudinary
+            const imageUrl = await uploadToCloudinary(req.file.buffer);
+
             const service = await HomeService.create({
                 title,
                 description,
-                image: req.file.filename
+                image: imageUrl
             });
 
             res.status(201).json({
@@ -114,10 +99,6 @@ export const createHomeService = async (req, res) => {
                 data: service
             });
         } catch (error) {
-            // Delete uploaded file if service creation fails
-            if (req.file) {
-                fs.unlinkSync(req.file.path);
-            }
             res.status(500).json({
                 success: false,
                 message: error.message
@@ -140,9 +121,6 @@ export const updateHomeService = async (req, res) => {
             const service = await HomeService.findById(req.params.id);
             
             if (!service) {
-                if (req.file) {
-                    fs.unlinkSync(req.file.path);
-                }
                 return res.status(404).json({
                     success: false,
                     message: 'Service not found'
@@ -152,22 +130,16 @@ export const updateHomeService = async (req, res) => {
             const { title, description } = req.body;
             
             if (!title || !description) {
-                if (req.file) {
-                    fs.unlinkSync(req.file.path);
-                }
                 return res.status(400).json({
                     success: false,
                     message: 'Title and description are required'
                 });
             }
 
-            // If new image is uploaded, delete old image
+            // If new image is uploaded, update it
             if (req.file) {
-                const oldImagePath = path.join('uploads/services', service.image);
-                if (service.image && fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath);
-                }
-                service.image = req.file.filename;
+                const imageUrl = await uploadToCloudinary(req.file.buffer);
+                service.image = imageUrl;
             }
 
             service.title = title;
@@ -179,9 +151,6 @@ export const updateHomeService = async (req, res) => {
                 data: service
             });
         } catch (error) {
-            if (req.file) {
-                fs.unlinkSync(req.file.path);
-            }
             res.status(500).json({
                 success: false,
                 message: error.message
@@ -193,34 +162,25 @@ export const updateHomeService = async (req, res) => {
 // Delete home service
 export const deleteHomeService = async (req, res) => {
     try {
-        const homeService = await HomeService.findById(req.params.id);
+        const service = await HomeService.findById(req.params.id);
         
-        if (!homeService) {
+        if (!service) {
             return res.status(404).json({
                 success: false,
-                message: 'Home service not found'
+                message: 'Service not found'
             });
         }
 
-        // Delete image file
-        if (homeService.image) {
-            const imagePath = path.join('uploads/services', homeService.image);
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath);
-            }
-        }
-
-        await homeService.deleteOne();
+        await service.deleteOne();
 
         res.status(200).json({
             success: true,
-            message: 'Home service deleted successfully'
+            message: 'Service deleted successfully'
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error deleting home service',
-            error: error.message
+            message: error.message
         });
     }
 }; 

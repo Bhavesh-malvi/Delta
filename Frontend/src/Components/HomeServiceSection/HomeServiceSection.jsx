@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
+import axiosInstance, { ENDPOINTS } from '../../config/api';
 import './HomeServiceSection.css';
 
 const HomeServiceSection = () => {
@@ -62,7 +62,7 @@ const HomeServiceSection = () => {
                     <div className="service-card" key={service._id}>
                         <div className="service-image-container">
                             <img 
-                                src={`${API_BASE_URL}/uploads/services/${service.image}`}
+                                src={service.image}
                                 alt={service.title} 
                                 className="service-image"
                                 onError={(e) => {
@@ -70,6 +70,7 @@ const HomeServiceSection = () => {
                                     e.target.onerror = null;
                                     e.target.src = '/placeholder-service.jpg';
                                 }}
+                                loading="lazy"
                             />
                             <div className="image-overlay"></div>
                         </div>
