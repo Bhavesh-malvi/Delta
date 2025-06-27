@@ -13,6 +13,7 @@ const HomeContent = () => {
     const [previewImage, setPreviewImage] = useState(null);
     const [contents, setContents] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [contentLoading, setContentLoading] = useState(true);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [message, setMessage] = useState({ text: '', type: '' });
     const [editingId, setEditingId] = useState(null);
@@ -23,10 +24,39 @@ const HomeContent = () => {
 
     const fetchContent = async () => {
         try {
+            setContentLoading(true);
+            setMessage({ text: '', type: '' });
+            
             const response = await axios.get(API_ENDPOINT);
-            setContents(response.data.data);
+            
+            if (response.data.success) {
+                setContents(response.data.data || []);
+            } else {
+                throw new Error(response.data.message || 'Failed to fetch content');
+            }
         } catch (error) {
-            setMessage({ text: 'Error fetching content', type: 'error' });
+            console.error('Error fetching content:', error);
+            let errorMessage = 'Failed to fetch content';
+            
+            if (error.response) {
+                // Server responded with error
+                errorMessage = error.response.data.message || 'Server error occurred';
+                console.error('Server error:', error.response.data);
+            } else if (error.request) {
+                // No response received
+                errorMessage = 'No response from server. Please check your connection.';
+            } else {
+                // Other error
+                errorMessage = error.message;
+            }
+            
+            setMessage({ 
+                text: errorMessage, 
+                type: 'error' 
+            });
+            setContents([]);
+        } finally {
+            setContentLoading(false);
         }
     };
 
@@ -198,6 +228,17 @@ const HomeContent = () => {
             {message.text && (
                 <div className={`message ${message.type}`}>
                     {message.text}
+                    {message.type === 'error' && (
+                        <button 
+                            className="retry-btn"
+                            onClick={() => {
+                                setMessage({ text: '', type: '' });
+                                fetchContent();
+                            }}
+                        >
+                            <i className="fas fa-sync-alt"></i> Retry
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -279,14 +320,56 @@ const HomeContent = () => {
             </form>
 
             <div className="content-list">
-                <h3>Existing Content</h3>
-                {contents.length === 0 ? (
-                    <div className="no-content">No content available</div>
+                <h3>
+                    Existing Content
+                    <button 
+                        className="refresh-btn"
+                        onClick={() => fetchContent()}
+                        disabled={contentLoading}
+                    >
+                        <i className={`fas fa-sync-alt ${contentLoading ? 'fa-spin' : ''}`}></i>
+                    </button>
+                </h3>
+                
+                {contentLoading ? (
+                    <div className="loading">
+                        <i className="fas fa-spinner fa-spin"></i>
+                        Loading content...
+                    </div>
+                ) : contents.length === 0 ? (
+                    <div className="no-content">
+                        {message.type === 'error' ? (
+                            <>
+                                <i className="fas fa-exclamation-circle"></i>
+                                <p>Failed to load content</p>
+                                <button 
+                                    className="retry-btn"
+                                    onClick={() => fetchContent()}
+                                >
+                                    <i className="fas fa-sync-alt"></i> Retry
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <i className="fas fa-inbox"></i>
+                                <p>No content available</p>
+                            </>
+                        )}
+                    </div>
                 ) : (
                     <div className="content-grid">
                         {contents.map(item => (
                             <div key={item._id} className="content-card">
-                                <img src={item.image} alt={item.title} />
+                                <div className="image-container">
+                                    <img 
+                                        src={item.image} 
+                                        alt={item.title}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'placeholder-image.jpg';
+                                        }}
+                                    />
+                                </div>
                                 <h4>{item.title}</h4>
                                 <div className="card-actions">
                                     <button
@@ -299,7 +382,7 @@ const HomeContent = () => {
                                     <button
                                         onClick={() => {
                                             if (window.confirm('Are you sure you want to delete this item?')) {
-                                                // Add delete functionality
+                                                handleDelete(item._id);
                                             }
                                         }}
                                         className="delete-btn"

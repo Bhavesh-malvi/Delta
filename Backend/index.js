@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import connectDB from './db/db.js';
 import debug from 'debug';
 // Import routes
@@ -15,9 +15,6 @@ import contactRoutes from './Routes/contactRoutes.js';
 import enrollRoutes from './Routes/enrollRoutes.js';
 
 const log = debug('app:server');
-
-// Load environment variables
-dotenv.config();
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
