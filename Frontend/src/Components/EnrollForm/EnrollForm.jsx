@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance, { ENDPOINTS } from '../../config/api';
 import './EnrollForm.css';
-import { API_BASE_URL } from '../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/enrolls`;
 
 const EnrollForm = () => {
     const [formData, setFormData] = useState({
@@ -26,7 +23,7 @@ const EnrollForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(API_ENDPOINT, formData);
+            const response = await axiosInstance.post(ENDPOINTS.ENROLL, formData);
             if (response.data.success) {
                 setStatus({ type: 'success', message: 'Enrollment submitted successfully!' });
                 setFormData({ name: '', email: '', phone: '', course: '', message: '' });
@@ -106,12 +103,13 @@ const EnrollForm = () => {
                         </div>
 
                         <div className="form-group">
-                            <label>Message (Optional)</label>
+                            <label>Message</label>
                             <textarea 
                                 name="message"
                                 placeholder="Any specific requirements or questions?" 
                                 value={formData.message}
                                 onChange={handleInputChange}
+                                required
                             ></textarea>
                         </div>
 

@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
+import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../../config/api';
 import './Career.css';
 
 const Career = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        experience: '',
-        location: '',
+        points: [''],
         image: null
     });
     const [careers, setCareers] = useState([]);
@@ -24,7 +23,14 @@ const Career = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get(ENDPOINTS.CAREER);
-            setCareers(response.data.data);
+            console.log('Fetched careers:', response.data);
+            if (response.data && Array.isArray(response.data)) {
+                setCareers(response.data);
+            } else if (response.data && Array.isArray(response.data.data)) {
+                setCareers(response.data.data);
+            } else {
+                setError('Invalid data format received');
+            }
             setError(null);
         } catch (err) {
             console.error('Error fetching careers:', err);
@@ -40,6 +46,32 @@ const Career = () => {
             ...prev,
             [name]: value
         }));
+    };
+
+    const handlePointChange = (index, value) => {
+        const newPoints = [...formData.points];
+        newPoints[index] = value;
+        setFormData(prev => ({
+            ...prev,
+            points: newPoints
+        }));
+    };
+
+    const addPoint = () => {
+        setFormData(prev => ({
+            ...prev,
+            points: [...prev.points, '']
+        }));
+    };
+
+    const removePoint = (index) => {
+        if (formData.points.length > 1) {
+            const newPoints = formData.points.filter((_, i) => i !== index);
+            setFormData(prev => ({
+                ...prev,
+                points: newPoints
+            }));
+        }
     };
 
     const handleImageChange = (e) => {
@@ -67,8 +99,7 @@ const Career = () => {
         setFormData({
             title: '',
             description: '',
-            experience: '',
-            location: '',
+            points: [''],
             image: null
         });
         setPreviewImage(null);
@@ -81,14 +112,29 @@ const Career = () => {
 
     const handleEdit = (career) => {
         setEditingId(career._id);
+        
+        // Convert old Point fields to points array if they exist
+        let points = [''];
+        if (career.points && Array.isArray(career.points)) {
+            points = career.points;
+        } else {
+            // Handle legacy Point1, Point2, etc. fields
+            const legacyPoints = [];
+            for (let i = 1; i <= 7; i++) {
+                if (career[`Point${i}`]) {
+                    legacyPoints.push(career[`Point${i}`]);
+                }
+            }
+            points = legacyPoints.length > 0 ? legacyPoints : [''];
+        }
+
         setFormData({
             title: career.title,
             description: career.description,
-            experience: career.experience,
-            location: career.location,
+            points: points,
             image: null
         });
-        setPreviewImage(`${UPLOAD_URLS.CAREERS}/${career.image}`);
+        setPreviewImage(`${API_BASE_URL}${career.image}`);
         window.scrollTo(0, 0);
     };
 
@@ -106,16 +152,19 @@ const Career = () => {
             const formDataToSend = new FormData();
             formDataToSend.append('title', formData.title);
             formDataToSend.append('description', formData.description);
-            formDataToSend.append('experience', formData.experience);
-            formDataToSend.append('location', formData.location);
+            
+            // Filter out empty points and send as JSON string
+            const filteredPoints = formData.points.filter(point => point.trim() !== '');
+            formDataToSend.append('points', JSON.stringify(filteredPoints));
+            
             if (formData.image) {
                 formDataToSend.append('image', formData.image);
             }
 
             const config = {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             };
 
             if (editingId) {
@@ -145,10 +194,6 @@ const Career = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this career?')) {
-            return;
-        }
-
         try {
             setLoading(true);
             await axiosInstance.delete(`${ENDPOINTS.CAREER}/${id}`);
@@ -231,31 +276,40 @@ const Career = () => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="experience">Experience Required <span className="required">*</span></label>
-                            <input
-                                type="text"
-                        id="experience"
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleInputChange}
-                        placeholder="Enter required experience"
-                        required
-                        disabled={loading}
-                            />
-                        </div>
-
-                <div className="form-group">
-                    <label htmlFor="location">Location <span className="required">*</span></label>
-                    <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        placeholder="Enter job location"
-                        required
-                        disabled={loading}
-                    />
+                    <label>Key Points</label>
+                    <div className="points-container">
+                        {formData.points.map((point, index) => (
+                            <div key={index} className="point-input-group">
+                                <input
+                                    type="text"
+                                    value={point}
+                                    onChange={(e) => handlePointChange(index, e.target.value)}
+                                    placeholder={`Enter point ${index + 1}`}
+                                    disabled={loading}
+                                    className="point-input"
+                                />
+                                {formData.points.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removePoint(index)}
+                                        className="remove-point-btn"
+                                        disabled={loading}
+                                        title="Remove point"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addPoint}
+                            className="add-point-btn"
+                            disabled={loading}
+                        >
+                            <i className="fas fa-plus"></i> Add Point
+                        </button>
+                    </div>
                 </div>
 
                 <div className="form-actions">
@@ -278,7 +332,7 @@ const Career = () => {
                             disabled={loading}
                         >
                             Cancel
-                </button>
+                        </button>
                     )}
                 </div>
             </form>
@@ -304,27 +358,39 @@ const Career = () => {
                                 {career.image && (
                                     <div className="career-image-container">
                                         <img 
-                                                src={`${UPLOAD_URLS.CAREERS}/${career.image}`}
+                                            src={`${API_BASE_URL}${career.image}`}
                                             alt={career.title} 
+                                            onLoad={() => console.log('Image loaded successfully:', `${API_BASE_URL}${career.image}`)}
                                             onError={(e) => {
+                                                console.error('Image failed to load:', e.target.src);
+                                                console.error('Career image path:', career.image);
+                                                console.error('Full image URL:', `${API_BASE_URL}${career.image}`);
                                                 e.target.onerror = null;
-                                                    e.target.src = '/placeholder-career.jpg';
+                                                e.target.src = '/placeholder-career.jpg';
                                             }}
                                         />
                                     </div>
                                 )}
                                 <p>{career.description}</p>
-                                    <div className="career-details">
-                                        <span>Experience: {career.experience}</span>
-                                        <span>Location: {career.location}</span>
-                                    </div>
+                                <div className="career-details">
+                                    {career.points && career.points.length > 0 && (
+                                        <div className="career-points">
+                                            <h5>Key Points:</h5>
+                                            <ul>
+                                                {career.points.map((point, index) => (
+                                                    <li key={index}>{point}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="career-actions">
                                 <button 
                                     onClick={() => handleEdit(career)}
                                     className="edit-btn"
                                     title="Edit"
-                                        disabled={loading}
+                                    disabled={loading}
                                 >
                                     <i className="fas fa-edit"></i>
                                 </button>
@@ -332,7 +398,7 @@ const Career = () => {
                                     onClick={() => handleDelete(career._id)}
                                     className="delete-btn"
                                     title="Delete"
-                                        disabled={loading}
+                                    disabled={loading}
                                 >
                                     <i className="fas fa-trash"></i>
                                 </button>

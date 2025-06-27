@@ -17,13 +17,8 @@ const careerSchema = new mongoose.Schema({
     },
     points: {
         type: [String],
-        required: true,
-        validate: {
-            validator: function(points) {
-                return points.length >= 4;
-            },
-            message: 'At least 4 points are required'
-        }
+        required: false,
+        default: []
     }
 }, {
     timestamps: true

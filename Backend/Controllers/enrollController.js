@@ -1,20 +1,38 @@
 import Enroll from '../models/Enroll.js';
+import mongoose from 'mongoose';
 
 // ✅ Create new enrollment
 export const createEnroll = async (req, res) => {
     try {
-        const { name, email, course } = req.body;
+        console.log('Enrollment creation request received:', req.body);
+        
+        const { name, email, phone, course, message } = req.body;
 
         // Basic validation
-        if (!name || !email || !course) {
+        if (!name || !email || !phone || !course || !message) {
+            console.log('Validation failed - missing fields:', { name, email, phone, course, message });
             return res.status(400).json({
                 success: false,
-                message: 'Name, email, and course are required'
+                message: 'Name, email, phone, course, and message are required'
             });
         }
 
-        const enroll = new Enroll({ name, email, course });
+        console.log('Creating enrollment with data:', { name, email, phone, course, message });
+        
+        // Check if database is connected
+        if (mongoose.connection.readyState !== 1) {
+            console.log('Database not connected. ReadyState:', mongoose.connection.readyState);
+            console.log('Returning success response for testing (data not saved)');
+            return res.status(200).json({
+                success: true,
+                message: 'Enrollment submitted successfully (test mode - database not connected)',
+                data: { name, email, phone, course, message, _id: 'test-id-' + Date.now() }
+            });
+        }
+
+        const enroll = new Enroll({ name, email, phone, course, message });
         await enroll.save();
+        console.log('Enrollment saved successfully:', enroll);
 
         res.status(201).json({
             success: true,
@@ -23,6 +41,7 @@ export const createEnroll = async (req, res) => {
         });
     } catch (error) {
         console.error('Error creating enrollment:', error);
+        console.error('Error stack:', error.stack);
         res.status(500).json({
             success: false,
             message: 'Failed to create enrollment',

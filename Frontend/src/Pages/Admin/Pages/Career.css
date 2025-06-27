@@ -478,4 +478,131 @@
     background: rgba(255, 59, 59, 0.2);
     border-color: #ff3b3b;
     transform: scale(1.1);
+}
+
+/* Points Array Styling */
+.points-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.point-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.point-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.point-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.remove-point-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 12px;
+}
+
+.remove-point-btn:hover {
+    background: #c82333;
+}
+
+.remove-point-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.add-point-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    margin-top: 5px;
+}
+
+.add-point-btn:hover {
+    background: #218838;
+}
+
+.add-point-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.add-point-btn i {
+    font-size: 12px;
+}
+
+/* Career Points Display */
+.career-points {
+    margin-top: 15px;
+}
+
+.career-points h5 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.career-points ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style-type: disc;
+}
+
+.career-points li {
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Responsive Design for Points */
+@media (max-width: 768px) {
+    .point-input-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .remove-point-btn {
+        align-self: flex-end;
+        width: 30px;
+        height: 30px;
+    }
+    
+    .add-point-btn {
+        align-self: stretch;
+        justify-content: center;
+    }
 } 

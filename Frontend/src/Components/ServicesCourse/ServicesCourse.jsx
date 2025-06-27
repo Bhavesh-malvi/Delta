@@ -1,20 +1,23 @@
 import React from 'react';
 import './ServicesCourse.css';
 import { motion } from 'framer-motion';
+import whoImg from '../../assets/img/who.webp';
+import who2Img from '../../assets/img/who2.webp';
+import who3Img from '../../assets/img/who3.webp';
 
 const ServicesCourse = () => {
     const clients = [
         {
             title: "E-Commerce Companies",
-            icon: "/src/assets/img/who.webp"
+            icon: whoImg
         },
         {
             title: "Healthcare Startups",
-            icon: "/src/assets/img/who2.webp"
+            icon: who2Img
         },
         {
             title: "Students",
-            icon: "/src/assets/img/who3.webp"
+            icon: who3Img
         }
     ];
 
@@ -54,7 +57,15 @@ const ServicesCourse = () => {
                         variants={itemVariants}
                     >
                         <div className="client-icon-wrapper">
-                            <img src={client.icon} alt={client.title} />
+                            <img 
+                                src={client.icon} 
+                                alt={client.title}
+                                onError={(e) => {
+                                    console.error('Image failed to load:', e.target.src);
+                                    e.target.onerror = null;
+                                    e.target.src = '/placeholder-image.jpg';
+                                }}
+                            />
                         </div>
                         <h3>{client.title}</h3>
                     </motion.div>

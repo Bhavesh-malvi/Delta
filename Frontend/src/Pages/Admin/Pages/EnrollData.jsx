@@ -26,10 +26,6 @@ const EnrollData = () => {
 
     // Delete enrollment
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this enrollment?')) {
-            return;
-        }
-
         try {
             setLoading(true);
             await axiosInstance.delete(`${ENDPOINTS.ENROLL}/${id}`);

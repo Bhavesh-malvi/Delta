@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesContent.css';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/servicecontent`;
+import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
 
 const ServicesContent = () => {
     const [content, setContent] = useState([]);
@@ -14,7 +11,7 @@ const ServicesContent = () => {
     useEffect(() => {
         const fetchContent = async () => {
             try {
-                const response = await axios.get(API_ENDPOINT);
+                const response = await axiosInstance.get(ENDPOINTS.SERVICE_CONTENT);
                 console.log('Fetched service content:', response.data);
                 if (response.data && Array.isArray(response.data)) {
                     setContent(response.data);
@@ -96,9 +93,14 @@ const ServicesContent = () => {
                     >
                         <div className="service-image-container">
                             <img 
-                                src={`http://localhost:5000/uploads/services/${service.image}`} 
+                                src={`${API_BASE_URL}/uploads/services/${service.image}`} 
                                 alt={service.title} 
-                                className="service-image" 
+                                className="service-image"
+                                onError={(e) => {
+                                    console.error('Image failed to load:', e.target.src);
+                                    e.target.onerror = null;
+                                    e.target.src = '/placeholder-service.jpg';
+                                }}
                             />
                         </div>
                         <div className="service-info">

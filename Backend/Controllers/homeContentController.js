@@ -11,12 +11,12 @@ const log = debug('app:homeContentController');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Multer Disk Storage config (images saved to /uploads)
+// Multer Disk Storage config (images saved to /uploads/content)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, '../uploads/');
+        const uploadPath = path.join(__dirname, '../uploads/content/');
         if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath);
+            fs.mkdirSync(uploadPath, { recursive: true });
         }
         cb(null, uploadPath);
     },
@@ -73,7 +73,7 @@ export const createHomeContent = async (req, res) => {
         }
 
         try {
-            const imagePath = `/uploads/${req.file.filename}`;
+            const imagePath = `/uploads/content/${req.file.filename}`;
             const created = await HomeContent.create({ title, image: imagePath });
             res.status(201).json({ success: true, message: 'Content created', data: created });
         } catch (error) {
@@ -103,7 +103,7 @@ export const updateHomeContent = async (req, res) => {
             content.title = title;
 
             if (req.file) {
-                content.image = `/uploads/${req.file.filename}`;
+                content.image = `/uploads/content/${req.file.filename}`;
             }
 
             await content.save();

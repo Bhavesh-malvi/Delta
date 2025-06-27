@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './HomeContent.css';
-import axios from 'axios';
-import { API_BASE_URL } from '../../../config/api';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/homecontent`;
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
 
 const HomeContent = () => {
     const [formData, setFormData] = useState({
@@ -28,7 +24,7 @@ const HomeContent = () => {
         setContentLoading(true);
             setMessage({ text: '', type: '' });
             
-            const response = await axios.get(API_ENDPOINT);
+            const response = await axiosInstance.get(ENDPOINTS.HOME_CONTENT);
             
             if (response.data.success) {
                 setContents(response.data.data || []);
@@ -208,20 +204,11 @@ const HomeContent = () => {
         try {
             setLoading(true);
             await axiosInstance.delete(`${ENDPOINTS.HOME_CONTENT}/${id}`);
-            
-            setMessage({
-                text: 'Content deleted successfully',
-                type: 'success'
-            });
-            
-            // Refresh the content list
+            setMessage({ text: 'Content deleted successfully!', type: 'success' });
             fetchContent();
-        } catch (error) {
-            console.error('Error deleting content:', error);
-            setMessage({
-                text: error.userMessage || 'Failed to delete content',
-                type: 'error'
-            });
+        } catch (err) {
+            console.error('Error deleting content:', err);
+            setMessage(err.userMessage || 'Failed to delete content');
         } finally {
             setLoading(false);
         }
@@ -367,15 +354,15 @@ const HomeContent = () => {
                         {contents.map(item => (
                             <div key={item._id} className="content-card">
                                 <div className="image-container">
-                                            <img 
-                                        src={item.image} 
-                                                alt={item.title}
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
+                                    <img 
+                                        src={`${API_BASE_URL}${item.image}`} 
+                                        alt={item.title}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
                                             e.target.src = '/placeholder-image.jpg';
-                                                }}
-                                            />
-                                        </div>
+                                        }}
+                                    />
+                                </div>
                                 <h4>{item.title}</h4>
                                 <div className="card-actions">
                                         <button 
@@ -386,11 +373,7 @@ const HomeContent = () => {
                                             <i className="fas fa-edit"></i>
                                         </button>
                                         <button 
-                                        onClick={() => {
-                                            if (window.confirm('Are you sure you want to delete this item?')) {
-                                                handleDelete(item._id);
-                                            }
-                                        }}
+                                        onClick={() => handleDelete(item._id)}
                                             className="delete-btn"
                                         disabled={loading}
                                         >

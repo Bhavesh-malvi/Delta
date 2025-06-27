@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesSlider.css';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/homecontent`;
+import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
 
 function ServicesSlider() {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -16,7 +13,7 @@ function ServicesSlider() {
     useEffect(() => {
         const fetchContent = async () => {
             try {
-                const response = await axios.get(API_ENDPOINT);
+                const response = await axiosInstance.get(ENDPOINTS.HOME_CONTENT);
                 console.log('Fetched content:', response.data);
                 if (response.data && Array.isArray(response.data)) {
                     setContent(response.data);
@@ -125,8 +122,13 @@ function ServicesSlider() {
                         >
                             <div className="slide-content">
                                 <img 
-                                    src={`http://localhost:5000/uploads/content/${slide.image}`} 
+                                    src={`${API_BASE_URL}${slide.image}`} 
                                     alt={slide.title} 
+                                    onError={(e) => {
+                                        console.error('Image failed to load:', e.target.src);
+                                        e.target.onerror = null;
+                                        e.target.src = '/placeholder-image.jpg';
+                                    }}
                                 />
                                 <h3>{slide.title}</h3>
                             </div>

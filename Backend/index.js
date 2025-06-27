@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import connectDB from './db/db.js';
 import debug from 'debug';
+import mongoose from 'mongoose';
 
 // Import routes
 import homeContentRoutes from './Routes/homeContentRoutes.js';
@@ -21,15 +22,9 @@ const log = debug('app:server');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Validate only MongoDB
-const requiredEnvVars = ['MONGODB_URI'];
 
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
-if (missingEnvVars.length > 0) {
-    console.error('Missing required environment variables:', missingEnvVars);
-    process.exit(1);
-}
+
 
 const app = express();
 
@@ -37,6 +32,15 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    console.log('Request Body:', JSON.stringify(req.body, null, 2));
+    console.log('Request Files:', req.files);
+    console.log('Request Headers:', req.headers);
+    next();
+});
 
 // Static folder for uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -52,79 +56,62 @@ app.use('/api/enroll', enrollRoutes);
 
 // Root
 app.get('/', (req, res) => {
-    res.json({ 
-        message: 'Welcome to the Delta API',
-        version: '1.0.0',
-        status: 'running',
-        timestamp: new Date().toISOString()
-    });
+    res.json({message: 'Welcome to the Delta API'});
 });
 
-// Health check
+// Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ 
-        status: 'ok', 
+    res.json({
+        success: true,
+        message: 'API is running',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        memory: process.memoryUsage()
+        routes: [
+            '/api/homeContent',
+            '/api/homeCourse', 
+            '/api/homeService',
+            '/api/serviceContent',
+            '/api/career',
+            '/api/contact',
+            '/api/enroll'
+        ]
     });
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
+// Test endpoint
+app.post('/api/test', (req, res) => {
+    console.log('Test endpoint hit:', req.body);
+    res.json({success: true, message: 'Test endpoint working', data: req.body});
+});
 
-    // MongoDB errors
-    if (err.name === 'MongoError' || err.name === 'MongoServerError') {
-        return res.status(500).json({
-            error: 'Database operation failed',
-            details: err.message
-        });
-    }
-
-    // Validation errors
-    if (err.name === 'ValidationError') {
-        return res.status(400).json({
-            error: 'Validation failed',
-            details: err.message
-        });
-    }
-
-    // Default
-    res.status(500).json({
-        error: 'Internal server error',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+// 404 handler for undefined routes
+app.use('*', (req, res) => {
+    console.log(`404 - Route not found: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({
+        success: false,
+        message: `Route ${req.method} ${req.originalUrl} not found`,
+        availableRoutes: [
+            'GET /',
+            'GET /api/health',
+            'POST /api/test',
+            'GET /api/homeContent',
+            'GET /api/homeCourse',
+            'GET /api/homeService', 
+            'GET /api/serviceContent',
+            'GET /api/career',
+            'GET /api/contact',
+            'GET /api/enroll'
+        ]
     });
 });
 
-// Connect to DB
-try {
-    await connectDB();
-    log('MongoDB connected successfully');
-} catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
-}
 
-// Start server
+connectDB();
+
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-// Handle promise errors
-process.on('unhandledRejection', (err) => {
-    console.error('Unhandled Promise Rejection:', err);
-    if (process.env.NODE_ENV !== 'production') {
-        server.close(() => process.exit(1));
-    }
-});
 
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err);
-    if (process.env.NODE_ENV !== 'production') {
-        server.close(() => process.exit(1));
-    }
-});
 
-export default app;
+

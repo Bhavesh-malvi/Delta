@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import './AutoSlider.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/homecontent`;
+import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
 
 const AutoSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -16,7 +13,7 @@ const AutoSlider = () => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await axios.get(API_ENDPOINT);
+        const response = await axiosInstance.get(ENDPOINTS.HOME_CONTENT);
         console.log('Fetched data:', response.data);
         if (response.data && response.data.success && Array.isArray(response.data.data)) {
           setContent(response.data.data);
@@ -79,13 +76,18 @@ const AutoSlider = () => {
         <AnimatePresence mode="wait">
           <motion.img
             key={currentIndex}
-            src={`http://localhost:5000/uploads/content/${content[currentIndex].image}`}
+            src={`${API_BASE_URL}${content[currentIndex].image}`}
             alt={content[currentIndex].title}
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 0.5 }}
             className="slider-image"
+            onError={(e) => {
+              console.error('Image failed to load:', e.target.src);
+              e.target.onerror = null;
+              e.target.src = '/placeholder-image.jpg';
+            }}
           />
         </AnimatePresence>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
 import './HomeService.css';
 
 const HomeService = () => {
@@ -20,7 +20,14 @@ const HomeService = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
-            setServices(response.data.data);
+            console.log('Fetched services:', response.data);
+            if (response.data && Array.isArray(response.data)) {
+                setServices(response.data);
+            } else if (response.data && Array.isArray(response.data.data)) {
+                setServices(response.data.data);
+            } else {
+                setError('Invalid data format received');
+            }
             setError(null);
         } catch (err) {
             console.error('Error fetching services:', err);
@@ -84,7 +91,7 @@ const HomeService = () => {
             description: service.description,
             image: null
         });
-        setPreviewImage(`${UPLOAD_URLS.SERVICES}/${service.image}`);
+        setPreviewImage(`${API_BASE_URL}/uploads/services/${service.image}`);
         window.scrollTo(0, 0);
     };
 
@@ -145,10 +152,6 @@ const HomeService = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this service?')) {
-            return;
-        }
-
         try {
             setLoading(true);
             await axiosInstance.delete(`${ENDPOINTS.HOME_SERVICE}/${id}`);
@@ -276,12 +279,13 @@ const HomeService = () => {
                                 {service.image && (
                                     <div className="service-image-container">
                                         <img 
-                                                src={`${UPLOAD_URLS.SERVICES}/${service.image}`}
+                                            src={`${API_BASE_URL}/uploads/services/${service.image}`}
                                             alt={service.title}
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = '/placeholder-service.jpg';
-                                                }}
+                                            onError={(e) => {
+                                                console.error('Image failed to load:', e.target.src);
+                                                e.target.onerror = null;
+                                                e.target.src = '/placeholder-service.jpg';
+                                            }}
                                         />
                                     </div>
                                 )}

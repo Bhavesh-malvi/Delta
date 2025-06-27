@@ -1,5 +1,5 @@
 // API Configuration
-const isDevelopment = import.meta.env.MODE === 'development';
+const isDevelopment = false; // Switch to production mode
 
 // Base URLs
 export const API_BASE_URL = isDevelopment 
@@ -25,7 +25,8 @@ export const ENDPOINTS = {
 export const UPLOAD_URLS = {
     SERVICES: `${API_BASE_URL}/uploads/services`,
     CAREERS: `${API_BASE_URL}/uploads/careers`,
-    CONTENT: `${API_BASE_URL}/uploads/content`
+    CONTENT: `${API_BASE_URL}/uploads/content`,
+    HOME_CONTENT: `${API_BASE_URL}/uploads/content`
 };
 
 // Default headers

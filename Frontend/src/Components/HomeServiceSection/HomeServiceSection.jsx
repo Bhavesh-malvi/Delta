@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
+import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
 import './HomeServiceSection.css';
 
 const HomeServiceSection = () => {
@@ -11,8 +11,11 @@ const HomeServiceSection = () => {
         const fetchServices = async () => {
             try {
                 const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
+                console.log('Fetched services:', response.data);
                 if (response.data && Array.isArray(response.data)) {
                     setServices(response.data);
+                } else if (response.data && Array.isArray(response.data.data)) {
+                    setServices(response.data.data);
                 } else {
                     setError('Invalid data format received');
                 }
@@ -59,10 +62,11 @@ const HomeServiceSection = () => {
                     <div className="service-card" key={service._id}>
                         <div className="service-image-container">
                             <img 
-                                src={`${UPLOAD_URLS.SERVICES}/${service.image}`}
+                                src={`${API_BASE_URL}/uploads/services/${service.image}`}
                                 alt={service.title} 
                                 className="service-image"
                                 onError={(e) => {
+                                    console.error('Image failed to load:', e.target.src);
                                     e.target.onerror = null;
                                     e.target.src = '/placeholder-service.jpg';
                                 }}

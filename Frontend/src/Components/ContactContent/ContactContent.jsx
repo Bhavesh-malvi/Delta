@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance, { ENDPOINTS } from '../../config/api';
 import './ContactContent.css';
-import { API_BASE_URL } from '../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/contacts`;
 
 const ContactContent = () => {
     const [formData, setFormData] = useState({
@@ -25,7 +22,7 @@ const ContactContent = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(API_ENDPOINT, formData);
+            const response = await axiosInstance.post(ENDPOINTS.CONTACT, formData);
             if (response.data.success) {
                 setStatus({ type: 'success', message: 'Message sent successfully!' });
                 setFormData({ name: '', email: '', phone: '', message: '' });

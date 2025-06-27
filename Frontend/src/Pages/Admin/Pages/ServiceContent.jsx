@@ -145,10 +145,6 @@ const ServiceContent = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this content?')) {
-            return;
-        }
-
         try {
             setLoading(true);
             await axiosInstance.delete(`${ENDPOINTS.SERVICE_CONTENT}/${id}`);
