@@ -20,7 +20,7 @@ const HomeService = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
-            setServices(response.data);
+            setServices(response.data.data);
             setError(null);
         } catch (err) {
             console.error('Error fetching services:', err);

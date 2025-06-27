@@ -1,38 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
 import './ServiceContent.css';
-import axios from 'axios';
-import { API_BASE_URL, UPLOADS_BASE_URL } from '../../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/servicecontent`;
-const UPLOADS_ENDPOINT = `${UPLOADS_BASE_URL}/services`;
 
 const ServiceContent = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        image: null,
-        points: ['', '', '', '']
+        image: null
     });
 
-    const [services, setServices] = useState([]);
-    const [editingId, setEditingId] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState({ text: '', type: '' });
     const [previewImage, setPreviewImage] = useState(null);
+    const [contents, setContents] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [editingId, setEditingId] = useState(null);
 
-    useEffect(() => {
-        fetchServices();
-    }, []);
-
-    const fetchServices = async () => {
+    // Fetch existing contents
+    const fetchContents = async () => {
         try {
-            const response = await axios.get(API_ENDPOINT);
-            setServices(response.data.data);
-        } catch (error) {
-            console.error('Error fetching services:', error);
-            setMessage({ text: 'Failed to fetch services', type: 'error' });
+            setLoading(true);
+            const response = await axiosInstance.get(ENDPOINTS.SERVICE_CONTENT);
+            setContents(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching contents:', err);
+            setError(err.userMessage || 'Failed to fetch contents');
+        } finally {
+            setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchContents();
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -40,29 +40,6 @@ const ServiceContent = () => {
             ...prev,
             [name]: value
         }));
-    };
-
-    const handlePointChange = (index, value) => {
-        setFormData(prev => ({
-            ...prev,
-            points: prev.points.map((point, i) => i === index ? value : point)
-        }));
-    };
-
-    const addPoint = () => {
-        setFormData(prev => ({
-            ...prev,
-            points: [...prev.points, '']
-        }));
-    };
-
-    const removePoint = (index) => {
-        if (formData.points.length > 4) {
-            setFormData(prev => ({
-                ...prev,
-                points: prev.points.filter((_, i) => i !== index)
-            }));
-        }
     };
 
     const handleImageChange = (e) => {
@@ -80,110 +57,124 @@ const ServiceContent = () => {
                 };
                 reader.readAsDataURL(file);
             } else {
-                setMessage({ text: 'Please upload an image file', type: 'error' });
+                setError('Please upload an image file');
                 e.target.value = '';
             }
         }
     };
 
+    const resetForm = () => {
+        setFormData({
+            title: '',
+            description: '',
+            image: null
+        });
+        setPreviewImage(null);
+        setEditingId(null);
+        setError(null);
+        // Reset file input
+        const fileInput = document.getElementById('image');
+        if (fileInput) fileInput.value = '';
+    };
+
+    const handleEdit = (content) => {
+        setEditingId(content._id);
+        setFormData({
+            title: content.title,
+            description: content.description,
+            image: null
+        });
+        setPreviewImage(`${UPLOAD_URLS.SERVICES}/${content.image}`);
+        window.scrollTo(0, 0);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!editingId && !formData.image) {
+            setError('Please select an image');
+            return;
+        }
+
         setLoading(true);
+        setError(null);
 
         try {
-        // Filter out empty points
-        const filteredPoints = formData.points.filter(point => point.trim() !== '');
-        
-            if (filteredPoints.length < 4) {
-                setMessage({ text: 'Please provide at least 4 non-empty points', type: 'error' });
-                setLoading(false);
-                return;
-            }
-
+            // Create FormData object
             const formDataToSend = new FormData();
             formDataToSend.append('title', formData.title);
             formDataToSend.append('description', formData.description);
             if (formData.image) {
                 formDataToSend.append('image', formData.image);
             }
-            filteredPoints.forEach((point, index) => {
-                formDataToSend.append(`points[${index}]`, point);
-            });
+
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
 
             if (editingId) {
-                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                setMessage({ text: 'Service content updated successfully', type: 'success' });
+                // Update existing content
+                await axiosInstance.put(
+                    `${ENDPOINTS.SERVICE_CONTENT}/${editingId}`, 
+                    formDataToSend, 
+                    config
+                );
+                setError({ text: 'Content updated successfully!', type: 'success' });
             } else {
-                await axios.post(API_ENDPOINT, formDataToSend, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                setMessage({ text: 'Service content added successfully', type: 'success' });
+                // Create new content
+                await axiosInstance.post(
+                    ENDPOINTS.SERVICE_CONTENT, 
+                    formDataToSend, 
+                    config
+                );
+                setError({ text: 'Content added successfully!', type: 'success' });
             }
 
             // Reset form
-            setFormData({
-                title: '',
-                description: '',
-                image: null,
-                points: ['', '', '', '']
-            });
-            setPreviewImage(null);
-            setEditingId(null);
-            fetchServices();
-        } catch (error) {
-            console.error('Error saving service content:', error);
-            setMessage({ 
-                text: error.response?.data?.message || 'Failed to save service content', 
-                type: 'error' 
-            });
+            resetForm();
+            
+            // Refresh contents list
+            fetchContents();
+        } catch (err) {
+            console.error(editingId ? 'Error updating content:' : 'Error adding content:', err);
+            setError(err.userMessage || (editingId ? 'Failed to update content' : 'Failed to add content'));
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
-        setTimeout(() => setMessage({ text: '', type: '' }), 3000);
-    };
-
-    const handleEdit = (service) => {
-        setFormData({
-            title: service.title,
-            description: service.description,
-            image: null,
-            points: [...service.points, ...Array(Math.max(0, 4 - service.points.length)).fill('')]
-        });
-        setPreviewImage(`${UPLOADS_ENDPOINT}/${service.image}`);
-        setEditingId(service._id);
     };
 
     const handleDelete = async (id) => {
-        try {
-            await axios.delete(`${API_ENDPOINT}/${id}`);
-            setMessage({ text: 'Service content deleted successfully', type: 'success' });
-            fetchServices();
-        } catch (error) {
-            console.error('Error deleting service content:', error);
-            setMessage({ text: 'Failed to delete service content', type: 'error' });
+        if (!window.confirm('Are you sure you want to delete this content?')) {
+            return;
         }
-        setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+
+        try {
+            setLoading(true);
+            await axiosInstance.delete(`${ENDPOINTS.SERVICE_CONTENT}/${id}`);
+            setError({ text: 'Content deleted successfully!', type: 'success' });
+            fetchContents();
+        } catch (err) {
+            console.error('Error deleting content:', err);
+            setError(err.userMessage || 'Failed to delete content');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div className="service-content-container">
-            <h2>{editingId ? 'Edit Service Content' : 'Add Service Content'}</h2>
-
-            {message.text && (
-                <div className={`message ${message.type}`}>
-                    {message.text}
+            <h2>{editingId ? 'Edit Content' : 'Add New Content'}</h2>
+            
+            {error && (
+                <div className={`message ${typeof error === 'object' ? error.type : 'error'}`}>
+                    {typeof error === 'object' ? error.text : error}
                 </div>
             )}
-
+            
             <form onSubmit={handleSubmit} className="service-content-form">
                 <div className="form-group">
-                    <label htmlFor="image">Service Image</label>
+                    <label htmlFor="image">Upload Image {!editingId && <span className="required">*</span>}</label>
                     <div className="image-upload-container">
                         <input
                             type="file"
@@ -192,6 +183,7 @@ const ServiceContent = () => {
                             onChange={handleImageChange}
                             accept="image/*"
                             className="image-input"
+                            disabled={loading}
                         />
                         {!previewImage ? (
                             <div className="upload-label">
@@ -204,7 +196,7 @@ const ServiceContent = () => {
                                     <img src={previewImage} alt="Preview" />
                                 </div>
                                 <span className="file-name">
-                                    {formData.image?.name || 'Current Image'}
+                                    {formData.image ? formData.image.name : 'Current Image'}
                                 </span>
                             </div>
                         )}
@@ -212,128 +204,117 @@ const ServiceContent = () => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="title">Service Title</label>
+                    <label htmlFor="title">Content Title <span className="required">*</span></label>
                     <input
                         type="text"
                         id="title"
                         name="title"
                         value={formData.title}
                         onChange={handleInputChange}
-                        placeholder="Enter service title"
+                        placeholder="Enter content title"
                         required
+                        disabled={loading}
                     />
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="description">Service Description</label>
+                    <label htmlFor="description">Content Description <span className="required">*</span></label>
                     <textarea
                         id="description"
                         name="description"
                         value={formData.description}
                         onChange={handleInputChange}
-                        placeholder="Enter service description"
+                        placeholder="Enter content description"
                         required
+                        disabled={loading}
                     />
                 </div>
 
-                <div className="form-group points-section">
-                    <label>Service Points (minimum 4 required)</label>
-                    {formData.points.map((point, index) => (
-                        <div key={index} className="point-input-container">
-                            <input
-                                type="text"
-                                value={point}
-                                onChange={(e) => handlePointChange(index, e.target.value)}
-                                placeholder={`Point ${index + 1}${index < 4 ? ' (required)' : ' (optional)'}`}
-                                required={index < 4}
-                            />
-                            {index >= 4 && (
-                                <button
-                                    type="button"
-                                    className="remove-point-btn"
-                                    onClick={() => removePoint(index)}
-                                >
-                                    <i className="fas fa-times"></i>
-                                </button>
-                            )}
-                        </div>
-                    ))}
-                    <button
-                        type="button"
-                        className="add-point-btn"
-                        onClick={addPoint}
-                    >
-                        <i className="fas fa-plus"></i> Add Point
-                    </button>
-                </div>
-
-                <div className="form-buttons">
+                <div className="form-actions">
                     <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? 'Processing...' : (editingId ? 'Update Service' : 'Add Service')}
+                        {loading ? (
+                            <>
+                                <i className="fas fa-spinner fa-spin"></i>
+                                Processing...
+                            </>
+                        ) : (
+                            editingId ? 'Update Content' : 'Add Content'
+                        )}
                     </button>
 
                     {editingId && (
                         <button 
                             type="button" 
                             className="cancel-btn"
-                            onClick={() => {
-                                setEditingId(null);
-                                setFormData({
-                                    title: '',
-                                    description: '',
-                                    image: null,
-                                    points: ['', '', '', '']
-                                });
-                                setPreviewImage(null);
-                            }}
+                            onClick={resetForm}
+                            disabled={loading}
                         >
                             Cancel
-                </button>
+                        </button>
                     )}
                 </div>
             </form>
 
-            <div className="existing-services">
-                <h3>Existing Services</h3>
-                <div className="services-list">
-                    {services.map(service => (
-                        <div key={service._id} className="service-item">
-                        <div className="service-content">
-                                <h4>{service.title}</h4>
-                                {service.image && (
-                                    <div className="service-image-container">
-                                        <img 
-                                            src={`${UPLOADS_ENDPOINT}/${service.image}`}
-                                            alt={service.title}
-                                        />
-                                    </div>
-                                )}
-                                <p>{service.description}</p>
-                                <ul>
-                                    {service.points.map((point, index) => (
-                                        <li key={index}>{point}</li>
-                                    ))}
-                            </ul>
-                        <div className="service-actions">
-                                    <button 
-                                        onClick={() => handleEdit(service)}
-                                        className="edit-btn"
-                                        title="Edit"
-                                    >
-                                <i className="fas fa-edit"></i>
-                            </button>
-                                    <button 
-                                        onClick={() => handleDelete(service._id)}
-                                        className="delete-btn"
-                                        title="Delete"
-                                    >
-                                <i className="fas fa-trash"></i>
-                            </button>
-                        </div>
+            <div className="contents-list">
+                <h3>
+                    Existing Contents
+                    <button 
+                        className="refresh-btn"
+                        onClick={fetchContents}
+                        disabled={loading}
+                    >
+                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
+                    </button>
+                </h3>
+
+                {loading ? (
+                    <div className="loading">
+                        <i className="fas fa-spinner fa-spin"></i>
+                        Loading contents...
                     </div>
-                        </div>
-                    ))}
-                </div>
+                ) : contents.length === 0 ? (
+                    <div className="no-contents">
+                        <i className="fas fa-inbox"></i>
+                        <p>No contents available</p>
+                    </div>
+                ) : (
+                    <div className="contents-grid">
+                        {contents.map(content => (
+                            <div key={content._id} className="content-card">
+                                <div className="content-image">
+                                    <img 
+                                        src={`${UPLOAD_URLS.SERVICES}/${content.image}`}
+                                        alt={content.title}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = '/placeholder-content.jpg';
+                                        }}
+                                    />
+                                </div>
+                                <div className="content-info">
+                                    <h4>{content.title}</h4>
+                                    <p>{content.description}</p>
+                                </div>
+                                <div className="content-actions">
+                                    <button
+                                        onClick={() => handleEdit(content)}
+                                        className="edit-btn"
+                                        disabled={loading}
+                                    >
+                                        <i className="fas fa-edit"></i>
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(content._id)}
+                                        className="delete-btn"
+                                        disabled={loading}
+                                    >
+                                        <i className="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
