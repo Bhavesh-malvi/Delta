@@ -60,14 +60,17 @@ export const createServiceContent = async (req, res) => {
     upload(req, res, async (err) => {
         if (err) return res.status(400).json({ success: false, message: err.message });
 
-        const { title, description } = req.body;
-        const points = Object.keys(req.body)
-            .filter(key => key.startsWith('points['))
-            .sort()
-            .map(key => req.body[key])
-            .filter(point => point.trim() !== '');
+        const { title, description, points: pointsString } = req.body;
+        let points = [];
+        
+        try {
+            points = JSON.parse(pointsString);
+        } catch (error) {
+            if (req.file) fs.unlinkSync(req.file.path);
+            return res.status(400).json({ success: false, message: 'Invalid points data' });
+        }
 
-        if (!req.file || !title || !description || points.length < 4) {
+        if (!req.file || !title || !description || !points || points.length < 4) {
             if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
@@ -105,14 +108,17 @@ export const updateServiceContent = async (req, res) => {
                 return res.status(404).json({ success: false, message: 'Service content not found' });
             }
 
-            const { title, description } = req.body;
-            const points = Object.keys(req.body)
-                .filter(key => key.startsWith('points['))
-                .sort()
-                .map(key => req.body[key])
-                .filter(point => point.trim() !== '');
+            const { title, description, points: pointsString } = req.body;
+            let points = [];
+            
+            try {
+                points = JSON.parse(pointsString);
+            } catch (error) {
+                if (req.file) fs.unlinkSync(req.file.path);
+                return res.status(400).json({ success: false, message: 'Invalid points data' });
+            }
 
-            if (!title || !description || points.length < 4) {
+            if (!title || !description || !points || points.length < 4) {
                 if (req.file) fs.unlinkSync(req.file.path);
                 return res.status(400).json({ 
                     success: false, 

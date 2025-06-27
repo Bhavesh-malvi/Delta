@@ -144,10 +144,10 @@ const ServiceContent = () => {
             const formDataToSend = new FormData();
             formDataToSend.append('title', formData.title);
             formDataToSend.append('description', formData.description);
-            // Append each point
-            formData.points.forEach((point, index) => {
-                formDataToSend.append(`points[${index}]`, point);
-            });
+            
+            // Append points as a JSON string
+            formDataToSend.append('points', JSON.stringify(formData.points.filter(point => point.trim() !== '')));
+            
             if (formData.image) {
                 formDataToSend.append('image', formData.image);
             }
