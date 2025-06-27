@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
 import './HomeService.css';
-import axios from 'axios';
-import { API_BASE_URL, UPLOADS_BASE_URL } from '../../../config/api';
-
-const API_ENDPOINT = `${API_BASE_URL}/api/homeservices`;
-const UPLOADS_ENDPOINT = `${UPLOADS_BASE_URL}/services`;
 
 const HomeService = () => {
     const [formData, setFormData] = useState({
@@ -22,11 +18,15 @@ const HomeService = () => {
     // Fetch existing services
     const fetchServices = async () => {
         try {
-            const response = await axios.get(API_ENDPOINT);
-            setServices(response.data.data);
+            setLoading(true);
+            const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
+            setServices(response.data);
+            setError(null);
         } catch (err) {
-            setError('Failed to fetch services');
             console.error('Error fetching services:', err);
+            setError(err.userMessage || 'Failed to fetch services');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -57,7 +57,7 @@ const HomeService = () => {
                 };
                 reader.readAsDataURL(file);
             } else {
-                alert('Please upload an image file');
+                setError('Please upload an image file');
                 e.target.value = '';
             }
         }
@@ -71,6 +71,7 @@ const HomeService = () => {
         });
         setPreviewImage(null);
         setEditingId(null);
+        setError(null);
         // Reset file input
         const fileInput = document.getElementById('image');
         if (fileInput) fileInput.value = '';
@@ -83,14 +84,14 @@ const HomeService = () => {
             description: service.description,
             image: null
         });
-        setPreviewImage(`${UPLOADS_ENDPOINT}/${service.image}`);
+        setPreviewImage(`${UPLOAD_URLS.SERVICES}/${service.image}`);
         window.scrollTo(0, 0);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!editingId && !formData.image) {
-            alert('Please select an image');
+            setError('Please select an image');
             return;
         }
 
@@ -106,20 +107,28 @@ const HomeService = () => {
                 formDataToSend.append('image', formData.image);
             }
 
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
             if (editingId) {
                 // Update existing service
-                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await axiosInstance.put(
+                    `${ENDPOINTS.HOME_SERVICE}/${editingId}`, 
+                    formDataToSend, 
+                    config
+                );
+                setError({ text: 'Service updated successfully!', type: 'success' });
             } else {
                 // Create new service
-                await axios.post(API_ENDPOINT, formDataToSend, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await axiosInstance.post(
+                    ENDPOINTS.HOME_SERVICE, 
+                    formDataToSend, 
+                    config
+                );
+                setError({ text: 'Service added successfully!', type: 'success' });
             }
 
             // Reset form
@@ -127,30 +136,41 @@ const HomeService = () => {
             
             // Refresh services list
             fetchServices();
-            
-            alert(editingId ? 'Service updated successfully!' : 'Service added successfully!');
         } catch (err) {
-            setError(editingId ? 'Failed to update service. Please try again.' : 'Failed to add service. Please try again.');
             console.error(editingId ? 'Error updating service:' : 'Error adding service:', err);
+            setError(err.userMessage || (editingId ? 'Failed to update service' : 'Failed to add service'));
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this service?')) {
+            return;
+        }
+
         try {
-            await axios.delete(`${API_ENDPOINT}/${id}`);
+            setLoading(true);
+            await axiosInstance.delete(`${ENDPOINTS.HOME_SERVICE}/${id}`);
+            setError({ text: 'Service deleted successfully!', type: 'success' });
             fetchServices();
         } catch (err) {
-            setError('Failed to delete service');
             console.error('Error deleting service:', err);
+            setError(err.userMessage || 'Failed to delete service');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <div className="home-service-container">
             <h2>{editingId ? 'Edit Service' : 'Add New Service'}</h2>
-            {error && <div className="error-message">{error}</div>}
+            
+            {error && (
+                <div className={`message ${typeof error === 'object' ? error.type : 'error'}`}>
+                    {typeof error === 'object' ? error.text : error}
+                </div>
+            )}
             
             <form onSubmit={handleSubmit} className="home-service-form">
                 <div className="form-group">
@@ -163,6 +183,7 @@ const HomeService = () => {
                             onChange={handleImageChange}
                             accept="image/*"
                             className="image-input"
+                            disabled={loading}
                         />
                         {!previewImage ? (
                             <div className="upload-label">
@@ -192,6 +213,7 @@ const HomeService = () => {
                         onChange={handleInputChange}
                         placeholder="Enter service title"
                         required
+                        disabled={loading}
                     />
                 </div>
 
@@ -204,63 +226,95 @@ const HomeService = () => {
                         onChange={handleInputChange}
                         placeholder="Enter service description"
                         required
+                        disabled={loading}
                     />
                 </div>
 
-                <div className="button-group">
+                <div className="form-actions">
                     <button type="submit" className="submit-btn" disabled={loading}>
                         {loading ? (
-                            <span>Saving...</span>
-                        ) : (
                             <>
-                                <i className="fas fa-save"></i> {editingId ? 'Update Service' : 'Add Service'}
+                                <i className="fas fa-spinner fa-spin"></i>
+                                Processing...
                             </>
+                        ) : (
+                            editingId ? 'Update Service' : 'Add Service'
                         )}
                     </button>
+
                     {editingId && (
-                        <button type="button" className="cancel-btn" onClick={resetForm}>
-                            <i className="fas fa-times"></i> Cancel
+                        <button 
+                            type="button" 
+                            className="cancel-btn"
+                            onClick={resetForm}
+                            disabled={loading}
+                        >
+                            Cancel
                         </button>
                     )}
                 </div>
             </form>
 
-            <div className="existing-services">
-                <h3>Existing Services</h3>
-                <div className="services-list">
-                    {services.map((service) => (
-                        <div key={service._id} className="service-item">
-                            <div className="service-content">
-                                <h4>{service.title}</h4>
-                                {service.image && (
-                                    <div className="service-image-container">
-                                        <img 
-                                            src={`${UPLOADS_ENDPOINT}/${service.image}`}
-                                            alt={service.title}
-                                        />
-                                    </div>
-                                )}
-                                <p>{service.description}</p>
+            <div className="services-list">
+                <h3>
+                    Existing Services
+                    <button 
+                        className="refresh-btn"
+                        onClick={fetchServices}
+                        disabled={loading}
+                    >
+                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
+                    </button>
+                </h3>
+
+                {loading ? (
+                    <div className="loading">
+                        <i className="fas fa-spinner fa-spin"></i>
+                        Loading services...
+                    </div>
+                ) : services.length === 0 ? (
+                    <div className="no-services">
+                        <i className="fas fa-inbox"></i>
+                        <p>No services available</p>
+                    </div>
+                ) : (
+                    <div className="services-grid">
+                        {services.map(service => (
+                            <div key={service._id} className="service-card">
+                                <div className="service-image">
+                                    <img 
+                                        src={`${UPLOAD_URLS.SERVICES}/${service.image}`}
+                                        alt={service.title}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = '/placeholder-service.jpg';
+                                        }}
+                                    />
+                                </div>
+                                <div className="service-content">
+                                    <h4>{service.title}</h4>
+                                    <p>{service.description}</p>
+                                </div>
                                 <div className="service-actions">
-                                    <button 
+                                    <button
                                         onClick={() => handleEdit(service)}
                                         className="edit-btn"
-                                        title="Edit"
+                                        disabled={loading}
                                     >
                                         <i className="fas fa-edit"></i>
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handleDelete(service._id)}
                                         className="delete-btn"
-                                        title="Delete"
+                                        disabled={loading}
                                     >
                                         <i className="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
