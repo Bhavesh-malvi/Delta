@@ -1,6 +1,6 @@
 .service-content-container {
-    padding: 2rem;
-    color: #fff;
+    min-height: 100vh;
+    background-color: #f8f9fa;
 }
 
 .service-content-container h2 {
@@ -87,8 +87,7 @@
 }
 
 .image-upload-container:hover {
-    border-color: rgba(0, 255, 135, 0.6);
-    background: rgba(0, 0, 0, 0.3);
+    border-color: #0d6efd !important;
 }
 
 .image-input {
@@ -463,4 +462,32 @@
 
 .add-point-btn i {
     font-size: 12px;
+}
+
+/* Hide the default file input button */
+input[type="file"] {
+    color: transparent;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+    visibility: hidden;
+}
+
+/* Custom styles for the file input */
+input[type="file"]::before {
+    content: 'Select File';
+    display: inline-block;
+    background: #0d6efd;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.card-img-wrapper img {
+    transition: transform 0.3s ease;
+}
+
+.card-img-wrapper:hover img {
+    transform: scale(1.05);
 } 

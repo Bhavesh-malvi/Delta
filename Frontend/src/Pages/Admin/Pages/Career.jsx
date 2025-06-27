@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../../config/api';
+import { Card, Button, Form, Container, Row, Col, Spinner } from 'react-bootstrap';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
 import './Career.css';
 
 const Career = () => {
@@ -7,7 +8,9 @@ const Career = () => {
         title: '',
         description: '',
         points: [''],
-        image: null
+        image: null,
+        experience: '',
+        location: ''
     });
     const [careers, setCareers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -100,7 +103,9 @@ const Career = () => {
             title: '',
             description: '',
             points: [''],
-            image: null
+            image: null,
+            experience: '',
+            location: ''
         });
         setPreviewImage(null);
         setEditingId(null);
@@ -132,7 +137,9 @@ const Career = () => {
             title: career.title,
             description: career.description,
             points: points,
-            image: null
+            image: null,
+            experience: career.experience,
+            location: career.location
         });
         // Always prepend API_BASE_URL for local file paths
         setPreviewImage(`${API_BASE_URL}${career.image}`);
@@ -161,6 +168,9 @@ const Career = () => {
             if (formData.image) {
                 formDataToSend.append('image', formData.image);
             }
+
+            formDataToSend.append('experience', formData.experience);
+            formDataToSend.append('location', formData.location);
 
             const config = {
                 headers: {
@@ -209,207 +219,214 @@ const Career = () => {
     };
 
     return (
-        <div className="career-container">
-            <h2>{editingId ? 'Edit Career' : 'Add New Career'}</h2>
-            
+        <Container className="career-container py-4">
+            <h2 className="mb-4">{editingId ? 'Edit Career' : 'Add New Career'}</h2>
+
             {error && (
-                <div className={`message ${typeof error === 'object' ? error.type : 'error'}`}>
+                <div className={`alert ${typeof error === 'object' ? (error.type === 'success' ? 'alert-success' : 'alert-danger') : 'alert-danger'} mb-4`}>
                     {typeof error === 'object' ? error.text : error}
                 </div>
             )}
-            
-            <form onSubmit={handleSubmit} className="career-form">
-                <div className="form-group">
-                    <label htmlFor="image">Career Image {!editingId && <span className="required">*</span>}</label>
-                    <div className="image-upload-container">
-                        <input
-                            type="file"
-                            id="image"
-                            name="image"
-                            onChange={handleImageChange}
-                            accept="image/*"
-                            className="image-input"
-                            disabled={loading}
-                        />
-                        {!previewImage ? (
-                            <div className="upload-label">
-                                <i className="fas fa-cloud-upload-alt"></i>
-                                <span>Choose an image or drag it here</span>
-                            </div>
-                        ) : (
-                            <div className="image-preview-container">
-                                <div className="image-preview">
-                                    <img src={previewImage} alt="Preview" />
-                                </div>
-                                <span className="file-name">
-                                    {formData.image ? formData.image.name : 'Current Image'}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                </div>
 
-                <div className="form-group">
-                    <label htmlFor="title">Career Title <span className="required">*</span></label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        placeholder="Enter career title"
-                        required
-                        disabled={loading}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="description">Career Description <span className="required">*</span></label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        placeholder="Enter career description"
-                        required
-                        disabled={loading}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Key Points</label>
-                    <div className="points-container">
-                        {formData.points.map((point, index) => (
-                            <div key={index} className="point-input-group">
-                                <input
-                                    type="text"
-                                    value={point}
-                                    onChange={(e) => handlePointChange(index, e.target.value)}
-                                    placeholder={`Enter point ${index + 1}`}
+            <Card className="mb-4">
+                <Card.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Upload Image {!editingId && <span className="text-danger">*</span>}</Form.Label>
+                            <div className="image-upload-container border rounded p-3">
+                                <Form.Control
+                                    type="file"
+                                    onChange={handleImageChange}
+                                    accept="image/*"
                                     disabled={loading}
-                                    className="point-input"
+                                    className="mb-3"
                                 />
-                                {formData.points.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => removePoint(index)}
-                                        className="remove-point-btn"
-                                        disabled={loading}
-                                        title="Remove point"
-                                    >
-                                        <i className="fas fa-times"></i>
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={addPoint}
-                            className="add-point-btn"
-                            disabled={loading}
-                        >
-                            <i className="fas fa-plus"></i> Add Point
-                        </button>
-                    </div>
-                </div>
-
-                <div className="form-actions">
-                    <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? (
-                            <>
-                                <i className="fas fa-spinner fa-spin"></i>
-                                Processing...
-                            </>
-                        ) : (
-                            editingId ? 'Update Career' : 'Add Career'
-                        )}
-                    </button>
-
-                    {editingId && (
-                        <button 
-                            type="button" 
-                            className="cancel-btn"
-                            onClick={resetForm}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                    )}
-                </div>
-            </form>
-
-            <div className="existing-careers">
-                <h3>Existing Careers</h3>
-                {loading ? (
-                    <div className="loading">
-                        <i className="fas fa-spinner fa-spin"></i>
-                        Loading careers...
-                    </div>
-                ) : careers.length === 0 ? (
-                    <div className="no-careers">
-                        <i className="fas fa-inbox"></i>
-                        <p>No careers available</p>
-                    </div>
-                ) : (
-                <div className="careers-list">
-                    {careers.map(career => (
-                        <div key={career._id} className="career-item">
-                            <div className="career-content">
-                                <h4>{career.title}</h4>
-                                {career.image && (
-                                    <div className="career-image-container">
+                                {!previewImage ? (
+                                    <div className="text-center text-muted">
+                                        <i className="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                        <p>Choose an image or drag it here</p>
+                                    </div>
+                                ) : (
+                                    <div className="text-center">
                                         <img 
-                                            // Always prepend API_BASE_URL for local file paths
-                                            src={`${API_BASE_URL}${career.image}`}
-                                            alt={career.title} 
-                                            onLoad={() => console.log('Image loaded successfully:', career.image)}
-                                            onError={(e) => {
-                                                console.error('Image failed to load:', e.target.src);
-                                                console.error('Career image path:', career.image);
-                                                e.target.onerror = null;
-                                                e.target.src = '/placeholder-career.jpg';
-                                            }}
+                                            src={previewImage} 
+                                            alt="Preview" 
+                                            className="img-thumbnail mb-2"
+                                            style={{ maxHeight: '200px' }}
                                         />
+                                        <p className="text-muted">
+                                            {formData.image ? formData.image.name : 'Current Image'}
+                                        </p>
                                     </div>
                                 )}
-                                <p>{career.description}</p>
-                                <div className="career-details">
-                                    {career.points && career.points.length > 0 && (
-                                        <div className="career-points">
-                                            <h5>Key Points:</h5>
-                                            <ul>
-                                                {career.points.map((point, index) => (
-                                                    <li key={index}>{point}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
                             </div>
-                            <div className="career-actions">
-                                <button 
-                                    onClick={() => handleEdit(career)}
-                                    className="edit-btn"
-                                    title="Edit"
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Career Title <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleInputChange}
+                                placeholder="Enter career title"
+                                required
+                                disabled={loading}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Career Description <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                placeholder="Enter career description"
+                                required
+                                disabled={loading}
+                                rows={4}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Experience Required <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="experience"
+                                value={formData.experience}
+                                onChange={handleInputChange}
+                                placeholder="Enter required experience"
+                                required
+                                disabled={loading}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Location <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="location"
+                                value={formData.location}
+                                onChange={handleInputChange}
+                                placeholder="Enter job location"
+                                required
+                                disabled={loading}
+                            />
+                        </Form.Group>
+
+                        <div className="d-flex gap-2">
+                            <Button 
+                                type="submit" 
+                                variant="primary"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <Spinner
+                                            as="span"
+                                            animation="border"
+                                            size="sm"
+                                            className="me-2"
+                                        />
+                                        Processing...
+                                    </>
+                                ) : (
+                                    editingId ? 'Update Career' : 'Add Career'
+                                )}
+                            </Button>
+
+                            {editingId && (
+                                <Button 
+                                    variant="secondary"
+                                    onClick={resetForm}
                                     disabled={loading}
                                 >
-                                    <i className="fas fa-edit"></i>
-                                </button>
-                                <button 
-                                    onClick={() => handleDelete(career._id)}
-                                    className="delete-btn"
-                                    title="Delete"
-                                    disabled={loading}
-                                >
-                                    <i className="fas fa-trash"></i>
-                                </button>
-                            </div>
+                                    Cancel
+                                </Button>
+                            )}
                         </div>
-                    ))}
-                </div>
-                )}
-            </div>
-        </div>
+                    </Form>
+                </Card.Body>
+            </Card>
+
+            <Card>
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                    <h3 className="mb-0">Existing Careers</h3>
+                    <Button 
+                        variant="outline-primary"
+                        onClick={fetchCareers}
+                        disabled={loading}
+                    >
+                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
+                    </Button>
+                </Card.Header>
+                <Card.Body>
+                    {loading ? (
+                        <div className="text-center py-5">
+                            <Spinner animation="border" variant="primary" />
+                            <p className="mt-2">Loading careers...</p>
+                        </div>
+                    ) : careers.length === 0 ? (
+                        <div className="text-center py-5 text-muted">
+                            <i className="fas fa-inbox fa-3x mb-3"></i>
+                            <p>No careers available</p>
+                        </div>
+                    ) : (
+                        <Row xs={1} md={2} lg={3} className="g-4">
+                            {careers.map(career => (
+                                <Col key={career._id}>
+                                    <Card className="h-100">
+                                        <div className="card-img-wrapper" style={{ height: '200px', overflow: 'hidden' }}>
+                                            <Card.Img
+                                                variant="top"
+                                                src={career.image.startsWith('http') ? career.image : `${API_BASE_URL}/uploads/careers/${career.image}`}
+                                                alt={career.title}
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = '/placeholder-career.jpg';
+                                                }}
+                                                style={{ height: '100%', objectFit: 'cover' }}
+                                            />
+                                        </div>
+                                        <Card.Body>
+                                            <Card.Title>{career.title}</Card.Title>
+                                            <Card.Text>{career.description}</Card.Text>
+                                            <div className="mt-3">
+                                                <p className="mb-1">
+                                                    <strong>Experience:</strong> {career.experience}
+                                                </p>
+                                                <p className="mb-0">
+                                                    <strong>Location:</strong> {career.location}
+                                                </p>
+                                            </div>
+                                        </Card.Body>
+                                        <Card.Footer className="d-flex justify-content-end gap-2">
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => handleEdit(career)}
+                                                disabled={loading}
+                                                size="sm"
+                                            >
+                                                <i className="fas fa-edit me-1"></i> Edit
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                onClick={() => handleDelete(career._id)}
+                                                disabled={loading}
+                                                size="sm"
+                                            >
+                                                <i className="fas fa-trash me-1"></i> Delete
+                                            </Button>
+                                        </Card.Footer>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                    )}
+                </Card.Body>
+            </Card>
+        </Container>
     );
 };
 

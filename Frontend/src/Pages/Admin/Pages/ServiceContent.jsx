@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
+import { Card, Button, Form, Container, Row, Col, Spinner } from 'react-bootstrap';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
 import './ServiceContent.css';
 
 const ServiceContent = () => {
@@ -118,7 +119,7 @@ const ServiceContent = () => {
             image: null,
             points: content.points || ['', '', '', ''] // Handle existing points
         });
-        setPreviewImage(content.image.startsWith('http') ? content.image : `${UPLOAD_URLS.SERVICES}${content.image}`);
+        setPreviewImage(content.image.startsWith('http') ? content.image : `${API_BASE_URL}/uploads/services/${content.image}`);
         window.scrollTo(0, 0);
     };
 
@@ -204,198 +205,218 @@ const ServiceContent = () => {
     };
 
     return (
-        <div className="service-content-container">
-            <h2>{editingId ? 'Edit Content' : 'Add New Content'}</h2>
+        <Container className="service-content-container py-4">
+            <h2 className="mb-4">{editingId ? 'Edit Content' : 'Add New Content'}</h2>
 
             {error && (
-                <div className={`message ${typeof error === 'object' ? error.type : 'error'}`}>
+                <div className={`alert ${typeof error === 'object' ? (error.type === 'success' ? 'alert-success' : 'alert-danger') : 'alert-danger'} mb-4`}>
                     {typeof error === 'object' ? error.text : error}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="service-content-form">
-                <div className="form-group">
-                    <label htmlFor="image">Upload Image {!editingId && <span className="required">*</span>}</label>
-                    <div className="image-upload-container">
-                        <input
-                            type="file"
-                            id="image"
-                            name="image"
-                            onChange={handleImageChange}
-                            accept="image/*"
-                            className="image-input"
-                            disabled={loading}
-                        />
-                        {!previewImage ? (
-                            <div className="upload-label">
-                                <i className="fas fa-cloud-upload-alt"></i>
-                                <span>Choose an image or drag it here</span>
-                            </div>
-                        ) : (
-                            <div className="image-preview-container">
-                                <div className="image-preview">
-                                    <img src={previewImage} alt="Preview" />
-                                </div>
-                                <span className="file-name">
-                                    {formData.image ? formData.image.name : 'Current Image'}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="title">Content Title <span className="required">*</span></label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        placeholder="Enter content title"
-                        required
-                        disabled={loading}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="description">Content Description <span className="required">*</span></label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        placeholder="Enter content description"
-                        required
-                        disabled={loading}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Content Points <span className="required">*</span></label>
-                    <p className="help-text">Please provide at least 4 points about this service</p>
-                    <div className="points-container">
-                        {formData.points.map((point, index) => (
-                            <div key={index} className="point-input-group">
-                                <input
-                                    type="text"
-                                    value={point}
-                                    onChange={(e) => handlePointChange(index, e.target.value)}
-                                    placeholder={`Point ${index + 1}`}
-                                    required
+            <Card className="mb-4">
+                <Card.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Upload Image {!editingId && <span className="text-danger">*</span>}</Form.Label>
+                            <div className="image-upload-container border rounded p-3">
+                                <Form.Control
+                                    type="file"
+                                    onChange={handleImageChange}
+                                    accept="image/*"
                                     disabled={loading}
-                                    className="point-input"
+                                    className="mb-3"
                                 />
-                                {formData.points.length > 4 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => deletePoint(index)}
-                                        className="delete-point-btn"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-trash-alt"></i>
-                                    </button>
+                                {!previewImage ? (
+                                    <div className="text-center text-muted">
+                                        <i className="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                        <p>Choose an image or drag it here</p>
+                                    </div>
+                                ) : (
+                                    <div className="text-center">
+                                        <img 
+                                            src={previewImage} 
+                                            alt="Preview" 
+                                            className="img-thumbnail mb-2"
+                                            style={{ maxHeight: '200px' }}
+                                        />
+                                        <p className="text-muted">
+                                            {formData.image ? formData.image.name : 'Current Image'}
+                                        </p>
+                                    </div>
                                 )}
                             </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={addNewPoint}
-                            className="add-point-btn"
-                            disabled={loading}
-                        >
-                            <i className="fas fa-plus"></i> Add More Point
-                        </button>
-                    </div>
-                </div>
+                        </Form.Group>
 
-                <div className="form-actions">
-                    <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? (
-                            <>
-                                <i className="fas fa-spinner fa-spin"></i>
-                                Processing...
-                            </>
-                        ) : (
-                            editingId ? 'Update Content' : 'Add Content'
-                        )}
-                    </button>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Content Title <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleInputChange}
+                                placeholder="Enter content title"
+                                required
+                                disabled={loading}
+                            />
+                        </Form.Group>
 
-                    {editingId && (
-                        <button 
-                            type="button" 
-                            className="cancel-btn"
-                            onClick={resetForm}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                    )}
-                </div>
-            </form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Content Description <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                placeholder="Enter content description"
+                                required
+                                disabled={loading}
+                                rows={4}
+                            />
+                        </Form.Group>
 
-            <div className="contents-list">
-                <h3>
-                    Existing Contents
-                    <button 
-                        className="refresh-btn"
+                        <Form.Group className="mb-3">
+                            <Form.Label>Content Points <span className="text-danger">*</span></Form.Label>
+                            <p className="text-muted small">Please provide at least 4 points about this service</p>
+                            <div className="points-container">
+                                {formData.points.map((point, index) => (
+                                    <div key={index} className="d-flex gap-2 mb-2">
+                                        <Form.Control
+                                            type="text"
+                                            value={point}
+                                            onChange={(e) => handlePointChange(index, e.target.value)}
+                                            placeholder={`Point ${index + 1}`}
+                                            required
+                                            disabled={loading}
+                                        />
+                                        {formData.points.length > 4 && (
+                                            <Button
+                                                variant="danger"
+                                                onClick={() => deletePoint(index)}
+                                                disabled={loading}
+                                                className="flex-shrink-0"
+                                            >
+                                                <i className="fas fa-trash-alt"></i>
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                                <Button
+                                    variant="success"
+                                    onClick={addNewPoint}
+                                    disabled={loading}
+                                    className="mt-2"
+                                >
+                                    <i className="fas fa-plus me-2"></i>
+                                    Add More Point
+                                </Button>
+                            </div>
+                        </Form.Group>
+
+                        <div className="d-flex gap-2">
+                            <Button 
+                                type="submit" 
+                                variant="primary"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <Spinner
+                                            as="span"
+                                            animation="border"
+                                            size="sm"
+                                            className="me-2"
+                                        />
+                                        Processing...
+                                    </>
+                                ) : (
+                                    editingId ? 'Update Content' : 'Add Content'
+                                )}
+                            </Button>
+
+                            {editingId && (
+                                <Button 
+                                    variant="secondary"
+                                    onClick={resetForm}
+                                    disabled={loading}
+                                >
+                                    Cancel
+                                </Button>
+                            )}
+                        </div>
+                    </Form>
+                </Card.Body>
+            </Card>
+
+            <Card>
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                    <h3 className="mb-0">Existing Contents</h3>
+                    <Button 
+                        variant="outline-primary"
                         onClick={fetchContents}
                         disabled={loading}
                     >
                         <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
-                    </button>
-                </h3>
-
-                {loading ? (
-                    <div className="loading">
-                        <i className="fas fa-spinner fa-spin"></i>
-                        Loading contents...
-                    </div>
-                ) : contents.length === 0 ? (
-                    <div className="no-contents">
-                        <i className="fas fa-inbox"></i>
-                        <p>No contents available</p>
-                    </div>
-                ) : (
-                    <div className="contents-grid">
-                        {contents.map(content => (
-                            <div key={content._id} className="content-card">
-                                <div className="content-image">
-                                    <img 
-                                        src={content.image.startsWith('http') ? content.image : `${UPLOAD_URLS.SERVICES}${content.image}`}
-                                        alt={content.title}
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = '/placeholder-content.jpg';
-                                        }}
-                                    />
-                                </div>
-                                <div className="content-info">
-                                    <h4>{content.title}</h4>
-                                    <p>{content.description}</p>
-                                </div>
-                                <div className="content-actions">
-                                    <button 
-                                        onClick={() => handleEdit(content)}
-                                        className="edit-btn"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-edit"></i>
-                                    </button>
-                                    <button 
-                                        onClick={() => handleDelete(content._id)}
-                                        className="delete-btn"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </div>
+                    </Button>
+                </Card.Header>
+                <Card.Body>
+                    {loading ? (
+                        <div className="text-center py-5">
+                            <Spinner animation="border" variant="primary" />
+                            <p className="mt-2">Loading contents...</p>
+                        </div>
+                    ) : contents.length === 0 ? (
+                        <div className="text-center py-5 text-muted">
+                            <i className="fas fa-inbox fa-3x mb-3"></i>
+                            <p>No contents available</p>
+                        </div>
+                    ) : (
+                        <Row xs={1} md={2} lg={3} className="g-4">
+                            {contents.map(content => (
+                                <Col key={content._id}>
+                                    <Card className="h-100">
+                                        <div className="card-img-wrapper" style={{ height: '200px', overflow: 'hidden' }}>
+                                            <Card.Img
+                                                variant="top"
+                                                src={content.image.startsWith('http') ? content.image : `${API_BASE_URL}/uploads/services/${content.image}`}
+                                                alt={content.title}
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = '/placeholder-content.jpg';
+                                                }}
+                                                style={{ height: '100%', objectFit: 'cover' }}
+                                            />
+                                        </div>
+                                        <Card.Body>
+                                            <Card.Title>{content.title}</Card.Title>
+                                            <Card.Text>{content.description}</Card.Text>
+                                        </Card.Body>
+                                        <Card.Footer className="d-flex justify-content-end gap-2">
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => handleEdit(content)}
+                                                disabled={loading}
+                                                size="sm"
+                                            >
+                                                <i className="fas fa-edit me-1"></i> Edit
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                onClick={() => handleDelete(content._id)}
+                                                disabled={loading}
+                                                size="sm"
+                                            >
+                                                <i className="fas fa-trash me-1"></i> Delete
+                                            </Button>
+                                        </Card.Footer>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                    )}
+                </Card.Body>
+            </Card>
+        </Container>
     );
 };
 

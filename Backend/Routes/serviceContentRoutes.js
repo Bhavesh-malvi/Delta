@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'fs';
 import {
     getAllServiceContents,
     getServiceContent,
@@ -12,42 +12,39 @@ import {
 
 const router = express.Router();
 
-// Configure multer for file upload
+// Configure multer for handling file uploads
 const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, 'uploads/services/');
+    destination: function (req, file, cb) {
+        const uploadDir = 'uploads/services';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
     },
-    filename: function(req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    filename: function (req, file, cb) {
+        const uniqueName = `image-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        cb(null, uniqueName + path.extname(file.originalname));
     }
 });
-
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-        cb(null, true);
-    } else {
-        cb(new Error('Not an image! Please upload an image.'), false);
-    }
-};
 
 const upload = multer({
-    storage: storage,
-    fileFilter: fileFilter,
+    storage,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+        fileSize: 5 * 1024 * 1024 // 5MB
+    },
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        if (extname && mimetype) cb(null, true);
+        else cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
     }
 });
 
-// Get all service contents and Create new service content
-router.route('/')
-    .get(getAllServiceContents)
-    .post(upload.single('image'), createServiceContent);
-
-// Get single service content, Update and Delete service content
-router.route('/:id')
-    .get(getServiceContent)
-    .put(upload.single('image'), updateServiceContent)
-    .delete(deleteServiceContent);
+router.get('/', getAllServiceContents);
+router.get('/:id', getServiceContent);
+router.post('/', upload.single('image'), createServiceContent);
+router.put('/:id', upload.single('image'), updateServiceContent);
+router.delete('/:id', deleteServiceContent);
 
 export default router; 

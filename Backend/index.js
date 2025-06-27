@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import connectDB from './db/db.js';
 import debug from 'debug';
 import mongoose from 'mongoose';
+import multer from 'multer';
 
 // Import routes
 import homeContentRoutes from './Routes/homeContentRoutes.js';
@@ -32,6 +33,31 @@ const corsOptions = {
     optionsSuccessStatus: 204,
 };
 
+// Configure multer for handling file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, 'uploads/services'));
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = `image-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        cb(null, uniqueName + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB
+    },
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        if (extname && mimetype) cb(null, true);
+        else cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
+    }
+});
+
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
@@ -40,7 +66,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Debug middleware to log all requests
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    console.log('Request Body:', JSON.stringify(req.body, null, 2));
+    console.log('Request Body:', req.body);
     console.log('Request Files:', req.files);
     console.log('Request Headers:', req.headers);
     next();
