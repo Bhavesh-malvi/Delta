@@ -13,7 +13,7 @@ const AutoSlider = () => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/homecontent');
+        const response = await axios.get('http://localhost:5000/api/homecontent ||' ||  'https://delta-g9xn.vercel.app/api/homecontent');
         console.log('Fetched data:', response.data);
         if (response.data && response.data.success && Array.isArray(response.data.data)) {
           setContent(response.data.data);
@@ -76,7 +76,7 @@ const AutoSlider = () => {
         <AnimatePresence mode="wait">
           <motion.img
             key={currentIndex}
-            src={`http://localhost:5000/uploads/content/${content[currentIndex].image}`}
+            src={`http://localhost:5000/uploads/content/${content[currentIndex].image}` || `https://delta-g9xn.vercel.app/uploads/content/${content[currentIndex].image}`}
             alt={content[currentIndex].title}
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
