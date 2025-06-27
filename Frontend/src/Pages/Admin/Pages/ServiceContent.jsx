@@ -6,7 +6,8 @@ const ServiceContent = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        image: null
+        image: null,
+        points: ['', '', '', ''] // Initialize with 4 empty points
     });
 
     const [previewImage, setPreviewImage] = useState(null);
@@ -63,11 +64,43 @@ const ServiceContent = () => {
         }
     };
 
+    const handlePointChange = (index, value) => {
+        setFormData(prev => {
+            const newPoints = [...prev.points];
+            newPoints[index] = value;
+            return {
+                ...prev,
+                points: newPoints
+            };
+        });
+    };
+
+    const addNewPoint = () => {
+        setFormData(prev => ({
+            ...prev,
+            points: [...prev.points, '']
+        }));
+    };
+
+    const deletePoint = (indexToDelete) => {
+        // Don't allow deleting if only 4 points remain
+        if (formData.points.length <= 4) {
+            setError('Minimum 4 points are required');
+            return;
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            points: prev.points.filter((_, index) => index !== indexToDelete)
+        }));
+    };
+
     const resetForm = () => {
         setFormData({
             title: '',
             description: '',
-            image: null
+            image: null,
+            points: ['', '', '', ''] // Reset points too
         });
         setPreviewImage(null);
         setEditingId(null);
@@ -82,7 +115,8 @@ const ServiceContent = () => {
         setFormData({
             title: content.title,
             description: content.description,
-            image: null
+            image: null,
+            points: content.points || ['', '', '', ''] // Handle existing points
         });
         setPreviewImage(content.image.startsWith('http') ? content.image : `${UPLOAD_URLS.SERVICES}${content.image}`);
         window.scrollTo(0, 0);
@@ -95,6 +129,13 @@ const ServiceContent = () => {
             return;
         }
 
+        // Validate points
+        const validPoints = formData.points.filter(point => point.trim() !== '');
+        if (validPoints.length < 4) {
+            setError('Please provide at least 4 non-empty points');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -103,14 +144,18 @@ const ServiceContent = () => {
             const formDataToSend = new FormData();
             formDataToSend.append('title', formData.title);
             formDataToSend.append('description', formData.description);
+            // Append each point
+            formData.points.forEach((point, index) => {
+                formDataToSend.append(`points[${index}]`, point);
+            });
             if (formData.image) {
                 formDataToSend.append('image', formData.image);
             }
 
             const config = {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             };
 
             if (editingId) {
@@ -226,6 +271,44 @@ const ServiceContent = () => {
                     />
                 </div>
 
+                <div className="form-group">
+                    <label>Content Points <span className="required">*</span></label>
+                    <p className="help-text">Please provide at least 4 points about this service</p>
+                    <div className="points-container">
+                        {formData.points.map((point, index) => (
+                            <div key={index} className="point-input-group">
+                                <input
+                                    type="text"
+                                    value={point}
+                                    onChange={(e) => handlePointChange(index, e.target.value)}
+                                    placeholder={`Point ${index + 1}`}
+                                    required
+                                    disabled={loading}
+                                    className="point-input"
+                                />
+                                {formData.points.length > 4 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => deletePoint(index)}
+                                        className="delete-point-btn"
+                                        disabled={loading}
+                                    >
+                                        <i className="fas fa-trash-alt"></i>
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addNewPoint}
+                            className="add-point-btn"
+                            disabled={loading}
+                        >
+                            <i className="fas fa-plus"></i> Add More Point
+                        </button>
+                    </div>
+                </div>
+
                 <div className="form-actions">
                     <button type="submit" className="submit-btn" disabled={loading}>
                         {loading ? (
@@ -246,7 +329,7 @@ const ServiceContent = () => {
                             disabled={loading}
                         >
                             Cancel
-                </button>
+                        </button>
                     )}
                 </div>
             </form>

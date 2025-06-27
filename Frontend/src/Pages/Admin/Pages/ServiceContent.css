@@ -395,4 +395,72 @@
     .image-upload-container {
         height: 250px;
     }
+}
+
+.points-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.point-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.point-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.delete-point-btn {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.delete-point-btn:hover {
+    background-color: #cc0000;
+}
+
+.delete-point-btn:disabled {
+    background-color: #ffaaaa;
+    cursor: not-allowed;
+}
+
+.add-point-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.add-point-btn:hover {
+    background-color: #45a049;
+}
+
+.add-point-btn:disabled {
+    background-color: #8bc34a;
+    cursor: not-allowed;
+}
+
+.add-point-btn i {
+    font-size: 12px;
 } 
