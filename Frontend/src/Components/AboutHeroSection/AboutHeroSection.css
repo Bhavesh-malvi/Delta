@@ -1,0 +1,72 @@
+.about-hero {
+    height: 60vh;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../../assets/img/welimgab.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+.about-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(0, 255, 135, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.about-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.about-hero h1 {
+    color: #ffffff;
+    font-size: 4rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
+}
+
+.about-breadcrumb {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    font-size: 1.2rem;
+}
+
+.about-breadcrumb a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.about-breadcrumb a:hover {
+    color: #00ff87;
+}
+
+.about-breadcrumb span {
+    color: #00ff87;
+}
+
+@media (max-width: 768px) {
+    .about-hero {
+        height: 40vh;
+    }
+
+    .about-hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .about-breadcrumb {
+        font-size: 1rem;
+    }
+} 

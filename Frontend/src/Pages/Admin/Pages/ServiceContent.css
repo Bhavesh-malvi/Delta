@@ -1,0 +1,398 @@
+.service-content-container {
+    padding: 2rem;
+    color: #fff;
+}
+
+.service-content-container h2 {
+    margin-bottom: 2rem;
+    color: #00ff87;
+    text-align: center;
+}
+
+.message {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.message.success {
+    color: #00ff87;
+    border: 1px solid #00ff87;
+}
+
+.message.error {
+    color: #ff4444;
+    border: 1px solid #ff4444;
+}
+
+.service-content-form {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #00ff87;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #00ff87;
+    box-shadow: 0 0 0 2px rgba(0, 255, 135, 0.2);
+}
+
+/* Image Upload Styles */
+.image-upload-container {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    border: 2px dashed rgba(0, 255, 135, 0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.image-upload-container:hover {
+    border-color: rgba(0, 255, 135, 0.6);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.image-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 15px;
+    color: rgba(0, 255, 135, 0.8);
+    pointer-events: none;
+}
+
+.upload-label i {
+    font-size: 3rem;
+}
+
+.image-preview-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    padding: 20px;
+}
+
+.image-preview {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 30px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 255, 135, 0.3);
+    object-fit: contain;
+}
+
+.file-name {
+    margin-top: 10px;
+    color: rgba(0, 255, 135, 0.8);
+    font-size: 0.9rem;
+    text-align: center;
+    word-break: break-all;
+}
+
+.points-section {
+    margin-top: 2rem;
+}
+
+.point-input-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.point-input-container input {
+    flex: 1;
+}
+
+.remove-point-btn,
+.add-point-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid rgba(255, 68, 68, 0.2);
+}
+
+.add-point-btn {
+    background: rgba(0, 255, 135, 0.1);
+    color: #00ff87;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.remove-point-btn:hover {
+    background: rgba(255, 68, 68, 0.2);
+}
+
+.add-point-btn:hover {
+    background: rgba(0, 255, 135, 0.2);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.submit-btn,
+.cancel-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    flex: 1;
+    max-width: 200px;
+}
+
+.submit-btn {
+    background: #00ff87;
+    color: #000;
+}
+
+.submit-btn:hover {
+    background: #00cc6a;
+}
+
+.submit-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid rgba(255, 68, 68, 0.2);
+}
+
+.cancel-btn:hover {
+    background: rgba(255, 68, 68, 0.2);
+}
+
+.existing-services {
+    margin-top: 3rem;
+}
+
+.existing-services h3 {
+    color: #00ff87;
+    margin-bottom: 1.5rem;
+}
+
+.services-list {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.service-item {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.service-item:hover {
+    transform: translateY(-5px);
+}
+
+.service-content h4 {
+    color: #00ff87;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.service-image-container {
+    margin: 1rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    height: 200px;
+}
+
+.service-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.service-image-container img:hover {
+    transform: scale(1.05);
+}
+
+.service-content p {
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+}
+
+.service-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+}
+
+.service-content li {
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.service-content li:before {
+    content: "•";
+    color: #00ff87;
+    position: absolute;
+    left: 0;
+}
+
+.service-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.edit-btn,
+.delete-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.edit-btn i,
+.delete-btn i {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.edit-btn {
+    background: rgba(0, 255, 135, 0.1);
+    color: #00ff87;
+    border: 1px solid #00ff87;
+}
+
+.delete-btn {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid #ff4444;
+}
+
+.edit-btn:hover {
+    background: #00ff87;
+    color: #000;
+    transform: scale(1.1);
+}
+
+.delete-btn:hover {
+    background: #ff4444;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .service-content-container {
+        padding: 1rem;
+    }
+
+    .services-list {
+        grid-template-columns: 1fr;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+    }
+
+    .submit-btn,
+    .cancel-btn {
+        max-width: 100%;
+    }
+
+    .image-upload-container {
+        height: 250px;
+    }
+} 

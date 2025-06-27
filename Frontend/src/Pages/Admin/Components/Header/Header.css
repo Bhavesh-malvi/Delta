@@ -1,0 +1,72 @@
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 255, 135, 0.1);
+    margin-bottom: 2rem;
+}
+
+.admin-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-profile span {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255, 77, 77, 0.2), rgba(255, 77, 77, 0.1));
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 77, 77, 0.2);
+}
+
+.logout-btn i {
+    font-size: 1rem;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 77, 77, 0.3), rgba(255, 77, 77, 0.2));
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.1);
+}
+
+@media screen and (max-width: 768px) {
+    .admin-header {
+        padding: 1rem;
+    }
+
+    .admin-profile span {
+        display: none;
+    }
+
+    .logout-btn {
+        padding: 0.5rem;
+    }
+
+    .logout-btn span {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .admin-header {
+        padding: 0.8rem;
+    }
+} 

@@ -1,0 +1,163 @@
+.how-section {
+    min-height: 100vh;
+    background-color: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.how-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(0, 255, 135, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.how-content {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    gap: 60px;
+    position: relative;
+}
+
+.how-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.how-title {
+    font-size: 5rem;
+    font-weight: bold;
+    color: #00ff87;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    margin-bottom: 30px;
+}
+
+.how-title span {
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.5),
+                 0 0 20px rgba(0, 255, 135, 0.3),
+                 0 0 30px rgba(0, 255, 135, 0.1);
+    transform: translateX(-100px);
+    opacity: 0;
+    animation: slideIn 0.5s forwards;
+}
+
+.how-title span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.how-title span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes slideIn {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.how-email {
+    color: #00ff87;
+    font-size: 1.2rem;
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards 0.6s;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.how-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.step-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    transform: translateX(100px);
+    opacity: 0;
+    animation: slideInRight 0.5s forwards;
+}
+
+.step-card:hover {
+    border-color: rgba(0, 255, 135, 0.4);
+    box-shadow: 0 0 30px rgba(0, 255, 135, 0.2);
+    transform: translateY(-5px);
+}
+
+@keyframes slideInRight {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.step-number {
+    min-width: 50px;
+    height: 50px;
+    background: #00ff87;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #0a0a0a;
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
+}
+
+.step-description {
+    color: #ffffff;
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .how-content {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .how-title {
+        font-size: 3.5rem;
+        text-align: center;
+    }
+
+    .how-email {
+        text-align: center;
+    }
+
+    .step-card {
+        text-align: left;
+    }
+
+    .step-description {
+        font-size: 1.1rem;
+    }
+} 

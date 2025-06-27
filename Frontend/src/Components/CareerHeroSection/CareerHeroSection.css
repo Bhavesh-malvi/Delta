@@ -1,0 +1,67 @@
+.career-hero {
+    height: 60vh;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../../assets/img/welimgab.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+.career-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(0, 255, 135, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.career-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.career-hero h1 {
+    color: #ffffff;
+    font-size: 4rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
+}
+
+.career-breadcrumb {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+}
+
+.career-breadcrumb a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.career-breadcrumb a:hover {
+    color: #00ff87;
+}
+
+.career-breadcrumb span {
+    color: #00ff87;
+}
+
+@media (max-width: 768px) {
+    .career-hero {
+        height: 40vh;
+    }
+
+    .career-hero h1 {
+        font-size: 2.5rem;
+    }
+} 

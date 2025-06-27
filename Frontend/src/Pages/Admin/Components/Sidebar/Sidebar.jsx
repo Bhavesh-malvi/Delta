@@ -1,0 +1,73 @@
+import React, { useState, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import './Sidebar.css';
+
+function Sidebar() {
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const location = useLocation();
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return (
+        <div className="sidebar">
+            <div className="sidebar-logo">
+                <h2>{isMobile ? 'A' : 'Admin'}</h2>
+            </div>
+            <nav className="sidebar-nav">
+                <ul>
+                    <li>
+                        <NavLink to="/deltaAdmin/home-content" end>
+                            <i className="fas fa-tachometer-alt"></i>
+                            <span>Home Content</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/deltaAdmin/home-service">
+                            <i className="fas fa-cogs"></i>
+                            <span>Home Service</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/deltaAdmin/home-courses">
+                            <i className="fas fa-graduation-cap"></i>
+                            <span>Home Courses</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/deltaAdmin/career">
+                            <i className="fas fa-briefcase"></i>
+                            <span>Career</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/deltaAdmin/service-content">
+                            <i className="fas fa-cogs"></i>
+                            <span>Service Content</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/deltaAdmin/contact-data">
+                            <i className="fas fa-address-book"></i>
+                            <span>Contact Data</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/deltaAdmin/enroll-data">
+                            <i className="fas fa-user-graduate"></i>
+                            <span>Enroll Data</span>
+                        </NavLink>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    );
+}
+
+export default Sidebar;

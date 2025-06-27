@@ -1,0 +1,246 @@
+.footer {
+    background-color: #0a0a0a;
+    color: #ffffff;
+    padding: 60px 20px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(0, 255, 135, 0.3) 50%, 
+        transparent 100%
+    );
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1.5fr;
+    gap: 40px;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.footer-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid #00ff87;
+    transition: all 0.3s ease;
+}
+
+.footer-brand:hover .footer-logo {
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.5),
+                inset 0 0 20px rgba(0, 255, 135, 0.5);
+    transform: scale(1.05);
+}
+
+.footer-title {
+    font-family: 'Poppins', sans-serif;
+    
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
+    margin: 0;
+    transition: all 0.3s ease;
+    text-transform: none;
+}
+
+.footer-title span {
+    background: linear-gradient(45deg, #00ff87, #60efff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 600;
+}
+
+
+.footer-brand:hover .footer-title {
+    text-shadow: 0 0 20px rgba(0, 255, 135, 0.8);
+}
+
+.footer-tagline {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.highlight {
+    color: #00ff87;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
+}
+
+.footer h3 {
+    color: #00ff87;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.footer-links a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    width: fit-content;
+}
+
+.footer-links a::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: #00ff87;
+    transition: width 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #00ff87;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
+}
+
+.footer-links a:hover::before {
+    width: 100%;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-item:hover {
+    color: #00ff87;
+}
+
+.contact-item i {
+    color: #00ff87;
+    font-size: 1.2rem;
+    margin-top: 4px;
+}
+
+.contact-item.address {
+    max-width: 300px;
+    line-height: 1.6;
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.enroll-btn {
+    background: #00ff87;
+    color: #0a0a0a;
+    padding: 10px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    order: 2;
+}
+
+.enroll-btn:hover {
+    background: transparent;
+    color: #00ff87;
+    border-color: #00ff87;
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
+}
+
+@media (max-width: 968px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 30px;
+    }
+
+    .footer-brand {
+        justify-content: center;
+    }
+
+    .footer-links a::before {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .contact-info {
+        align-items: center;
+    }
+
+    .contact-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .contact-item i {
+        margin-top: 0;
+        font-size: 1.4rem;
+    }
+
+    .contact-item.address {
+        max-width: 250px;
+        margin: 0 auto;
+    }
+
+    .footer-bottom {
+        flex-direction: column-reverse;
+        gap: 20px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-tagline {
+        font-size: 1.2rem;
+    }
+
+    .footer-title {
+        font-size: 28px;
+    }
+
+    .contact-item.address {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+} 

@@ -1,0 +1,93 @@
+import { useState, useEffect, useCallback } from 'react';
+import './AutoSlider.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+
+const AutoSlider = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [content, setContent] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch home content data
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/homecontent');
+        console.log('Fetched data:', response.data);
+        if (response.data && response.data.success && Array.isArray(response.data.data)) {
+          setContent(response.data.data);
+        } else {
+          setError('Invalid data format received');
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching content:', err);
+        setError('Failed to fetch content: ' + err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
+
+  const nextSlide = useCallback(() => {
+    if (content.length > 0) {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % content.length);
+    }
+  }, [content.length]);
+
+  useEffect(() => {
+    const intervalId = setInterval(nextSlide, 3000); // Change slide every 3 seconds
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [nextSlide]);
+
+  if (loading) {
+    return <div className="slider-container loading">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="slider-container error">{error}</div>;
+  }
+
+  if (!content.length) {
+    return <div className="slider-container empty">No content available</div>;
+  }
+
+  return (
+    <div className="slider-container">
+      <div className="slider-content">
+        <AnimatePresence mode="wait">
+          <motion.div 
+            className="slide-title"
+            key={`title-${currentIndex}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2>{content[currentIndex].title}</h2>
+          </motion.div>
+        </AnimatePresence>
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={currentIndex}
+            src={`http://localhost:5000/uploads/content/${content[currentIndex].image}`}
+            alt={content[currentIndex].title}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.5 }}
+            className="slider-image"
+          />
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+export default AutoSlider;

@@ -1,0 +1,199 @@
+.enroll-form-container {
+    background-color: #000;
+    padding: 80px 20px;
+    min-height: calc(100vh - 60vh);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.enroll-form-content {
+    display: flex;
+    max-width: 1200px;
+    width: 100%;
+    background: rgba(0, 255, 187, 0.02);
+    border: 1px solid rgba(0, 255, 187, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 187, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.enroll-form-left {
+    flex: 0 0 40%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-right: 1px solid rgba(0, 255, 187, 0.1);
+}
+
+.enroll-form-left h2 {
+    color: #00ffbb;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 187, 0.3);
+}
+
+.enroll-form-left p {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.sign-in-link {
+    margin-top: 30px;
+}
+
+.sign-in-link a {
+    color: #00ffbb;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.sign-in-link a:hover {
+    text-shadow: 0 0 10px rgba(0, 255, 187, 0.5);
+}
+
+.enroll-form-right {
+    flex: 0 0 60%;
+    padding: 60px 40px;
+}
+
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #00ffbb;
+    font-size: 1rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="email"],
+.form-group select,
+.form-group textarea {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 187, 0.2);
+    background: rgba(0, 255, 187, 0.02);
+    color: #fff;
+    font-size: 1rem;
+}
+
+.form-group select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ffbb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.form-group select option {
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 12px;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #00ffbb;
+    box-shadow: 0 0 10px rgba(0, 255, 187, 0.2);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #00ffbb;
+    box-shadow: 0 0 10px rgba(0, 255, 187, 0.2);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.submit-btn {
+    margin-top: 20px;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: #00ffbb;
+    color: #000;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 187, 0.3);
+}
+
+.status-message {
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.status-message.success {
+    background: rgba(0, 255, 135, 0.1);
+    border: 1px solid rgba(0, 255, 135, 0.3);
+    color: #00ff87;
+}
+
+.status-message.error {
+    background: rgba(255, 59, 59, 0.1);
+    border: 1px solid rgba(255, 59, 59, 0.3);
+    color: #ff3b3b;
+}
+
+@media (max-width: 968px) {
+    .enroll-form-content {
+        flex-direction: column;
+    }
+
+    .enroll-form-left {
+        padding: 40px;
+        text-align: center;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 255, 187, 0.1);
+    }
+
+    .enroll-form-right {
+        padding: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .enroll-form-container {
+        padding: 40px 15px;
+    }
+
+    .gender-options {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .enroll-form-left h2 {
+        font-size: 1.8rem;
+    }
+} 

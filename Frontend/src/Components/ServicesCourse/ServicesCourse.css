@@ -1,0 +1,133 @@
+.services-course-container {
+    padding: 40px 20px;
+    background-color: #0a0a0a;
+    min-height: 65vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.services-course-title {
+    font-size: 3.5rem;
+    margin-bottom: 60px;
+    text-align: center;
+    background: linear-gradient(45deg, #00ff87, #60efff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
+}
+
+.services-course-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.client-card {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    border: 2px solid rgba(0, 255, 135, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.client-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(0, 255, 135, 0.3);
+    box-shadow: 0 0 30px rgba(0, 255, 135, 0.1);
+}
+
+.client-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ff87, transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+
+.client-card:hover::before {
+    transform: translateX(100%);
+}
+
+.client-icon-wrapper {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(0, 255, 135, 0.2);
+    transition: all 0.3s ease;
+}
+
+.client-card:hover .client-icon-wrapper {
+    border-color: rgba(0, 255, 135, 0.4);
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.2);
+}
+
+.client-icon-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.client-card h3 {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 15px;
+    background: linear-gradient(45deg, #00ff87, #60efff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.client-card p {
+    font-size: 1rem;
+    color: #aaa;
+    line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+    .services-course-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+
+    .services-course-title {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .services-course-container {
+        padding: 30px 15px;
+    }
+
+    .services-course-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .services-course-title {
+        font-size: 2.5rem;
+        margin-bottom: 40px;
+    }
+
+    .client-icon-wrapper {
+        width: 100px;
+        height: 100px;
+    }
+
+    .client-card h3 {
+        font-size: 1.5rem;
+    }
+} 
