@@ -1,35 +1,24 @@
 import HomeContent from '../models/HomeContent.js';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
-// Configure multer for file upload
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = 'uploads/content';
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// Configure multer to use memory storage
+const storage = multer.memoryStorage();
 
 const upload = multer({
     storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
     fileFilter: function (req, file, cb) {
         const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const extname = allowedTypes.test(file.originalname.toLowerCase());
         const mimetype = allowedTypes.test(file.mimetype);
 
         if (extname && mimetype) {
             return cb(null, true);
         } else {
-            cb('Error: Images only!');
+            cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
         }
     }
 }).single('image');
@@ -77,10 +66,17 @@ export const getHomeContent = async (req, res) => {
 // Create new home content
 export const createHomeContent = async (req, res) => {
     upload(req, res, async (err) => {
-        if (err) {
+        if (err instanceof multer.MulterError) {
             return res.status(400).json({
                 success: false,
-                message: err.message || 'Error uploading file'
+                message: 'File upload error',
+                details: err.message
+            });
+        } else if (err) {
+            return res.status(400).json({
+                success: false,
+                message: err.message || 'Error uploading file',
+                details: 'There was a problem processing your upload'
             });
         }
 
@@ -88,24 +84,34 @@ export const createHomeContent = async (req, res) => {
             if (!req.file) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Please upload an image'
+                    message: 'Please upload an image',
+                    details: 'Image file is required'
                 });
             }
 
             const { title } = req.body;
             
             if (!title) {
-                // Delete uploaded file if validation fails
-                fs.unlinkSync(req.file.path);
                 return res.status(400).json({
                     success: false,
-                    message: 'Title is required'
+                    message: 'Title is required',
+                    details: 'Please provide a title for the content'
+                });
+            }
+
+            // Upload image to Cloudinary
+            const imageUrl = await uploadToCloudinary(req.file);
+            if (!imageUrl) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to upload image to cloud storage',
+                    details: 'Please try again'
                 });
             }
 
             const homeContent = await HomeContent.create({
                 title,
-                image: req.file.filename
+                image: imageUrl
             });
 
             res.status(201).json({
@@ -114,13 +120,11 @@ export const createHomeContent = async (req, res) => {
                 data: homeContent
             });
         } catch (error) {
-            // Delete uploaded file if content creation fails
-            if (req.file) {
-                fs.unlinkSync(req.file.path);
-            }
+            console.error('Content creation error:', error);
             res.status(500).json({
                 success: false,
-                message: error.message
+                message: 'Error creating content',
+                details: error.message
             });
         }
     });
@@ -129,10 +133,17 @@ export const createHomeContent = async (req, res) => {
 // Update home content
 export const updateHomeContent = async (req, res) => {
     upload(req, res, async (err) => {
-        if (err) {
+        if (err instanceof multer.MulterError) {
             return res.status(400).json({
                 success: false,
-                message: err.message || 'Error uploading file'
+                message: 'File upload error',
+                details: err.message
+            });
+        } else if (err) {
+            return res.status(400).json({
+                success: false,
+                message: err.message || 'Error uploading file',
+                details: 'There was a problem processing your upload'
             });
         }
 
@@ -140,9 +151,6 @@ export const updateHomeContent = async (req, res) => {
             const homeContent = await HomeContent.findById(req.params.id);
             
             if (!homeContent) {
-                if (req.file) {
-                    fs.unlinkSync(req.file.path);
-                }
                 return res.status(404).json({
                     success: false,
                     message: 'Home content not found'
@@ -152,22 +160,24 @@ export const updateHomeContent = async (req, res) => {
             const { title } = req.body;
             
             if (!title) {
-                if (req.file) {
-                    fs.unlinkSync(req.file.path);
-                }
                 return res.status(400).json({
                     success: false,
-                    message: 'Title is required'
+                    message: 'Title is required',
+                    details: 'Please provide a title for the content'
                 });
             }
 
-            // If new image is uploaded, delete old image
+            // If new image is uploaded, update the image
             if (req.file) {
-                const oldImagePath = path.join('uploads/content', homeContent.image);
-                if (homeContent.image && fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath);
+                const imageUrl = await uploadToCloudinary(req.file);
+                if (!imageUrl) {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Failed to upload image to cloud storage',
+                        details: 'Please try again'
+                    });
                 }
-                homeContent.image = req.file.filename;
+                homeContent.image = imageUrl;
             }
 
             homeContent.title = title;
@@ -179,12 +189,11 @@ export const updateHomeContent = async (req, res) => {
                 data: homeContent
             });
         } catch (error) {
-            if (req.file) {
-                fs.unlinkSync(req.file.path);
-            }
+            console.error('Content update error:', error);
             res.status(500).json({
                 success: false,
-                message: error.message
+                message: 'Error updating content',
+                details: error.message
             });
         }
     });
@@ -202,11 +211,6 @@ export const deleteHomeContent = async (req, res) => {
             });
         }
 
-        // Delete image file
-        if (homeContent.image && fs.existsSync(homeContent.image)) {
-            fs.unlinkSync(homeContent.image);
-        }
-
         await homeContent.deleteOne();
 
         res.status(200).json({
@@ -216,7 +220,8 @@ export const deleteHomeContent = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error.message
+            message: 'Error deleting home content',
+            error: error.message
         });
     }
 }; 

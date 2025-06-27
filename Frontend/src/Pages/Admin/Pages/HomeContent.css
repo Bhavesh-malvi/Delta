@@ -143,22 +143,17 @@
     object-fit: contain;
 }
 
-.file-name {
-    margin-top: 10px;
-    color: rgba(0, 255, 135, 0.8);
-    font-size: 0.9rem;
-    text-align: center;
-    word-break: break-all;
+.remove-image {
+    display: none;
 }
 
-.button-group {
+.form-actions {
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
 }
 
-.submit-btn,
-.cancel-btn {
+.submit-btn, .cancel-btn {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 8px;
@@ -205,6 +200,15 @@
     margin-bottom: 1.5rem;
 }
 
+.loading, .no-content {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
 .content-grid {
     display: grid;
     gap: 1.5rem;
@@ -216,90 +220,73 @@
     backdrop-filter: blur(10px);
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1.5rem;
+    overflow: hidden;
     transition: transform 0.3s ease;
+    position: relative;
 }
 
 .content-item:hover {
     transform: translateY(-5px);
 }
 
-.content-content h4 {
-    color: #00ff87;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.content-image-container {
-    margin: 1rem 0;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid rgba(0, 255, 135, 0.2);
+.content-item img {
+    width: 100%;
     height: 200px;
-}
-
-.content-image-container img {
-    width: 100%;
-    height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.content-image-container img:hover {
-    transform: scale(1.05);
-}
-
-.content-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-top: 1rem;
-}
-
-.edit-btn,
-.delete-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-    line-height: 1;
-}
-
-.edit-btn i,
-.delete-btn i {
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-}
-
-.edit-btn {
-    background: rgba(0, 255, 135, 0.1);
+.content-item h4 {
+    padding: 1rem;
+    margin: 0;
     color: #00ff87;
-    border: 1px solid #00ff87;
+    font-size: 1.1rem;
+    text-align: left;
+    padding-left: 1.5rem;
 }
 
-.delete-btn {
-    background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
-    border: 1px solid #ff4444;
+.item-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 1.5rem 1rem;
+    background: transparent;
 }
 
-.edit-btn:hover {
+.item-actions button {
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.item-actions button i {
+    font-size: 0.9rem;
+}
+
+.item-actions button:first-child {
+    background: rgba(0, 255, 135, 0.15);
+    color: #00ff87;
+}
+
+.item-actions button:first-child:hover {
     background: #00ff87;
     color: #000;
     transform: scale(1.1);
 }
 
-.delete-btn:hover {
+.item-actions button:last-child {
+    background: rgba(255, 68, 68, 0.15);
+    color: #ff4444;
+}
+
+.item-actions button:last-child:hover {
     background: #ff4444;
     color: #fff;
     transform: scale(1.1);
@@ -314,7 +301,7 @@
         grid-template-columns: 1fr;
     }
 
-    .button-group {
+    .form-actions {
         flex-direction: column;
     }
 
@@ -323,14 +310,122 @@
     }
 }
 
-.loading-message,
-.empty-message {
-    width: 100%;
-    padding: 2rem;
-    text-align: center;
-    color: #666;
-    font-size: 1.1rem;
-    background: #f5f5f5;
-    border-radius: 8px;
+.upload-progress {
     margin: 1rem 0;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    height: 24px;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(0, 255, 135, 0.2) 0%, rgba(0, 255, 135, 0.8) 100%);
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.image-input:disabled {
+    cursor: not-allowed;
+}
+
+.submit-btn i {
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+.content-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.content-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 255, 135, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 255, 135, 0.1);
+}
+
+.content-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 2px solid rgba(0, 255, 135, 0.1);
+}
+
+.content-card h4 {
+    color: #fff;
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.edit-btn,
+.delete-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.edit-btn {
+    background: rgba(0, 255, 135, 0.1);
+    color: #00ff87;
+}
+
+.edit-btn:hover {
+    background: rgba(0, 255, 135, 0.2);
+}
+
+.delete-btn {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+}
+
+.delete-btn:hover {
+    background: rgba(255, 68, 68, 0.2);
+}
+
+.edit-btn:disabled,
+.delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
 } 

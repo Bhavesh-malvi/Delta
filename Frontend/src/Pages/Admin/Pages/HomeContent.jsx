@@ -1,66 +1,108 @@
 import React, { useState, useEffect } from 'react';
 import './HomeContent.css';
 import axios from 'axios';
-import { API_BASE_URL, UPLOADS_BASE_URL } from '../../../config/api';
+import { API_BASE_URL } from '../../../config/api';
 
 const API_ENDPOINT = `${API_BASE_URL}/api/homecontent`;
-const UPLOADS_ENDPOINT = `${UPLOADS_BASE_URL}/content`;
 
 const HomeContent = () => {
     const [formData, setFormData] = useState({
         title: '',
         image: null
     });
-
     const [previewImage, setPreviewImage] = useState(null);
-    const [content, setContent] = useState([]);
+    const [contents, setContents] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [contentLoading, setContentLoading] = useState(true);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [message, setMessage] = useState({ text: '', type: '' });
     const [editingId, setEditingId] = useState(null);
-
-    // Fetch existing content
-    const fetchContent = async () => {
-        setContentLoading(true);
-        try {
-            const response = await axios.get(API_ENDPOINT);
-            console.log('Fetched content:', response.data.data);
-            setContent(response.data.data || []);
-        } catch (err) {
-            setMessage({ text: 'Failed to fetch content', type: 'error' });
-            console.error('Error fetching content:', err);
-            setContent([]);
-        } finally {
-            setContentLoading(false);
-        }
-    };
 
     useEffect(() => {
         fetchContent();
     }, []);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+    const fetchContent = async () => {
+        try {
+            const response = await axios.get(API_ENDPOINT);
+            setContents(response.data.data);
+        } catch (error) {
+            setMessage({ text: 'Error fetching content', type: 'error' });
+        }
     };
 
-    const handleImageChange = (e) => {
+    const compressImage = async (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Max dimensions
+                    const MAX_WIDTH = 1000;
+                    const MAX_HEIGHT = 1000;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to blob with quality 0.7 (70%)
+                    canvas.toBlob((blob) => {
+                        resolve(new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        }));
+                    }, 'image/jpeg', 0.7);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
         if (file) {
             if (file.type.startsWith('image/')) {
-                setFormData(prev => ({
-                    ...prev,
-                    image: file
-                }));
-                // Create preview URL
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setPreviewImage(reader.result);
-                };
-                reader.readAsDataURL(file);
+                try {
+                    // Show loading state for compression
+                    setMessage({ text: 'Optimizing image...', type: 'info' });
+                    
+                    // Compress image
+                    const compressedFile = await compressImage(file);
+                    
+                    setFormData(prev => ({
+                        ...prev,
+                        image: compressedFile
+                    }));
+
+                    // Create preview URL
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setPreviewImage(reader.result);
+                        setMessage({ text: '', type: '' });
+                    };
+                    reader.readAsDataURL(compressedFile);
+                } catch (error) {
+                    setMessage({ text: 'Error processing image', type: 'error' });
+                    e.target.value = '';
+                }
             } else {
                 setMessage({ text: 'Please upload an image file', type: 'error' });
                 e.target.value = '';
@@ -75,6 +117,7 @@ const HomeContent = () => {
         });
         setPreviewImage(null);
         setEditingId(null);
+        setUploadProgress(0);
         // Reset file input
         const fileInput = document.getElementById('image');
         if (fileInput) fileInput.value = '';
@@ -86,7 +129,7 @@ const HomeContent = () => {
             title: item.title,
             image: null
         });
-        setPreviewImage(`${UPLOADS_ENDPOINT}/${item.image}`);
+        setPreviewImage(item.image);
         window.scrollTo(0, 0);
     };
 
@@ -99,6 +142,7 @@ const HomeContent = () => {
 
         setLoading(true);
         setMessage({ text: '', type: '' });
+        setUploadProgress(0);
 
         try {
             // Create FormData object
@@ -108,22 +152,26 @@ const HomeContent = () => {
                 formDataToSend.append('image', formData.image);
             }
 
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
+                },
+                timeout: 60000 // 60 second timeout
+            };
+
             if (editingId) {
                 // Update existing content
-                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await axios.put(`${API_ENDPOINT}/${editingId}`, formDataToSend, config);
                 setMessage({ text: 'Content updated successfully!', type: 'success' });
             } else {
                 // Create new content
-                await axios.post(API_ENDPOINT, formDataToSend, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                const response = await axios.post(API_ENDPOINT, formDataToSend, config);
                 setMessage({ text: 'Content added successfully!', type: 'success' });
+                console.log('Server response:', response.data);
             }
 
             // Reset form
@@ -131,51 +179,39 @@ const HomeContent = () => {
             
             // Refresh content list
             fetchContent();
-        } catch (err) {
+        } catch (error) {
+            console.error('Error:', error);
             setMessage({ 
-                text: err.response?.data?.message || (editingId ? 'Failed to update content' : 'Failed to add content'), 
-                type: 'error' 
+                text: error.response?.data?.message || 'Error processing your request',
+                type: 'error'
             });
-            console.error(editingId ? 'Error updating content:' : 'Error adding content:', err);
         } finally {
             setLoading(false);
-            setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+            setUploadProgress(0);
         }
-    };
-
-    const handleDelete = async (id) => {
-        try {
-            await axios.delete(`${API_ENDPOINT}/${id}`);
-            setMessage({ text: 'Content deleted successfully!', type: 'success' });
-            fetchContent();
-        } catch (err) {
-            setMessage({ text: 'Failed to delete content', type: 'error' });
-            console.error('Error deleting content:', err);
-        }
-        setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     };
 
     return (
         <div className="home-content-container">
             <h2>{editingId ? 'Edit Content' : 'Add New Content'}</h2>
-            
+
             {message.text && (
                 <div className={`message ${message.type}`}>
                     {message.text}
                 </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="home-content-form">
                 <div className="form-group">
-                    <label htmlFor="title">Title <span className="required">*</span></label>
+                    <label htmlFor="title">Title {!editingId && <span className="required">*</span>}</label>
                     <input
                         type="text"
                         id="title"
                         name="title"
                         value={formData.title}
-                        onChange={handleInputChange}
-                        placeholder="Enter title"
+                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                         required
+                        placeholder="Enter title"
                     />
                 </div>
 
@@ -189,6 +225,7 @@ const HomeContent = () => {
                             onChange={handleImageChange}
                             accept="image/*"
                             className="image-input"
+                            disabled={loading}
                         />
                         {!previewImage ? (
                             <div className="upload-label">
@@ -200,31 +237,42 @@ const HomeContent = () => {
                                 <div className="image-preview">
                                     <img src={previewImage} alt="Preview" />
                                 </div>
-                                <span className="file-name">
-                                    {formData.image?.name || 'Current Image'}
-                                </span>
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div className="button-group">
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                    <div className="upload-progress">
+                        <div 
+                            className="progress-bar" 
+                            style={{ width: `${uploadProgress}%` }}
+                        >
+                            {uploadProgress}%
+                        </div>
+                    </div>
+                )}
+
+                <div className="form-actions">
                     <button type="submit" className="submit-btn" disabled={loading}>
                         {loading ? (
-                            <span>Saving...</span>
-                        ) : (
                             <>
-                                <i className="fas fa-save"></i> {editingId ? 'Update Content' : 'Add Content'}
+                                <i className="fas fa-spinner fa-spin"></i>
+                                {uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : 'Processing...'}
                             </>
+                        ) : (
+                            editingId ? 'Update Content' : 'Add Content'
                         )}
                     </button>
+
                     {editingId && (
                         <button 
                             type="button" 
                             className="cancel-btn"
                             onClick={resetForm}
+                            disabled={loading}
                         >
-                            <i className="fas fa-times"></i> Cancel
+                            Cancel
                         </button>
                     )}
                 </div>
@@ -232,48 +280,38 @@ const HomeContent = () => {
 
             <div className="content-list">
                 <h3>Existing Content</h3>
-                <div className="content-grid">
-                    {contentLoading ? (
-                        <div className="loading-message">Loading content...</div>
-                    ) : (
-                        content.map(item => (
-                            <div key={item._id} className="content-item">
-                                <div className="content-content">
-                                    <h4>{item.title}</h4>
-                                    {item.image && (
-                                        <div className="content-image-container">
-                                            <img 
-                                                src={`${UPLOADS_ENDPOINT}/${item.image}`}
-                                                alt={item.title}
-                                                onError={(e) => {
-                                                    console.error('Error loading image:', e);
-                                                    e.target.onerror = null;
-                                                    e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
-                                                }}
-                                            />
-                                        </div>
-                                    )}
-                                    <div className="content-actions">
-                                        <button 
-                                            className="edit-btn"
-                                            onClick={() => handleEdit(item)}
-                                            title="Edit"
-                                        >
-                                            <i className="fas fa-edit"></i>
-                                        </button>
-                                        <button 
-                                            className="delete-btn"
-                                            onClick={() => handleDelete(item._id)}
-                                            title="Delete"
-                                        >
-                                            <i className="fas fa-trash"></i>
-                                        </button>
-                                    </div>
+                {contents.length === 0 ? (
+                    <div className="no-content">No content available</div>
+                ) : (
+                    <div className="content-grid">
+                        {contents.map(item => (
+                            <div key={item._id} className="content-card">
+                                <img src={item.image} alt={item.title} />
+                                <h4>{item.title}</h4>
+                                <div className="card-actions">
+                                    <button
+                                        onClick={() => handleEdit(item)}
+                                        className="edit-btn"
+                                        disabled={loading}
+                                    >
+                                        <i className="fas fa-edit"></i>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm('Are you sure you want to delete this item?')) {
+                                                // Add delete functionality
+                                            }
+                                        }}
+                                        className="delete-btn"
+                                        disabled={loading}
+                                    >
+                                        <i className="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-                        ))
-                    )}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
