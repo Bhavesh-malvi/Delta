@@ -4,7 +4,7 @@ const isDevelopment = false; // Switch to production mode
 // Base URLs
 export const API_BASE_URL = isDevelopment 
     ? 'http://localhost:5000'
-    : 'https://delta-theta-one.vercel.app';
+    : 'https://delta-teal.vercel.app';
 
 // Timeout configuration
 export const API_TIMEOUT = 60000; // 60 seconds
