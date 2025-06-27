@@ -6,6 +6,9 @@ import { uploadToCloudinary } from '../config/cloudinary.js';
 const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
     fileFilter: function (req, file, cb) {
         const allowedTypes = /jpeg|jpg|png|gif/;
         const mimetype = allowedTypes.test(file.mimetype);
@@ -13,7 +16,7 @@ const upload = multer({
         if (mimetype) {
             return cb(null, true);
         } else {
-            cb('Error: Images only!');
+            cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
         }
     }
 }).single('image');
@@ -62,6 +65,7 @@ export const getHomeService = async (req, res) => {
 export const createHomeService = async (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
+            console.error('Multer error:', err);
             return res.status(400).json({
                 success: false,
                 message: err.message || 'Error uploading file'
@@ -69,6 +73,9 @@ export const createHomeService = async (req, res) => {
         }
 
         try {
+            console.log('Request body:', req.body);
+            console.log('Request file:', req.file);
+
             if (!req.file) {
                 return res.status(400).json({
                     success: false,
@@ -86,7 +93,18 @@ export const createHomeService = async (req, res) => {
             }
 
             // Upload to Cloudinary
-            const imageUrl = await uploadToCloudinary(req.file.buffer);
+            let imageUrl;
+            try {
+                imageUrl = await uploadToCloudinary(req.file.buffer);
+                console.log('Cloudinary upload successful:', imageUrl);
+            } catch (cloudinaryError) {
+                console.error('Cloudinary upload error:', cloudinaryError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error uploading image to cloud storage',
+                    error: cloudinaryError.message
+                });
+            }
 
             const service = await HomeService.create({
                 title,
@@ -94,14 +112,18 @@ export const createHomeService = async (req, res) => {
                 image: imageUrl
             });
 
+            console.log('Service created successfully:', service);
+
             res.status(201).json({
                 success: true,
                 data: service
             });
         } catch (error) {
+            console.error('Service creation error:', error);
             res.status(500).json({
                 success: false,
-                message: error.message
+                message: 'Error creating service',
+                error: error.message
             });
         }
     });

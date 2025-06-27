@@ -134,6 +134,7 @@ const Career = () => {
             points: points,
             image: null
         });
+        // Always prepend API_BASE_URL for local file paths
         setPreviewImage(`${API_BASE_URL}${career.image}`);
         window.scrollTo(0, 0);
     };
@@ -358,13 +359,13 @@ const Career = () => {
                                 {career.image && (
                                     <div className="career-image-container">
                                         <img 
+                                            // Always prepend API_BASE_URL for local file paths
                                             src={`${API_BASE_URL}${career.image}`}
                                             alt={career.title} 
-                                            onLoad={() => console.log('Image loaded successfully:', `${API_BASE_URL}${career.image}`)}
+                                            onLoad={() => console.log('Image loaded successfully:', career.image)}
                                             onError={(e) => {
                                                 console.error('Image failed to load:', e.target.src);
                                                 console.error('Career image path:', career.image);
-                                                console.error('Full image URL:', `${API_BASE_URL}${career.image}`);
                                                 e.target.onerror = null;
                                                 e.target.src = '/placeholder-career.jpg';
                                             }}

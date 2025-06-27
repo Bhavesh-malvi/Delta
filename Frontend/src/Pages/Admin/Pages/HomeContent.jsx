@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { API_BASE_URL } from '../../../config/api';
+import { Card, Form, Button, Row, Col, Container, Alert } from 'react-bootstrap';
+import { FaCloudUploadAlt, FaEdit, FaTrash, FaSpinner } from 'react-icons/fa';
 import './HomeContent.css';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
 
 const HomeContent = () => {
     const [formData, setFormData] = useState({
@@ -131,13 +135,14 @@ const HomeContent = () => {
         setMessage({ text: '', type: '' });
     };
 
-    const handleEdit = (item) => {
-        setEditingId(item._id);
+    const handleEdit = (content) => {
+        setEditingId(content._id);
         setFormData({
-            title: item.title,
+            title: content.title,
             image: null
         });
-        setPreviewImage(item.image);
+        setPreviewImage(content.image.startsWith('http') ? content.image : `${API_BASE_URL}${content.image}`);
+        window.scrollTo(0, 0);
     };
 
     const handleSubmit = async (e) => {
@@ -217,9 +222,9 @@ const HomeContent = () => {
     return (
         <div className="home-content-container">
             <h2>{editingId ? 'Edit Content' : 'Add New Content'}</h2>
-            
+
             {message.text && (
-                <div className={`message ${message.type}`}>
+                <Alert variant={message.type === 'success' ? 'success' : 'danger'}>
                     {message.text}
                     {message.type === 'error' && (
                         <button 
@@ -232,159 +237,148 @@ const HomeContent = () => {
                             <i className="fas fa-sync-alt"></i> Retry
                         </button>
                     )}
-                </div>
+                </Alert>
             )}
-            
-            <form onSubmit={handleSubmit} className="home-content-form">
-                <div className="form-group">
-                    <label htmlFor="title">Title {!editingId && <span className="required">*</span>}</label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                        required
-                        placeholder="Enter title"
-                    />
-                </div>
 
-                <div className="form-group">
-                    <label htmlFor="image">Upload Image {!editingId && <span className="required">*</span>}</label>
-                    <div className="image-upload-container">
-                        <input
-                            type="file"
-                            id="image"
-                            name="image"
-                            onChange={handleImageChange}
-                            accept="image/*"
-                            className="image-input"
-                            disabled={loading}
-                        />
-                        {!previewImage ? (
-                            <div className="upload-label">
-                                <i className="fas fa-cloud-upload-alt"></i>
-                                <span>Choose an image or drag it here</span>
+            <Card className="mb-4 bg-dark text-white border-success">
+                <Card.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-success">
+                                Title {!editingId && <span className="text-danger">*</span>}
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="title"
+                                value={formData.title}
+                                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                                required
+                                placeholder="Enter title"
+                                className="bg-dark text-white border-success"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-success">
+                                Upload Image {!editingId && <span className="text-danger">*</span>}
+                            </Form.Label>
+                            <div className="image-upload-container bg-dark border border-success rounded p-3">
+                                <Form.Control
+                                    type="file"
+                                    onChange={handleImageChange}
+                                    accept="image/*"
+                                    className="d-none"
+                                    disabled={loading}
+                                />
+                                <label className="w-100 h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer">
+                                    {!previewImage ? (
+                                        <>
+                                            <FaCloudUploadAlt size={40} className="mb-2 text-success" />
+                                            <span>Choose an image or drag it here</span>
+                                        </>
+                                    ) : (
+                                        <div className="position-relative w-100 h-100">
+                                            <img 
+                                                src={previewImage} 
+                                                alt="Preview" 
+                                                className="img-fluid rounded" 
+                                                style={{maxHeight: '300px', objectFit: 'contain'}} 
+                                            />
+                                        </div>
+                                    )}
+                                </label>
                             </div>
-                        ) : (
-                            <div className="image-preview-container">
-                                <div className="image-preview">
-                                    <img src={previewImage} alt="Preview" />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                        </Form.Group>
 
-                {uploadProgress > 0 && uploadProgress < 100 && (
-                    <div className="upload-progress">
-                        <div 
-                            className="progress-bar" 
-                            style={{ width: `${uploadProgress}%` }}
-                        >
-                            {uploadProgress}%
-                        </div>
-                    </div>
-                )}
-
-                <div className="form-actions">
-                    <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? (
-                            <>
-                                <i className="fas fa-spinner fa-spin"></i>
-                                {uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : 'Processing...'}
-                            </>
-                        ) : (
-                            editingId ? 'Update Content' : 'Add Content'
-                        )}
-                    </button>
-
-                    {editingId && (
-                        <button 
-                            type="button" 
-                            className="cancel-btn"
-                            onClick={resetForm}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                    )}
-                </div>
-            </form>
-
-            <div className="content-list">
-                <h3>
-                    Existing Content
-                    <button 
-                        className="refresh-btn"
-                        onClick={() => fetchContent()}
-                        disabled={contentLoading}
-                    >
-                        <i className={`fas fa-sync-alt ${contentLoading ? 'fa-spin' : ''}`}></i>
-                    </button>
-                </h3>
-                
-                    {contentLoading ? (
-                    <div className="loading">
-                        <i className="fas fa-spinner fa-spin"></i>
-                        Loading content...
-                    </div>
-                ) : contents.length === 0 ? (
-                    <div className="no-content">
-                        {message.type === 'error' ? (
-                            <>
-                                <i className="fas fa-exclamation-circle"></i>
-                                <p>Failed to load content</p>
-                                <button 
-                                    className="retry-btn"
-                                    onClick={() => fetchContent()}
+                        <div className="d-flex gap-3">
+                            <Button 
+                                type="submit" 
+                                variant="success" 
+                                className="flex-grow-1"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <FaSpinner className="spinner me-2" />
+                                        Processing...
+                                    </>
+                                ) : (
+                                    editingId ? 'Update Content' : 'Add Content'
+                                )}
+                            </Button>
+                            
+                            {editingId && (
+                                <Button 
+                                    type="button" 
+                                    variant="outline-danger" 
+                                    className="flex-grow-1"
+                                    onClick={resetForm}
+                                    disabled={loading}
                                 >
-                                    <i className="fas fa-sync-alt"></i> Retry
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <i className="fas fa-inbox"></i>
-                                <p>No content available</p>
-                            </>
-                        )}
-                    </div>
-                ) : (
-                    <div className="content-grid">
-                        {contents.map(item => (
-                            <div key={item._id} className="content-card">
-                                <div className="image-container">
-                                    <img 
-                                        src={`${API_BASE_URL}${item.image}`} 
+                                    Cancel
+                                </Button>
+                            )}
+                        </div>
+                    </Form>
+                </Card.Body>
+            </Card>
+
+            <h3 className="text-center mb-4 text-success">Existing Content</h3>
+            
+            {loading ? (
+                <div className="text-center">
+                    <FaSpinner className="spinner text-success" size={40} />
+                </div>
+            ) : contents.length === 0 ? (
+                <div className="text-center text-muted">
+                    <FaCloudUploadAlt size={40} className="mb-2" />
+                    <p>No content added yet</p>
+                </div>
+            ) : (
+                <Row className="g-4">
+                    {contents.map(item => (
+                        <Col key={item._id} xs={12} sm={6} lg={4}>
+                            <Card className="h-100 bg-dark text-white border-success hover-card">
+                                <div className="card-img-container">
+                                    <Card.Img 
+                                        variant="top" 
+                                        src={item.image.startsWith('http') ? item.image : `${API_BASE_URL}${item.image}`}
                                         alt={item.title}
+                                        className="service-image"
                                         onError={(e) => {
                                             e.target.onerror = null;
                                             e.target.src = '/placeholder-image.jpg';
                                         }}
                                     />
                                 </div>
-                                <h4>{item.title}</h4>
-                                <div className="card-actions">
-                                        <button 
-                                        onClick={() => handleEdit(item)}
-                                            className="edit-btn"
-                                        disabled={loading}
+                                <Card.Body>
+                                    <Card.Title className="text-success">{item.title}</Card.Title>
+                                </Card.Body>
+                                <Card.Footer className="bg-dark border-success">
+                                    <div className="d-flex gap-2 justify-content-end">
+                                        <Button
+                                            variant="outline-success"
+                                            size="sm"
+                                            onClick={() => handleEdit(item)}
+                                            disabled={loading}
                                         >
-                                            <i className="fas fa-edit"></i>
-                                        </button>
-                                        <button 
-                                        onClick={() => handleDelete(item._id)}
-                                            className="delete-btn"
-                                        disabled={loading}
+                                            <FaEdit />
+                                        </Button>
+                                        <Button
+                                            variant="outline-danger"
+                                            size="sm"
+                                            onClick={() => handleDelete(item._id)}
+                                            disabled={loading}
                                         >
-                                            <i className="fas fa-trash"></i>
-                                        </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    )}
-            </div>
+                                            <FaTrash />
+                                        </Button>
+                                    </div>
+                                </Card.Footer>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+            )}
         </div>
     );
 };

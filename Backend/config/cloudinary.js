@@ -6,16 +6,22 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-export const uploadToCloudinary = async (file) => {
+export const uploadToCloudinary = async (buffer) => {
     try {
-        const result = await cloudinary.uploader.upload(file, {
+        // Convert buffer to base64
+        const b64 = Buffer.from(buffer).toString('base64');
+        const dataURI = `data:image/jpeg;base64,${b64}`;
+        
+        const result = await cloudinary.uploader.upload(dataURI, {
             folder: 'delta/services',
             resource_type: 'auto'
         });
+        
+        console.log('Cloudinary upload result:', result);
         return result.secure_url;
     } catch (error) {
         console.error('Error uploading to Cloudinary:', error);
-        throw error;
+        throw new Error(`Cloudinary upload failed: ${error.message}`);
     }
 };
 

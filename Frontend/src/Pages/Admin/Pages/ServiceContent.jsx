@@ -84,7 +84,7 @@ const ServiceContent = () => {
             description: content.description,
             image: null
         });
-        setPreviewImage(`${UPLOAD_URLS.SERVICES}/${content.image}`);
+        setPreviewImage(content.image.startsWith('http') ? content.image : `${UPLOAD_URLS.SERVICES}${content.image}`);
         window.scrollTo(0, 0);
     };
 
@@ -278,15 +278,15 @@ const ServiceContent = () => {
                         {contents.map(content => (
                             <div key={content._id} className="content-card">
                                 <div className="content-image">
-                                        <img 
-                                        src={`${UPLOAD_URLS.SERVICES}/${content.image}`}
+                                    <img 
+                                        src={content.image.startsWith('http') ? content.image : `${UPLOAD_URLS.SERVICES}${content.image}`}
                                         alt={content.title}
                                         onError={(e) => {
                                             e.target.onerror = null;
                                             e.target.src = '/placeholder-content.jpg';
                                         }}
-                                        />
-                                    </div>
+                                    />
+                                </div>
                                 <div className="content-info">
                                     <h4>{content.title}</h4>
                                     <p>{content.description}</p>
@@ -297,19 +297,19 @@ const ServiceContent = () => {
                                         className="edit-btn"
                                         disabled={loading}
                                     >
-                                <i className="fas fa-edit"></i>
-                            </button>
+                                        <i className="fas fa-edit"></i>
+                                    </button>
                                     <button 
                                         onClick={() => handleDelete(content._id)}
                                         className="delete-btn"
                                         disabled={loading}
                                     >
-                                <i className="fas fa-trash"></i>
-                            </button>
+                                        <i className="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                        </div>
-                    ))}
-                </div>
                 )}
             </div>
         </div>

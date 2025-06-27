@@ -1,5 +1,5 @@
 // API Configuration
-const isDevelopment = false; // Switch to production mode
+const isDevelopment = true; // Switch to development mode for local testing
 
 // Base URLs
 export const API_BASE_URL = isDevelopment 
@@ -31,7 +31,8 @@ export const UPLOAD_URLS = {
 
 // Default headers
 export const DEFAULT_HEADERS = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
 };
 
 // Error messages
@@ -52,7 +53,8 @@ import axios from 'axios';
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: API_TIMEOUT,
-    headers: DEFAULT_HEADERS
+    headers: DEFAULT_HEADERS,
+    withCredentials: true // Enable sending cookies with requests
 });
 
 // Add response interceptor for error handling

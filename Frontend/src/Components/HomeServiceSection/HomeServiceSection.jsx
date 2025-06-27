@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS } from '../../config/api';
+import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
 import './HomeServiceSection.css';
 
 const HomeServiceSection = () => {
@@ -29,6 +29,14 @@ const HomeServiceSection = () => {
 
         fetchServices();
     }, []);
+
+    const getImageUrl = (image) => {
+        if (!image) return '/placeholder-service.jpg';
+        // If it's already a full URL (Cloudinary)
+        if (image.startsWith('http')) return image;
+        // If it's just a filename, construct the full path
+        return `${API_BASE_URL}/uploads/services/${image}`;
+    };
 
     if (loading) {
         return (
@@ -62,7 +70,7 @@ const HomeServiceSection = () => {
                     <div className="service-card" key={service._id}>
                         <div className="service-image-container">
                             <img 
-                                src={service.image}
+                                src={getImageUrl(service.image)}
                                 alt={service.title} 
                                 className="service-image"
                                 onError={(e) => {

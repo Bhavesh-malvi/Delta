@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
+import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../../config/api';
+import { Card, Button, Row, Col, Form, Container } from 'react-bootstrap';
+import { FaEdit, FaTrash, FaCloudUploadAlt } from 'react-icons/fa';
 import './HomeService.css';
 
 const HomeService = () => {
@@ -20,13 +22,26 @@ const HomeService = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
-            console.log('Fetched services:', response.data);
-            if (response.data && Array.isArray(response.data)) {
-                setServices(response.data);
-            } else if (response.data && Array.isArray(response.data.data)) {
-                setServices(response.data.data);
+            console.log('Raw API Response:', response);
+            console.log('Services data:', response.data);
+            
+            if (response.data && Array.isArray(response.data.data)) {
+                const services = response.data.data.map(service => ({
+                    ...service,
+                    image: service.image || '/placeholder-service.jpg'
+                }));
+                console.log('Processed services:', services);
+                setServices(services);
+            } else if (response.data && Array.isArray(response.data)) {
+                const services = response.data.map(service => ({
+                    ...service,
+                    image: service.image || '/placeholder-service.jpg'
+                }));
+                console.log('Processed services:', services);
+                setServices(services);
             } else {
                 setError('Invalid data format received');
+                console.error('Invalid data format:', response.data);
             }
             setError(null);
         } catch (err) {
@@ -91,7 +106,9 @@ const HomeService = () => {
             description: service.description,
             image: null
         });
-        setPreviewImage(`${API_BASE_URL}/uploads/services/${service.image}`);
+        // Handle both Cloudinary and local URLs
+        const imageUrl = service.image.startsWith('http') ? service.image : `${API_BASE_URL}${service.image}`;
+        setPreviewImage(imageUrl);
         window.scrollTo(0, 0);
     };
 
@@ -106,7 +123,6 @@ const HomeService = () => {
         setError(null);
 
         try {
-            // Create FormData object
             const formDataToSend = new FormData();
             formDataToSend.append('title', formData.title);
             formDataToSend.append('description', formData.description);
@@ -121,7 +137,6 @@ const HomeService = () => {
             };
 
             if (editingId) {
-                // Update existing service
                 await axiosInstance.put(
                     `${ENDPOINTS.HOME_SERVICE}/${editingId}`, 
                     formDataToSend, 
@@ -129,7 +144,6 @@ const HomeService = () => {
                 );
                 setError({ text: 'Service updated successfully!', type: 'success' });
             } else {
-                // Create new service
                 await axiosInstance.post(
                     ENDPOINTS.HOME_SERVICE, 
                     formDataToSend, 
@@ -138,10 +152,7 @@ const HomeService = () => {
                 setError({ text: 'Service added successfully!', type: 'success' });
             }
 
-            // Reset form
             resetForm();
-            
-            // Refresh services list
             fetchServices();
         } catch (err) {
             console.error(editingId ? 'Error updating service:' : 'Error adding service:', err);
@@ -152,169 +163,214 @@ const HomeService = () => {
     };
 
     const handleDelete = async (id) => {
-        try {
-            setLoading(true);
-            await axiosInstance.delete(`${ENDPOINTS.HOME_SERVICE}/${id}`);
-            setError({ text: 'Service deleted successfully!', type: 'success' });
-            fetchServices();
-        } catch (err) {
-            console.error('Error deleting service:', err);
-            setError(err.userMessage || 'Failed to delete service');
-        } finally {
-            setLoading(false);
+        if (window.confirm('Are you sure you want to delete this service?')) {
+            try {
+                setLoading(true);
+                await axiosInstance.delete(`${ENDPOINTS.HOME_SERVICE}/${id}`);
+                setError({ text: 'Service deleted successfully!', type: 'success' });
+                fetchServices();
+            } catch (err) {
+                console.error('Error deleting service:', err);
+                setError(err.userMessage || 'Failed to delete service');
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
     return (
-        <div className="home-service-container">
-            <h2>{editingId ? 'Edit Service' : 'Add New Service'}</h2>
+        <Container fluid className="home-service-container py-4">
+            <h2 className="text-center mb-4 text-success">{editingId ? 'Edit Service' : 'Add New Service'}</h2>
             
             {error && (
-                <div className={`message ${typeof error === 'object' ? error.type : 'error'}`}>
+                <div className={`alert ${typeof error === 'object' ? (error.type === 'success' ? 'alert-success' : 'alert-danger') : 'alert-danger'} mb-4`}>
                     {typeof error === 'object' ? error.text : error}
                 </div>
             )}
             
-            <form onSubmit={handleSubmit} className="home-service-form">
-                <div className="form-group">
-                    <label htmlFor="image">Upload Image {!editingId && <span className="required">*</span>}</label>
-                    <div className="image-upload-container">
-                        <input
-                            type="file"
-                            id="image"
-                            name="image"
-                            onChange={handleImageChange}
-                            accept="image/*"
-                            className="image-input"
-                            disabled={loading}
-                        />
-                        {!previewImage ? (
-                            <div className="upload-label">
-                                <i className="fas fa-cloud-upload-alt"></i>
-                                <span>Choose an image or drag it here</span>
+            <Card className="mb-4 bg-dark text-white border-success">
+                <Card.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-success">Upload Image {!editingId && <span className="text-danger">*</span>}</Form.Label>
+                            <div className="image-upload-container bg-dark border border-success rounded p-3">
+                                <Form.Control
+                                    type="file"
+                                    id="image"
+                                    onChange={handleImageChange}
+                                    accept="image/*"
+                                    className="d-none"
+                                    disabled={loading}
+                                />
+                                <label htmlFor="image" className="w-100 h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer">
+                                    {!previewImage ? (
+                                        <>
+                                            <FaCloudUploadAlt size={40} className="mb-2 text-success" />
+                                            <span>Choose an image or drag it here</span>
+                                        </>
+                                    ) : (
+                                        <div className="position-relative w-100 h-100">
+                                            <img src={previewImage} alt="Preview" className="img-fluid rounded" style={{maxHeight: '300px', objectFit: 'contain'}} />
+                                        </div>
+                                    )}
+                                </label>
                             </div>
-                        ) : (
-                            <div className="image-preview-container">
-                                <div className="image-preview">
-                                    <img src={previewImage} alt="Preview" />
-                                </div>
-                                <span className="file-name">
-                                    {formData.image ? formData.image.name : 'Current Image'}
-                                </span>
-                            </div>
-                        )}
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-success">Title <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleInputChange}
+                                required
+                                className="bg-dark text-white border-success"
+                                placeholder="Enter service title"
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-success">Description <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                required
+                                className="bg-dark text-white border-success"
+                                placeholder="Enter service description"
+                                rows={4}
+                            />
+                        </Form.Group>
+
+                        <div className="d-flex gap-3">
+                            <Button 
+                                type="submit" 
+                                variant="success" 
+                                className="flex-grow-1"
+                                disabled={loading}
+                            >
+                                {loading ? 'Processing...' : (editingId ? 'Update Service' : 'Add Service')}
+                            </Button>
+                            {editingId && (
+                                <Button 
+                                    type="button" 
+                                    variant="outline-danger" 
+                                    className="flex-grow-1"
+                                    onClick={resetForm}
+                                    disabled={loading}
+                                >
+                                    Cancel
+                                </Button>
+                            )}
+                        </div>
+                    </Form>
+                </Card.Body>
+            </Card>
+
+            <h3 className="text-center mb-4 text-success">Existing Services</h3>
+            
+            {loading && (
+                <div className="text-center">
+                    <div className="spinner-border text-success" role="status">
+                        <span className="visually-hidden">Loading...</span>
                     </div>
                 </div>
-
-                <div className="form-group">
-                    <label htmlFor="title">Service Title <span className="required">*</span></label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        placeholder="Enter service title"
-                        required
-                        disabled={loading}
-                    />
+            )}
+            
+            {!loading && services.length === 0 && (
+                <div className="text-center text-muted">
+                    <FaCloudUploadAlt size={40} className="mb-2" />
+                    <p>No services added yet</p>
                 </div>
-
-                <div className="form-group">
-                    <label htmlFor="description">Service Description <span className="required">*</span></label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        placeholder="Enter service description"
-                        required
-                        disabled={loading}
-                    />
-                </div>
-
-                <div className="form-actions">
-                    <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? (
-                            <>
-                                <i className="fas fa-spinner fa-spin"></i>
-                                Processing...
-                            </>
-                        ) : (
-                            editingId ? 'Update Service' : 'Add Service'
-                        )}
-                    </button>
-
-                    {editingId && (
-                        <button 
-                            type="button" 
-                            className="cancel-btn"
-                            onClick={resetForm}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                    )}
-                </div>
-            </form>
-
-            <div className="services-list">
-                <h3>Existing Services</h3>
-                <div className="services-grid">
-                    {loading ? (
-                        <div className="loading">
-                            <i className="fas fa-spinner fa-spin"></i>
-                            Loading services...
-                        </div>
-                    ) : services.length === 0 ? (
-                        <div className="no-services">
-                            <i className="fas fa-inbox"></i>
-                            <p>No services available</p>
-                        </div>
-                    ) : (
-                        services.map(service => (
-                        <div key={service._id} className="service-item">
-                            <div className="service-content">
-                                <h4>{service.title}</h4>
-                                {service.image && (
-                                    <div className="service-image-container">
-                                        <img 
-                                            src={`${API_BASE_URL}/uploads/services/${service.image}`}
-                                            alt={service.title}
-                                            onError={(e) => {
-                                                console.error('Image failed to load:', e.target.src);
-                                                e.target.onerror = null;
-                                                e.target.src = '/placeholder-service.jpg';
-                                            }}
-                                        />
+            )}
+            
+            <Row className="g-4">
+                {services.map((service, index) => {
+                    // Handle different URL formats and provide fallback
+                    let imageUrl;
+                    try {
+                        if (!service.image) {
+                            imageUrl = `${API_BASE_URL}/placeholder-service.jpg`;
+                        } else if (service.image.startsWith('http')) {
+                            imageUrl = service.image;
+                        } else if (service.image.startsWith('/')) {
+                            imageUrl = `${API_BASE_URL}${service.image}`;
+                        } else {
+                            imageUrl = `${API_BASE_URL}/${service.image}`;
+                        }
+                    } catch (error) {
+                        console.error('Error processing image URL:', error);
+                        imageUrl = `${API_BASE_URL}/placeholder-service.jpg`;
+                    }
+                    
+                    console.log(`Rendering service ${index + 1}:`, {
+                        id: service._id,
+                        title: service.title,
+                        originalImage: service.image,
+                        computedUrl: imageUrl
+                    });
+                    
+                    return (
+                        <Col key={service._id} xs={12} sm={6} lg={4}>
+                            <Card className="h-100 bg-dark text-white border-success hover-card">
+                                <div className="card-img-container">
+                                    <Card.Img 
+                                        variant="top" 
+                                        src={imageUrl}
+                                        alt={service.title}
+                                        className="service-image"
+                                        onError={(e) => {
+                                            console.error('Image failed to load:', {
+                                                originalSrc: e.target.src,
+                                                serviceImage: service.image,
+                                                computedUrl: imageUrl,
+                                                serviceId: service._id,
+                                                error: e.error
+                                            });
+                                            e.target.onerror = null;
+                                            e.target.src = `${API_BASE_URL}/placeholder-service.jpg`;
+                                        }}
+                                        onLoad={() => {
+                                            console.log('Image loaded successfully:', {
+                                                serviceId: service._id,
+                                                title: service.title,
+                                                originalImage: service.image,
+                                                computedUrl: imageUrl
+                                            });
+                                        }}
+                                    />
+                                </div>
+                                <Card.Body className="d-flex flex-column">
+                                    <Card.Title className="text-success">{service.title}</Card.Title>
+                                    <Card.Text className="flex-grow-1">{service.description}</Card.Text>
+                                    <div className="mt-auto d-flex justify-content-end">
+                                        <Button 
+                                            variant="outline-success" 
+                                            size="sm" 
+                                            className="me-2"
+                                            onClick={() => handleEdit(service)}
+                                            disabled={loading}
+                                        >
+                                            <FaEdit /> Edit
+                                        </Button>
+                                        <Button 
+                                            variant="outline-danger" 
+                                            size="sm"
+                                            onClick={() => handleDelete(service._id)}
+                                            disabled={loading}
+                                        >
+                                            <FaTrash /> Delete
+                                        </Button>
                                     </div>
-                                )}
-                                <p>{service.description}</p>
-                                </div>
-                                <div className="service-actions">
-                                    <button 
-                                        onClick={() => handleEdit(service)}
-                                        className="edit-btn"
-                                        title="Edit"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-edit"></i>
-                                    </button>
-                                    <button 
-                                        onClick={() => handleDelete(service._id)}
-                                        className="delete-btn"
-                                        title="Delete"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
-        </div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    );
+                })}
+            </Row>
+        </Container>
     );
 };
 
