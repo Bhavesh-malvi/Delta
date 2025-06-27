@@ -11,13 +11,14 @@ export const API_TIMEOUT = 60000; // 60 seconds
 
 // API endpoints
 export const ENDPOINTS = {
-    HOME_CONTENT: '/api/homecontent',
-    HOME_COURSE: '/api/homecourse',
-    HOME_SERVICE: '/api/homeservice',
-    SERVICE_CONTENT: '/api/servicecontent',
+    HOME_CONTENT: '/api/homeContent',
+    HOME_COURSE: '/api/homeCourse',
+    HOME_SERVICE: '/api/homeService',
+    SERVICE_CONTENT: '/api/serviceContent',
     CAREER: '/api/career',
     CONTACT: '/api/contact',
-    ENROLL: '/api/enroll'
+    ENROLL: '/api/enroll',
+    HEALTH: '/api/health'
 };
 
 // Default headers
@@ -40,12 +41,15 @@ export const ERROR_MESSAGES = {
 // Configure axios defaults
 import axios from 'axios';
 
-axios.defaults.baseURL = API_BASE_URL;
-axios.defaults.timeout = API_TIMEOUT;
-axios.defaults.headers.common = DEFAULT_HEADERS;
+// Configure axios instance
+const axiosInstance = axios.create({
+    baseURL: API_BASE_URL,
+    timeout: API_TIMEOUT,
+    headers: DEFAULT_HEADERS
+});
 
 // Add response interceptor for error handling
-axios.interceptors.response.use(
+axiosInstance.interceptors.response.use(
     response => response,
     error => {
         console.error('API Error:', error);
@@ -67,4 +71,6 @@ axios.interceptors.response.use(
     }
 );
 
-export const UPLOADS_BASE_URL = 'https://delta-theta-one.vercel.app/uploads'; 
+export const UPLOADS_BASE_URL = `${API_BASE_URL}/uploads`;
+
+export default axiosInstance; 

@@ -54,9 +54,24 @@ app.use('/api/career', careerRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/enroll', enrollRoutes);
 
+// Root route
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'Welcome to the Delta API',
+        version: '1.0.0',
+        status: 'running',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.status(200).json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: process.memoryUsage()
+    });
 });
 
 // Error handling middleware
