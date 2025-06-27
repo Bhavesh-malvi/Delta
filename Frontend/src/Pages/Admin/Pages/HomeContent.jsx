@@ -25,7 +25,7 @@ const HomeContent = () => {
 
     const fetchContent = async () => {
         try {
-            setContentLoading(true);
+        setContentLoading(true);
             setMessage({ text: '', type: '' });
             
             const response = await axios.get(API_ENDPOINT);
@@ -109,11 +109,11 @@ const HomeContent = () => {
 
         try {
             // Show preview
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result);
-            };
-            reader.readAsDataURL(file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setPreviewImage(reader.result);
+                };
+                reader.readAsDataURL(file);
 
             // Compress image
             const compressedFile = await compressImage(file);
@@ -153,8 +153,8 @@ const HomeContent = () => {
         }
 
         try {
-            setLoading(true);
-            setMessage({ text: '', type: '' });
+        setLoading(true);
+        setMessage({ text: '', type: '' });
 
             const data = new FormData();
             data.append('title', formData.title);
@@ -196,7 +196,7 @@ const HomeContent = () => {
             console.error('Error:', error);
             setMessage({ 
                 text: error.userMessage || 'Error processing your request',
-                type: 'error'
+                type: 'error' 
             });
         } finally {
             setLoading(false);
@@ -230,7 +230,7 @@ const HomeContent = () => {
     return (
         <div className="home-content-container">
             <h2>{editingId ? 'Edit Content' : 'Add New Content'}</h2>
-
+            
             {message.text && (
                 <div className={`message ${message.type}`}>
                     {message.text}
@@ -247,7 +247,7 @@ const HomeContent = () => {
                     )}
                 </div>
             )}
-
+            
             <form onSubmit={handleSubmit} className="home-content-form">
                 <div className="form-group">
                     <label htmlFor="title">Title {!editingId && <span className="required">*</span>}</label>
@@ -337,7 +337,7 @@ const HomeContent = () => {
                     </button>
                 </h3>
                 
-                {contentLoading ? (
+                    {contentLoading ? (
                     <div className="loading">
                         <i className="fas fa-spinner fa-spin"></i>
                         Loading content...
@@ -367,40 +367,40 @@ const HomeContent = () => {
                         {contents.map(item => (
                             <div key={item._id} className="content-card">
                                 <div className="image-container">
-                                    <img 
+                                            <img 
                                         src={item.image} 
-                                        alt={item.title}
-                                        onError={(e) => {
-                                            e.target.onerror = null;
+                                                alt={item.title}
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
                                             e.target.src = '/placeholder-image.jpg';
-                                        }}
-                                    />
-                                </div>
+                                                }}
+                                            />
+                                        </div>
                                 <h4>{item.title}</h4>
                                 <div className="card-actions">
-                                    <button
+                                        <button 
                                         onClick={() => handleEdit(item)}
-                                        className="edit-btn"
+                                            className="edit-btn"
                                         disabled={loading}
-                                    >
-                                        <i className="fas fa-edit"></i>
-                                    </button>
-                                    <button
+                                        >
+                                            <i className="fas fa-edit"></i>
+                                        </button>
+                                        <button 
                                         onClick={() => {
                                             if (window.confirm('Are you sure you want to delete this item?')) {
                                                 handleDelete(item._id);
                                             }
                                         }}
-                                        className="delete-btn"
+                                            className="delete-btn"
                                         disabled={loading}
-                                    >
-                                        <i className="fas fa-trash"></i>
-                                    </button>
+                                        >
+                                            <i className="fas fa-trash"></i>
+                                        </button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                )}
+                    )}
             </div>
         </div>
     );

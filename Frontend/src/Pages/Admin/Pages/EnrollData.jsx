@@ -73,7 +73,7 @@ const EnrollData = () => {
                     <i className="fas fa-inbox"></i>
                     <p>No enrollment submissions found</p>
                 </div>
-            ) : (
+                ) : (
                 <div className="enrolls-list">
                     {enrolls.map(enroll => (
                         <div key={enroll._id} className="enroll-item">
@@ -84,7 +84,7 @@ const EnrollData = () => {
                                         {new Date(enroll.createdAt).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <div className="enroll-info">
+                            <div className="enroll-info">
                                     <p>
                                         <i className="fas fa-envelope"></i>
                                         <strong>Email:</strong> {enroll.email}
@@ -104,19 +104,19 @@ const EnrollData = () => {
                                 </div>
                             </div>
                             <div className="enroll-actions">
-                                <button
+                            <button 
                                     onClick={() => handleDelete(enroll._id)}
-                                    className="delete-btn"
-                                    title="Delete"
+                                className="delete-btn"
+                                title="Delete"
                                     disabled={loading}
-                                >
+                            >
                                     <i className="fas fa-trash"></i>
-                                </button>
+                            </button>
                             </div>
                         </div>
                     ))}
                 </div>
-            )}
+                )}
         </div>
     );
 };

@@ -270,25 +270,25 @@ const HomeService = () => {
                         </div>
                     ) : (
                         services.map(service => (
-                            <div key={service._id} className="service-item">
-                                <div className="service-content">
-                                    <h4>{service.title}</h4>
-                                    {service.image && (
-                                        <div className="service-image-container">
-                                            <img 
+                        <div key={service._id} className="service-item">
+                            <div className="service-content">
+                                <h4>{service.title}</h4>
+                                {service.image && (
+                                    <div className="service-image-container">
+                                        <img 
                                                 src={`${UPLOAD_URLS.SERVICES}/${service.image}`}
-                                                alt={service.title}
+                                            alt={service.title}
                                                 onError={(e) => {
                                                     e.target.onerror = null;
                                                     e.target.src = '/placeholder-service.jpg';
                                                 }}
-                                            />
-                                        </div>
-                                    )}
-                                    <p>{service.description}</p>
+                                        />
+                                    </div>
+                                )}
+                                <p>{service.description}</p>
                                 </div>
                                 <div className="service-actions">
-                                    <button
+                                    <button 
                                         onClick={() => handleEdit(service)}
                                         className="edit-btn"
                                         title="Edit"
@@ -296,7 +296,7 @@ const HomeService = () => {
                                     >
                                         <i className="fas fa-edit"></i>
                                     </button>
-                                    <button
+                                    <button 
                                         onClick={() => handleDelete(service._id)}
                                         className="delete-btn"
                                         title="Delete"

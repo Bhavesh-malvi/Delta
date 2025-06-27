@@ -168,13 +168,13 @@ const HomeCourses = () => {
     return (
         <div className="home-course-container">
             <h2>{editingId ? 'Edit Course' : 'Add New Course'}</h2>
-            
+
             {error && (
                 <div className={`message ${typeof error === 'object' ? error.type : 'error'}`}>
                     {typeof error === 'object' ? error.text : error}
                 </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="home-course-form">
                 <div className="form-group">
                     <label htmlFor="image">Course Image {!editingId && <span className="required">*</span>}</label>
@@ -219,7 +219,7 @@ const HomeCourses = () => {
                         disabled={loading}
                     />
                 </div>
-
+                
                 <div className="form-group">
                     <label htmlFor="description">Course Description <span className="required">*</span></label>
                     <textarea
@@ -272,10 +272,10 @@ const HomeCourses = () => {
                             editingId ? 'Update Course' : 'Add Course'
                         )}
                     </button>
-
+                    
                     {editingId && (
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             className="cancel-btn"
                             onClick={resetForm}
                             disabled={loading}
@@ -301,9 +301,9 @@ const HomeCourses = () => {
                 ) : (
                     <div className="courses-list">
                         {courses.map(course => (
-                            <div key={course._id} className="course-item">
-                                <div className="course-content">
-                                    <h4>{course.title}</h4>
+                        <div key={course._id} className="course-item">
+                            <div className="course-content">
+                                <h4>{course.title}</h4>
                                     {course.image && (
                                         <div className="course-image-container">
                                             <img 
@@ -316,33 +316,33 @@ const HomeCourses = () => {
                                             />
                                         </div>
                                     )}
-                                    <p>{course.description}</p>
+                                <p>{course.description}</p>
                                     <div className="course-details">
                                         <span>Duration: {course.duration}</span>
                                         <span>Price: {course.price}</span>
                                     </div>
-                                </div>
-                                <div className="course-actions">
-                                    <button
-                                        onClick={() => handleEdit(course)}
-                                        className="edit-btn"
-                                        title="Edit"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-edit"></i>
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(course._id)}
-                                        className="delete-btn"
-                                        title="Delete"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-trash"></i>
-                                    </button>
-                                </div>
                             </div>
-                        ))}
-                    </div>
+                            <div className="course-actions">
+                                <button
+                                    onClick={() => handleEdit(course)}
+                                        className="edit-btn"
+                                    title="Edit"
+                                        disabled={loading}
+                                >
+                                    <i className="fas fa-edit"></i>
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(course._id)}
+                                        className="delete-btn"
+                                    title="Delete"
+                                        disabled={loading}
+                                >
+                                    <i className="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
                 )}
             </div>
         </div>

@@ -101,7 +101,7 @@ const Career = () => {
 
         setLoading(true);
         setError(null);
-
+        
         try {
             const formDataToSend = new FormData();
             formDataToSend.append('title', formData.title);
@@ -113,9 +113,9 @@ const Career = () => {
             }
 
             const config = {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
             };
 
             if (editingId) {
@@ -232,8 +232,8 @@ const Career = () => {
 
                 <div className="form-group">
                     <label htmlFor="experience">Experience Required <span className="required">*</span></label>
-                    <input
-                        type="text"
+                            <input
+                                type="text"
                         id="experience"
                         name="experience"
                         value={formData.experience}
@@ -241,8 +241,8 @@ const Career = () => {
                         placeholder="Enter required experience"
                         required
                         disabled={loading}
-                    />
-                </div>
+                            />
+                        </div>
 
                 <div className="form-group">
                     <label htmlFor="location">Location <span className="required">*</span></label>
@@ -278,7 +278,7 @@ const Career = () => {
                             disabled={loading}
                         >
                             Cancel
-                        </button>
+                </button>
                     )}
                 </div>
             </form>
@@ -296,50 +296,50 @@ const Career = () => {
                         <p>No careers available</p>
                     </div>
                 ) : (
-                    <div className="careers-list">
-                        {careers.map(career => (
-                            <div key={career._id} className="career-item">
-                                <div className="career-content">
-                                    <h4>{career.title}</h4>
-                                    {career.image && (
-                                        <div className="career-image-container">
-                                            <img 
+                <div className="careers-list">
+                    {careers.map(career => (
+                        <div key={career._id} className="career-item">
+                            <div className="career-content">
+                                <h4>{career.title}</h4>
+                                {career.image && (
+                                    <div className="career-image-container">
+                                        <img 
                                                 src={`${UPLOAD_URLS.CAREERS}/${career.image}`}
-                                                alt={career.title}
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
+                                            alt={career.title} 
+                                            onError={(e) => {
+                                                e.target.onerror = null;
                                                     e.target.src = '/placeholder-career.jpg';
-                                                }}
-                                            />
-                                        </div>
-                                    )}
-                                    <p>{career.description}</p>
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                <p>{career.description}</p>
                                     <div className="career-details">
                                         <span>Experience: {career.experience}</span>
                                         <span>Location: {career.location}</span>
                                     </div>
-                                </div>
-                                <div className="career-actions">
-                                    <button
-                                        onClick={() => handleEdit(career)}
-                                        className="edit-btn"
-                                        title="Edit"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-edit"></i>
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(career._id)}
-                                        className="delete-btn"
-                                        title="Delete"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-trash"></i>
-                                    </button>
-                                </div>
                             </div>
-                        ))}
-                    </div>
+                            <div className="career-actions">
+                                <button 
+                                    onClick={() => handleEdit(career)}
+                                    className="edit-btn"
+                                    title="Edit"
+                                        disabled={loading}
+                                >
+                                    <i className="fas fa-edit"></i>
+                                </button>
+                                <button 
+                                    onClick={() => handleDelete(career._id)}
+                                    className="delete-btn"
+                                    title="Delete"
+                                        disabled={loading}
+                                >
+                                    <i className="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
                 )}
             </div>
         </div>

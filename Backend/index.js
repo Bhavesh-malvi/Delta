@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import connectDB from './db/db.js';
 import debug from 'debug';
+
 // Import routes
 import homeContentRoutes from './Routes/homeContentRoutes.js';
 import homeCourseRoutes from './Routes/homeCourseRoutes.js';
@@ -20,13 +21,8 @@ const log = debug('app:server');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Validate required environment variables
-const requiredEnvVars = [
-    'MONGODB_URI',
-    'CLOUDINARY_CLOUD_NAME',
-    'CLOUDINARY_API_KEY',
-    'CLOUDINARY_API_SECRET'
-];
+// ✅ Validate only MongoDB
+const requiredEnvVars = ['MONGODB_URI'];
 
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
@@ -42,7 +38,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Static files
+// Static folder for uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -54,7 +50,7 @@ app.use('/api/career', careerRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/enroll', enrollRoutes);
 
-// Root route
+// Root
 app.get('/', (req, res) => {
     res.json({ 
         message: 'Welcome to the Delta API',
@@ -64,7 +60,7 @@ app.get('/', (req, res) => {
     });
 });
 
-// Health check endpoint
+// Health check
 app.get('/api/health', (req, res) => {
     res.status(200).json({ 
         status: 'ok', 
@@ -74,42 +70,34 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
     console.error('Error:', err);
-    
-    // Handle Cloudinary errors
-    if (err.message && err.message.includes('Cloudinary')) {
-        return res.status(500).json({
-            error: 'Image upload failed',
-            details: err.message
-        });
-    }
-    
-    // Handle MongoDB errors
+
+    // MongoDB errors
     if (err.name === 'MongoError' || err.name === 'MongoServerError') {
         return res.status(500).json({
             error: 'Database operation failed',
             details: err.message
         });
     }
-    
-    // Handle validation errors
+
+    // Validation errors
     if (err.name === 'ValidationError') {
         return res.status(400).json({
             error: 'Validation failed',
             details: err.message
         });
     }
-    
-    // Default error
+
+    // Default
     res.status(500).json({
         error: 'Internal server error',
         message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
     });
 });
 
-// Connect to MongoDB
+// Connect to DB
 try {
     await connectDB();
     log('MongoDB connected successfully');
@@ -124,23 +112,19 @@ const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-// Handle unhandled promise rejections
+// Handle promise errors
 process.on('unhandledRejection', (err) => {
     console.error('Unhandled Promise Rejection:', err);
-    // Don't crash the server in production
     if (process.env.NODE_ENV !== 'production') {
         server.close(() => process.exit(1));
     }
 });
 
-// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
-    // Don't crash the server in production
     if (process.env.NODE_ENV !== 'production') {
         server.close(() => process.exit(1));
     }
 });
 
 export default app;
-

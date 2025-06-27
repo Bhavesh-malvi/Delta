@@ -1,229 +1,140 @@
 import ServiceContent from '../models/ServiceContent.js';
 import multer from 'multer';
-import { uploadToCloudinary } from '../config/cloudinary.js';
+import path from 'path';
+import fs from 'fs';
 
-// Configure multer to use memory storage
-const storage = multer.memoryStorage();
+// Configure multer for local file storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = 'uploads/serviceContent';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, uniqueName + path.extname(file.originalname));
+    }
+});
 
 const upload = multer({
-    storage: storage,
+    storage,
     limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
+        fileSize: 5 * 1024 * 1024 // 5MB
     },
     fileFilter: function (req, file, cb) {
         const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(file.originalname.toLowerCase());
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
         const mimetype = allowedTypes.test(file.mimetype);
-
-        if (extname && mimetype) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
-        }
+        if (extname && mimetype) cb(null, true);
+        else cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
     }
 }).single('image');
 
 // Get all service contents
 export const getAllServiceContents = async (req, res) => {
     try {
-        const serviceContents = await ServiceContent.find().sort({ createdAt: -1 });
-        res.status(200).json({
-            success: true,
-            data: serviceContents
-        });
+        const contents = await ServiceContent.find().sort({ createdAt: -1 });
+        res.status(200).json({ success: true, data: contents });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching service contents',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Get single service content
+// Get single content
 export const getServiceContent = async (req, res) => {
     try {
-        const serviceContent = await ServiceContent.findById(req.params.id);
-        if (!serviceContent) {
-            return res.status(404).json({
-                success: false,
-                message: 'Service content not found'
-            });
+        const content = await ServiceContent.findById(req.params.id);
+        if (!content) {
+            return res.status(404).json({ success: false, message: 'Service content not found' });
         }
-        res.status(200).json({
-            success: true,
-            data: serviceContent
-        });
+        res.status(200).json({ success: true, data: content });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching service content',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Create new service content
+// Create new content
 export const createServiceContent = async (req, res) => {
     upload(req, res, async (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(400).json({
-                success: false,
-                message: 'File upload error',
-                details: err.message
-            });
-        } else if (err) {
-            return res.status(400).json({
-                success: false,
-                message: err.message || 'Error uploading file',
-                details: 'There was a problem processing your upload'
-            });
+        if (err) return res.status(400).json({ success: false, message: err.message });
+
+        const { title, description } = req.body;
+        if (!req.file || !title || !description) {
+            if (req.file) fs.unlinkSync(req.file.path);
+            return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
         try {
-            if (!req.file) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Please upload an image',
-                    details: 'Image file is required'
-                });
-            }
-
-            const { title, description } = req.body;
-            
-            if (!title || !description) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'All fields are required',
-                    details: 'Please provide title and description'
-                });
-            }
-
-            // Upload image to Cloudinary
-            const imageUrl = await uploadToCloudinary(req.file);
-            if (!imageUrl) {
-                return res.status(500).json({
-                    success: false,
-                    message: 'Failed to upload image to cloud storage',
-                    details: 'Please try again'
-                });
-            }
-
-            const serviceContent = await ServiceContent.create({
+            const newContent = await ServiceContent.create({
                 title,
                 description,
-                image: imageUrl
+                image: req.file.filename
             });
-
-            res.status(201).json({
-                success: true,
-                message: 'Service content created successfully',
-                data: serviceContent
-            });
+            res.status(201).json({ success: true, data: newContent });
         } catch (error) {
-            console.error('Service content creation error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error creating service content',
-                details: error.message
-            });
+            if (req.file) fs.unlinkSync(req.file.path);
+            res.status(500).json({ success: false, message: error.message });
         }
     });
 };
 
-// Update service content
+// Update content
 export const updateServiceContent = async (req, res) => {
     upload(req, res, async (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(400).json({
-                success: false,
-                message: 'File upload error',
-                details: err.message
-            });
-        } else if (err) {
-            return res.status(400).json({
-                success: false,
-                message: err.message || 'Error uploading file',
-                details: 'There was a problem processing your upload'
-            });
-        }
+        if (err) return res.status(400).json({ success: false, message: err.message });
 
         try {
-            const serviceContent = await ServiceContent.findById(req.params.id);
-            
-            if (!serviceContent) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Service content not found'
-                });
+            const content = await ServiceContent.findById(req.params.id);
+            if (!content) {
+                if (req.file) fs.unlinkSync(req.file.path);
+                return res.status(404).json({ success: false, message: 'Service content not found' });
             }
 
             const { title, description } = req.body;
-            
             if (!title || !description) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'All fields are required',
-                    details: 'Please provide title and description'
-                });
+                if (req.file) fs.unlinkSync(req.file.path);
+                return res.status(400).json({ success: false, message: 'All fields are required' });
             }
 
-            // If new image is uploaded, update the image
             if (req.file) {
-                const imageUrl = await uploadToCloudinary(req.file);
-                if (!imageUrl) {
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Failed to upload image to cloud storage',
-                        details: 'Please try again'
-                    });
+                const oldImagePath = path.join('uploads/serviceContent', content.image);
+                if (content.image && fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
                 }
-                serviceContent.image = imageUrl;
+                content.image = req.file.filename;
             }
 
-            serviceContent.title = title;
-            serviceContent.description = description;
-            await serviceContent.save();
+            content.title = title;
+            content.description = description;
+            await content.save();
 
-            res.status(200).json({
-                success: true,
-                message: 'Service content updated successfully',
-                data: serviceContent
-            });
+            res.status(200).json({ success: true, data: content });
         } catch (error) {
-            console.error('Service content update error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error updating service content',
-                details: error.message
-            });
+            if (req.file) fs.unlinkSync(req.file.path);
+            res.status(500).json({ success: false, message: error.message });
         }
     });
 };
 
-// Delete service content
+// Delete content
 export const deleteServiceContent = async (req, res) => {
     try {
-        const serviceContent = await ServiceContent.findById(req.params.id);
-        
-        if (!serviceContent) {
-            return res.status(404).json({
-                success: false,
-                message: 'Service content not found'
-            });
+        const content = await ServiceContent.findById(req.params.id);
+        if (!content) {
+            return res.status(404).json({ success: false, message: 'Service content not found' });
         }
 
-        await serviceContent.deleteOne();
+        const imagePath = path.join('uploads/serviceContent', content.image);
+        if (content.image && fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
 
-        res.status(200).json({
-            success: true,
-            message: 'Service content deleted successfully'
-        });
+        await content.deleteOne();
+
+        res.status(200).json({ success: true, message: 'Service content deleted successfully' });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error deleting service content',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: error.message });
     }
-}; 
+};

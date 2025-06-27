@@ -1,57 +1,67 @@
 import HomeCourse from '../models/HomeCourse.js';
 
-// Create a new course
+// ✅ Create a new course
 export const createHomeCourse = async (req, res) => {
     try {
         const { title, description } = req.body;
-        const course = new HomeCourse({
-            title,
-            description
-        });
-        await course.save();
-        res.status(201).json(course);
+
+        if (!title || !description) {
+            return res.status(400).json({ message: 'Title and description are required' });
+        }
+
+        const course = await HomeCourse.create({ title, description });
+        res.status(201).json({ success: true, message: 'Course created successfully', data: course });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ success: false, message: error.message });
     }
 };
 
-// Get all courses
+// ✅ Get all courses
 export const getHomeCourses = async (req, res) => {
     try {
-        const courses = await HomeCourse.find();
-        res.json(courses);
+        const courses = await HomeCourse.find().sort({ createdAt: -1 });
+        res.status(200).json({ success: true, data: courses });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Update a course
+// ✅ Update a course
 export const updateHomeCourse = async (req, res) => {
     try {
         const { title, description } = req.body;
-        const course = await HomeCourse.findByIdAndUpdate(
+
+        if (!title || !description) {
+            return res.status(400).json({ message: 'Title and description are required' });
+        }
+
+        const updated = await HomeCourse.findByIdAndUpdate(
             req.params.id,
             { title, description },
             { new: true }
         );
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
+
+        if (!updated) {
+            return res.status(404).json({ success: false, message: 'Course not found' });
         }
-        res.json(course);
+
+        res.status(200).json({ success: true, message: 'Course updated', data: updated });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ success: false, message: error.message });
     }
 };
 
-// Delete a course
+// ✅ Delete a course
 export const deleteHomeCourse = async (req, res) => {
     try {
-        const course = await HomeCourse.findByIdAndDelete(req.params.id);
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
+        const deleted = await HomeCourse.findByIdAndDelete(req.params.id);
+
+        if (!deleted) {
+            return res.status(404).json({ success: false, message: 'Course not found' });
         }
-        res.json({ message: 'Course deleted successfully' });
+
+        res.status(200).json({ success: true, message: 'Course deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
-}; 
+};

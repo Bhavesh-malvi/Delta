@@ -1,20 +1,30 @@
 import Career from '../models/Career.js';
 import multer from 'multer';
-import { uploadToCloudinary } from '../config/cloudinary.js';
+import path from 'path';
+import fs from 'fs';
 
-// Configure multer to use memory storage
-const storage = multer.memoryStorage();
+// Multer setup: Save images to local 'uploads/' folder
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadPath = 'uploads/';
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath);
+        }
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + '-' + file.originalname;
+        cb(null, uniqueName);
+    }
+});
 
 const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
-    },
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     fileFilter: function (req, file, cb) {
         const allowedTypes = /jpeg|jpg|png|gif/;
         const extname = allowedTypes.test(file.originalname.toLowerCase());
         const mimetype = allowedTypes.test(file.mimetype);
-
         if (extname && mimetype) {
             return cb(null, true);
         } else {
@@ -27,16 +37,9 @@ const upload = multer({
 export const getAllCareers = async (req, res) => {
     try {
         const careers = await Career.find().sort({ createdAt: -1 });
-        res.status(200).json({
-            success: true,
-            data: careers
-        });
+        res.status(200).json({ success: true, data: careers });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching careers',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Error fetching careers', error: error.message });
     }
 };
 
@@ -44,43 +47,21 @@ export const getAllCareers = async (req, res) => {
 export const getCareer = async (req, res) => {
     try {
         const career = await Career.findById(req.params.id);
-        if (!career) {
-            return res.status(404).json({
-                success: false,
-                message: 'Career not found'
-            });
-        }
-        res.status(200).json({
-            success: true,
-            data: career
-        });
+        if (!career) return res.status(404).json({ success: false, message: 'Career not found' });
+        res.status(200).json({ success: true, data: career });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching career',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Error fetching career', error: error.message });
     }
 };
 
 // Create new career
 export const createCareer = async (req, res) => {
     upload(req, res, async (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(400).json({
-                success: false,
-                message: 'File upload error',
-                details: err.message
-            });
-        } else if (err) {
-            return res.status(400).json({
-                success: false,
-                message: err.message || 'Error uploading file',
-                details: 'There was a problem processing your upload'
-            });
-        }
+        if (err) return res.status(400).json({ success: false, message: err.message });
 
         try {
+            const { title, description } = req.body;
+
             if (!req.file) {
                 return res.status(400).json({
                     success: false,
@@ -89,30 +70,19 @@ export const createCareer = async (req, res) => {
                 });
             }
 
-            const { title, description } = req.body;
-            
             if (!title || !description) {
                 return res.status(400).json({
                     success: false,
-                    message: 'All fields are required',
-                    details: 'Please provide title and description'
+                    message: 'All fields are required'
                 });
             }
 
-            // Upload image to Cloudinary
-            const imageUrl = await uploadToCloudinary(req.file);
-            if (!imageUrl) {
-                return res.status(500).json({
-                    success: false,
-                    message: 'Failed to upload image to cloud storage',
-                    details: 'Please try again'
-                });
-            }
+            const imagePath = `/uploads/${req.file.filename}`;
 
             const career = await Career.create({
                 title,
                 description,
-                image: imageUrl
+                image: imagePath
             });
 
             res.status(201).json({
@@ -121,12 +91,7 @@ export const createCareer = async (req, res) => {
                 data: career
             });
         } catch (error) {
-            console.error('Career creation error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error creating career',
-                details: error.message
-            });
+            res.status(500).json({ success: false, message: 'Error creating career', details: error.message });
         }
     });
 };
@@ -134,51 +99,21 @@ export const createCareer = async (req, res) => {
 // Update career
 export const updateCareer = async (req, res) => {
     upload(req, res, async (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(400).json({
-                success: false,
-                message: 'File upload error',
-                details: err.message
-            });
-        } else if (err) {
-            return res.status(400).json({
-                success: false,
-                message: err.message || 'Error uploading file',
-                details: 'There was a problem processing your upload'
-            });
-        }
+        if (err) return res.status(400).json({ success: false, message: err.message });
 
         try {
-            const career = await Career.findById(req.params.id);
-            
-            if (!career) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Career not found'
-                });
-            }
-
             const { title, description } = req.body;
-            
+            const career = await Career.findById(req.params.id);
+
+            if (!career) return res.status(404).json({ success: false, message: 'Career not found' });
+
             if (!title || !description) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'All fields are required',
-                    details: 'Please provide title and description'
-                });
+                return res.status(400).json({ success: false, message: 'All fields are required' });
             }
 
-            // If new image is uploaded, update the image
+            // If image uploaded, update path
             if (req.file) {
-                const imageUrl = await uploadToCloudinary(req.file);
-                if (!imageUrl) {
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Failed to upload image to cloud storage',
-                        details: 'Please try again'
-                    });
-                }
-                career.image = imageUrl;
+                career.image = `/uploads/${req.file.filename}`;
             }
 
             career.title = title;
@@ -191,12 +126,7 @@ export const updateCareer = async (req, res) => {
                 data: career
             });
         } catch (error) {
-            console.error('Career update error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error updating career',
-                details: error.message
-            });
+            res.status(500).json({ success: false, message: 'Error updating career', details: error.message });
         }
     });
 };
@@ -205,13 +135,7 @@ export const updateCareer = async (req, res) => {
 export const deleteCareer = async (req, res) => {
     try {
         const career = await Career.findById(req.params.id);
-        
-        if (!career) {
-            return res.status(404).json({
-                success: false,
-                message: 'Career not found'
-            });
-        }
+        if (!career) return res.status(404).json({ success: false, message: 'Career not found' });
 
         await career.deleteOne();
 
@@ -220,10 +144,6 @@ export const deleteCareer = async (req, res) => {
             message: 'Career deleted successfully'
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error deleting career',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Error deleting career', error: error.message });
     }
-}; 
+};

@@ -1,264 +1,134 @@
 import HomeContent from '../models/HomeContent.js';
 import multer from 'multer';
-import { uploadToCloudinary } from '../config/cloudinary.js';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import debug from 'debug';
 
 const log = debug('app:homeContentController');
 
-// Configure multer to use memory storage
-const storage = multer.memoryStorage();
+// Setup __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Multer Disk Storage config (images saved to /uploads)
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadPath = path.join(__dirname, '../uploads/');
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath);
+        }
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        const ext = path.extname(file.originalname);
+        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
+        cb(null, uniqueName);
+    }
+});
 
 const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
-    },
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     fileFilter: function (req, file, cb) {
-        const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(file.originalname.toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-
-        if (extname && mimetype) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
-        }
+        const allowed = /jpeg|jpg|png|gif/;
+        const extname = allowed.test(file.originalname.toLowerCase());
+        const mimetype = allowed.test(file.mimetype);
+        if (extname && mimetype) cb(null, true);
+        else cb(new Error('Only image files are allowed!'));
     }
 }).single('image');
 
-// Get all home content items
+// ✅ GET all content
 export const getAllHomeContent = async (req, res) => {
     try {
-        log('Fetching all content');
-        const homeContents = await HomeContent.find().sort({ createdAt: -1 });
-        res.status(200).json({
-            success: true,
-            data: homeContents
-        });
+        const data = await HomeContent.find().sort({ createdAt: -1 });
+        res.status(200).json({ success: true, data });
     } catch (error) {
-        log('Error in getAllHomeContent:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching home content',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Failed to fetch content', error: error.message });
     }
 };
 
-// Get single home content item
+// ✅ GET one content
 export const getHomeContent = async (req, res) => {
     try {
-        log('Fetching single content');
-        const homeContent = await HomeContent.findById(req.params.id);
-        if (!homeContent) {
-            log('Content not found');
-            return res.status(404).json({
-                success: false,
-                message: 'Home content not found'
-            });
-        }
-        res.status(200).json({
-            success: true,
-            data: homeContent
-        });
+        const item = await HomeContent.findById(req.params.id);
+        if (!item) return res.status(404).json({ success: false, message: 'Content not found' });
+        res.status(200).json({ success: true, data: item });
     } catch (error) {
-        log('Error in getHomeContent:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching home content',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Failed to fetch content', error: error.message });
     }
 };
 
-// Create new home content
+// ✅ CREATE content
 export const createHomeContent = async (req, res) => {
     upload(req, res, async (err) => {
-        if (err instanceof multer.MulterError) {
-            log('Multer error:', err);
-            return res.status(400).json({
-                success: false,
-                message: 'File upload error',
-                details: err.message
-            });
-        } else if (err) {
-            log('Upload error:', err);
-            return res.status(400).json({
-                success: false,
-                message: err.message || 'Error uploading file',
-                details: 'There was a problem processing your upload'
-            });
+        if (err) {
+            return res.status(400).json({ success: false, message: err.message });
+        }
+
+        const { title } = req.body;
+        if (!title || !req.file) {
+            return res.status(400).json({ success: false, message: 'Title and image are required' });
         }
 
         try {
-            log('Processing upload request');
-            
-            if (!req.file) {
-                log('No file provided');
-                return res.status(400).json({
-                    success: false,
-                    message: 'Please upload an image',
-                    details: 'Image file is required'
-                });
-            }
-
-            const { title } = req.body;
-            
-            if (!title) {
-                log('No title provided');
-                return res.status(400).json({
-                    success: false,
-                    message: 'Title is required',
-                    details: 'Please provide a title for the content'
-                });
-            }
-
-            log('Uploading to Cloudinary');
-            // Upload image to Cloudinary
-            const imageUrl = await uploadToCloudinary(req.file);
-            if (!imageUrl) {
-                log('Cloudinary upload failed');
-                return res.status(500).json({
-                    success: false,
-                    message: 'Failed to upload image to cloud storage',
-                    details: 'Please try again'
-                });
-            }
-            log('Cloudinary upload successful:', imageUrl);
-
-            // Create content in database
-            log('Creating content in database');
-            const homeContent = await HomeContent.create({
-                title,
-                image: imageUrl
-            });
-            log('Content created successfully');
-
-            res.status(201).json({
-                success: true,
-                message: 'Home content created successfully',
-                data: homeContent
-            });
+            const imagePath = `/uploads/${req.file.filename}`;
+            const created = await HomeContent.create({ title, image: imagePath });
+            res.status(201).json({ success: true, message: 'Content created', data: created });
         } catch (error) {
-            log('Error in createHomeContent:', error);
-            console.error('Content creation error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error creating content',
-                details: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-            });
+            res.status(500).json({ success: false, message: 'Error saving content', error: error.message });
         }
     });
 };
 
-// Update home content
+// ✅ UPDATE content
 export const updateHomeContent = async (req, res) => {
     upload(req, res, async (err) => {
-        if (err instanceof multer.MulterError) {
-            log('Multer error:', err);
-            return res.status(400).json({
-                success: false,
-                message: 'File upload error',
-                details: err.message
-            });
-        } else if (err) {
-            log('Upload error:', err);
-            return res.status(400).json({
-                success: false,
-                message: err.message || 'Error uploading file',
-                details: 'There was a problem processing your upload'
-            });
+        if (err) {
+            return res.status(400).json({ success: false, message: err.message });
+        }
+
+        const { title } = req.body;
+        if (!title) {
+            return res.status(400).json({ success: false, message: 'Title is required' });
         }
 
         try {
-            log('Processing update request');
-            const homeContent = await HomeContent.findById(req.params.id);
-            
-            if (!homeContent) {
-                log('Content not found');
-                return res.status(404).json({
-                    success: false,
-                    message: 'Home content not found'
-                });
+            const content = await HomeContent.findById(req.params.id);
+            if (!content) {
+                return res.status(404).json({ success: false, message: 'Content not found' });
             }
 
-            const { title } = req.body;
-            
-            if (!title) {
-                log('No title provided');
-                return res.status(400).json({
-                    success: false,
-                    message: 'Title is required',
-                    details: 'Please provide a title for the content'
-                });
-            }
+            content.title = title;
 
-            // If new image is uploaded, update the image
             if (req.file) {
-                log('Uploading new image to Cloudinary');
-                const imageUrl = await uploadToCloudinary(req.file);
-                if (!imageUrl) {
-                    log('Cloudinary upload failed');
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Failed to upload image to cloud storage',
-                        details: 'Please try again'
-                    });
-                }
-                log('Cloudinary upload successful:', imageUrl);
-                homeContent.image = imageUrl;
+                content.image = `/uploads/${req.file.filename}`;
             }
 
-            homeContent.title = title;
-            await homeContent.save();
-            log('Content updated successfully');
-
-            res.status(200).json({
-                success: true,
-                message: 'Home content updated successfully',
-                data: homeContent
-            });
+            await content.save();
+            res.status(200).json({ success: true, message: 'Content updated', data: content });
         } catch (error) {
-            log('Error in updateHomeContent:', error);
-            console.error('Content update error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error updating content',
-                details: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-            });
+            res.status(500).json({ success: false, message: 'Error updating content', error: error.message });
         }
     });
 };
 
-// Delete home content
+// ✅ DELETE content
 export const deleteHomeContent = async (req, res) => {
     try {
-        log('Processing delete request');
-        const homeContent = await HomeContent.findById(req.params.id);
-        
-        if (!homeContent) {
-            log('Content not found');
-            return res.status(404).json({
-                success: false,
-                message: 'Home content not found'
-            });
+        const content = await HomeContent.findById(req.params.id);
+        if (!content) return res.status(404).json({ success: false, message: 'Content not found' });
+
+        // Optionally delete image file from uploads folder
+        const imagePath = path.join(__dirname, '..', content.image);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
         }
 
-        await homeContent.deleteOne();
-        log('Content deleted successfully');
-
-        res.status(200).json({
-            success: true,
-            message: 'Home content deleted successfully'
-        });
+        await content.deleteOne();
+        res.status(200).json({ success: true, message: 'Content deleted' });
     } catch (error) {
-        log('Error in deleteHomeContent:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error deleting home content',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Error deleting content', error: error.message });
     }
-}; 
+};

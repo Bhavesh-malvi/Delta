@@ -108,9 +108,9 @@ const ServiceContent = () => {
             }
 
             const config = {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
             };
 
             if (editingId) {
@@ -165,13 +165,13 @@ const ServiceContent = () => {
     return (
         <div className="service-content-container">
             <h2>{editingId ? 'Edit Content' : 'Add New Content'}</h2>
-            
+
             {error && (
                 <div className={`message ${typeof error === 'object' ? error.type : 'error'}`}>
                     {typeof error === 'object' ? error.text : error}
                 </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="service-content-form">
                 <div className="form-group">
                     <label htmlFor="image">Upload Image {!editingId && <span className="required">*</span>}</label>
@@ -250,7 +250,7 @@ const ServiceContent = () => {
                             disabled={loading}
                         >
                             Cancel
-                        </button>
+                </button>
                     )}
                 </div>
             </form>
@@ -282,38 +282,38 @@ const ServiceContent = () => {
                         {contents.map(content => (
                             <div key={content._id} className="content-card">
                                 <div className="content-image">
-                                    <img 
+                                        <img 
                                         src={`${UPLOAD_URLS.SERVICES}/${content.image}`}
                                         alt={content.title}
                                         onError={(e) => {
                                             e.target.onerror = null;
                                             e.target.src = '/placeholder-content.jpg';
                                         }}
-                                    />
-                                </div>
+                                        />
+                                    </div>
                                 <div className="content-info">
                                     <h4>{content.title}</h4>
                                     <p>{content.description}</p>
                                 </div>
                                 <div className="content-actions">
-                                    <button
+                                    <button 
                                         onClick={() => handleEdit(content)}
                                         className="edit-btn"
                                         disabled={loading}
                                     >
-                                        <i className="fas fa-edit"></i>
-                                    </button>
-                                    <button
+                                <i className="fas fa-edit"></i>
+                            </button>
+                                    <button 
                                         onClick={() => handleDelete(content._id)}
                                         className="delete-btn"
                                         disabled={loading}
                                     >
-                                        <i className="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                                <i className="fas fa-trash"></i>
+                            </button>
                     </div>
+                        </div>
+                    ))}
+                </div>
                 )}
             </div>
         </div>
