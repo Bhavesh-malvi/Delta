@@ -17,5 +17,14 @@
                 "Access-Control-Allow-Headers": "Content-Type, Authorization"
             }
         }
-    ]
+    ],
+    "functions": {
+        "api/**/*.js": {
+            "memory": 1024,
+            "maxDuration": 60
+        }
+    },
+    "env": {
+        "NODE_ENV": "production"
+    }
 }

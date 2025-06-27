@@ -1,13 +1,13 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import 'dotenv/config';
 import connectDB from './db/db.js';
 import debug from 'debug';
 // Import routes
-import homeCourseRoutes from './Routes/homeCourseRoutes.js';
 import homeContentRoutes from './Routes/homeContentRoutes.js';
+import homeCourseRoutes from './Routes/homeCourseRoutes.js';
 import homeServiceRoutes from './Routes/homeServiceRoutes.js';
 import serviceContentRoutes from './Routes/serviceContentRoutes.js';
 import careerRoutes from './Routes/careerRoutes.js';
@@ -31,69 +31,101 @@ const requiredEnvVars = [
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-    console.error('Error: Missing required environment variables:');
-    missingEnvVars.forEach(envVar => console.error(`- ${envVar}`));
+    console.error('Missing required environment variables:', missingEnvVars);
     process.exit(1);
 }
 
 const app = express();
 
-// CORS configuration - Allow all origins during development
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Log static file requests
-app.use('/uploads', (req, res, next) => {
-    console.log('Static file requested:', req.url);
-    next();
-});
-
+// Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.use('/api/homecourses', homeCourseRoutes);
-app.use('/api/homecontent', homeContentRoutes);
-app.use('/api/homeservices', homeServiceRoutes);
-app.use('/api/servicecontent', serviceContentRoutes);
-app.use('/api/careers', careerRoutes);
-app.use('/api/contacts', contactRoutes);
-app.use('/api/enrolls', enrollRoutes);
+app.use('/api/homeContent', homeContentRoutes);
+app.use('/api/homeCourse', homeCourseRoutes);
+app.use('/api/homeService', homeServiceRoutes);
+app.use('/api/serviceContent', serviceContentRoutes);
+app.use('/api/career', careerRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/enroll', enrollRoutes);
 
-app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to the Delta API' });
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Global error handler:', err);
+    console.error('Error:', err);
+    
+    // Handle Cloudinary errors
+    if (err.message && err.message.includes('Cloudinary')) {
+        return res.status(500).json({
+            error: 'Image upload failed',
+            details: err.message
+        });
+    }
+    
+    // Handle MongoDB errors
+    if (err.name === 'MongoError' || err.name === 'MongoServerError') {
+        return res.status(500).json({
+            error: 'Database operation failed',
+            details: err.message
+        });
+    }
+    
+    // Handle validation errors
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({
+            error: 'Validation failed',
+            details: err.message
+        });
+    }
+    
+    // Default error
     res.status(500).json({
-        success: false,
-        message: 'Internal server error',
-        details: process.env.NODE_ENV === 'development' ? err.message : 'An unexpected error occurred'
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
     });
 });
 
 // Connect to MongoDB
-const startServer = async () => {
-    try {
-        await connectDB();
-        const PORT = process.env.PORT || 5000;
-        app.listen(PORT, () => {
-            log(`Server running on port ${PORT}`);
-            console.log(`Server running on port ${PORT}`);
-        });
-    } catch (err) {
-        console.error('Failed to start server:', err);
-        process.exit(1);
-    }
-};
+try {
+    await connectDB();
+    log('MongoDB connected successfully');
+} catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+}
 
-startServer();
+// Start server
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Promise Rejection:', err);
+    // Don't crash the server in production
+    if (process.env.NODE_ENV !== 'production') {
+        server.close(() => process.exit(1));
+    }
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    // Don't crash the server in production
+    if (process.env.NODE_ENV !== 'production') {
+        server.close(() => process.exit(1));
+    }
+});
+
+export default app;
 

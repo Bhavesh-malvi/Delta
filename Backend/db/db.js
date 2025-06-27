@@ -1,41 +1,46 @@
 import mongoose from "mongoose";
 import debug from "debug";
 
-const log = debug("app:database");
+const log = debug("app:db");
+
+let cachedConnection = null;
 
 const connectDB = async () => {
+    if (cachedConnection) {
+        log("Using cached database connection");
+        return cachedConnection;
+    }
+
     try {
-        log("Connecting to MongoDB...");
-        const conn = await mongoose.connect(process.env.MONGODB_URI, {
+        const options = {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000 // 5 second timeout
-        });
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+        };
 
+        const conn = await mongoose.connect(process.env.MONGODB_URI, options);
+        
         log(`MongoDB Connected: ${conn.connection.host}`);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-
-        // Handle MongoDB connection errors
-        mongoose.connection.on("error", (err) => {
-            log("MongoDB connection error:", err);
+        
+        // Cache the connection
+        cachedConnection = conn;
+        
+        // Handle connection errors
+        conn.connection.on("error", (err) => {
             console.error("MongoDB connection error:", err);
+            cachedConnection = null;
         });
 
-        mongoose.connection.on("disconnected", () => {
-            log("MongoDB disconnected");
-            console.warn("MongoDB disconnected");
+        conn.connection.on("disconnected", () => {
+            console.log("MongoDB disconnected");
+            cachedConnection = null;
         });
 
-        mongoose.connection.on("reconnected", () => {
-            log("MongoDB reconnected");
-            console.log("MongoDB reconnected");
-        });
-
+        return conn;
     } catch (error) {
-        log("Error connecting to MongoDB:", error);
-        console.error("Error connecting to MongoDB:", error);
-        // Exit process with failure
-        process.exit(1);
+        console.error("MongoDB connection error:", error);
+        throw error;
     }
 };
 
