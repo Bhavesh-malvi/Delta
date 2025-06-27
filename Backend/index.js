@@ -23,16 +23,14 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// CORS configuration
-const corsOptions = {
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'https://your-frontend-domain.vercel.app'],
+// CORS configuration - Allow all origins during development
+app.use(cors({
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-};
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware
-app.use(cors(corsOptions));
 app.use(express.json());
 
 // Log static file requests
@@ -53,7 +51,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/enrolls', enrollRoutes);
 
 app.get('/', (req, res) => {
-    res.send('Welcome to the Home Page');
+    res.json({ message: 'Welcome to the Delta API' });
 });
 // MongoDB connection
 connectDB();
