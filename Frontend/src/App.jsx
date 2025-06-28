@@ -19,13 +19,20 @@ import './index.css';
 // Component to handle conditional rendering of Navbar and Footer
 const AppLayout = () => {
   const location = useLocation();
-  const [showLanding, setShowLanding] = useState(true);
+  const [showLanding, setShowLanding] = useState(false); // Initialize as false
   
   // Check if current path is an admin route
   const isAdminRoute = React.useMemo(() => {
     const path = location.pathname.toLowerCase();
     return path.startsWith('/deltaadmin');
   }, [location.pathname]);
+
+  // Only show landing effect on non-admin routes when first loading the site
+  useEffect(() => {
+    if (!isAdminRoute && location.pathname === '/') {
+      setShowLanding(true);
+    }
+  }, []); // Run only once when component mounts
 
   useEffect(() => {
     // Handle direct navigation to admin routes
@@ -44,7 +51,7 @@ const AppLayout = () => {
 
   return (
     <>
-      {showLanding && <LandingPage onComplete={handleLandingComplete} />}
+      {showLanding && !isAdminRoute && <LandingPage onComplete={handleLandingComplete} />}
       <ScrollToTop />
       {!isAdminRoute && !showLanding && <Navbar />}
       <Routes>
