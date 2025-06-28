@@ -39,7 +39,7 @@ const HomeHowSection = () => {
                             data-aos="fade-left"
                             data-aos-delay={index * 100}
                         >
-                            <div className="card-header2">
+                            <div className="card-header3">
                                 <div className="step-number2">{step.number}</div>
                                 <h3 className="step-title2">{step.title}</h3>
                             </div>
