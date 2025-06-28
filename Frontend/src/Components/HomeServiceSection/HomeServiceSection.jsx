@@ -10,17 +10,26 @@ const HomeServiceSection = () => {
     useEffect(() => {
         const fetchServices = async () => {
             try {
+                console.log('Fetching services from:', ENDPOINTS.HOME_SERVICE);
                 const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
-                if (response.data && Array.isArray(response.data.data)) {
+                console.log('Response:', response.data);
+                
+                if (response.data && response.data.data && Array.isArray(response.data.data)) {
                     setServices(response.data.data);
                 } else if (response.data && Array.isArray(response.data)) {
                     setServices(response.data);
                 } else {
+                    console.error('Invalid data format:', response.data);
                     throw new Error('Invalid data format received');
                 }
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching services:', err);
+                console.error('Error details:', {
+                    message: err.message,
+                    response: err.response?.data,
+                    status: err.response?.status
+                });
                 setError(err.message || 'Failed to fetch services');
                 setLoading(false);
             }
@@ -31,7 +40,27 @@ const HomeServiceSection = () => {
 
     const getImageUrl = (image) => {
         if (!image) return 'https://via.placeholder.com/400x300?text=Service+Image';
-        return image.startsWith('http') ? image : `${API_BASE_URL}/uploads/${image}`;
+        
+        // If the image path already contains the full URL, use it as is
+        if (image.startsWith('http')) {
+            return image;
+        }
+        
+        // Remove any leading slashes from the image path
+        const cleanImagePath = image.replace(/^\/+/, '');
+        
+        // If the path already includes 'uploads/services', don't add it again
+        if (cleanImagePath.startsWith('uploads/services/')) {
+            return `${API_BASE_URL}/${cleanImagePath}`;
+        }
+        
+        // If the path starts with 'services/', add 'uploads/'
+        if (cleanImagePath.startsWith('services/')) {
+            return `${API_BASE_URL}/uploads/${cleanImagePath}`;
+        }
+        
+        // Otherwise, construct the full URL with the services path
+        return `${API_BASE_URL}/uploads/services/${cleanImagePath}`;
     };
 
     if (loading) {
@@ -45,7 +74,7 @@ const HomeServiceSection = () => {
     if (error) {
         return (
             <section className="service-section">
-                <div className="error-state">{error}</div>
+                <div className="error-state">Error: {error}</div>
             </section>
         );
     }

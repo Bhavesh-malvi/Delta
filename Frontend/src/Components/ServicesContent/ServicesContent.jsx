@@ -40,8 +40,16 @@ const ServicesContent = () => {
             return imagePath;
         }
         
-        // If it's just a filename, construct the full URL
-        return `${UPLOAD_URLS.SERVICES}/${imagePath}`;
+        // Remove any leading slashes from the image path
+        const cleanImagePath = imagePath.replace(/^\/+/, '');
+        
+        // If the path already includes 'uploads/services', don't add it again
+        if (cleanImagePath.startsWith('uploads/services/')) {
+            return `${UPLOAD_URLS.SERVICES}/${cleanImagePath}`;
+        }
+        
+        // Otherwise, construct the full URL with the services path
+        return `${UPLOAD_URLS.SERVICES}/${cleanImagePath}`;
     };
 
     const containerVariants = {

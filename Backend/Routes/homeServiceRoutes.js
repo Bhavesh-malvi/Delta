@@ -49,16 +49,16 @@ const upload = multer({
     }
 });
 
-// GET /api/home-services - Get all services
+// GET /api/homeService - Get all services
 router.get('/', getAllHomeServices);
 
-// POST /api/home-services - Create new service
+// POST /api/homeService - Create new service
 router.post('/', upload.single('image'), createHomeService);
 
-// PUT /api/home-services/:id - Update service
+// PUT /api/homeService/:id - Update service
 router.put('/:id', upload.single('image'), updateHomeService);
 
-// DELETE /api/home-services/:id - Delete service
+// DELETE /api/homeService/:id - Delete service
 router.delete('/:id', deleteHomeService);
 
 export default router; 
