@@ -49,8 +49,7 @@ const axiosInstance = axios.create({
     timeout: API_TIMEOUT,
     headers: {
         'Content-Type': 'application/json'
-    },
-    withCredentials: true
+    }
 });
 
 // Add request interceptor for debugging
