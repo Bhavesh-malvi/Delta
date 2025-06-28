@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './Admin.css';
 import Header from './Components/Header/Header';
 import Sidebar from './Components/Sidebar/Sidebar';
@@ -22,6 +22,7 @@ const Admin = () => {
                 <Header />
                 <div className="admin-content">
                     <Routes>
+                        <Route path="/" element={<Navigate to="/deltaAdmin/home-content" replace />} />
                         <Route path="/login" element={<LoginForm />} />
                         <Route path="/home-content" element={<HomeContent />} />
                         <Route path="/home-courses" element={<HomeCourses />} />

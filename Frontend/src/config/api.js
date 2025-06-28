@@ -1,4 +1,6 @@
 // API Configuration
+// Frontend URL: https://delta-frco.vercel.app
+// Backend URL: https://delta-teal.vercel.app
 // Base URLs - Always use Vercel URL
 export const API_BASE_URL = 'https://delta-teal.vercel.app';
 
