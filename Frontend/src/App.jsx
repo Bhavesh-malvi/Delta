@@ -19,15 +19,15 @@ import './index.css';
 // Component to handle conditional rendering of Navbar and Footer
 const AppLayout = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/deltaadmin');
+  const isAdminRoute = location.pathname.toLowerCase().includes('/deltaadmin');
   const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
     // Handle direct navigation to admin routes
-    if (isAdminRoute && location.pathname === '/deltaadmin') {
+    if (location.pathname.toLowerCase() === '/deltaadmin') {
       window.location.href = '/deltaadmin/login';
     }
-  }, [location.pathname, isAdminRoute]);
+  }, [location.pathname]);
 
   const handleLandingComplete = () => {
     setShowLanding(false);

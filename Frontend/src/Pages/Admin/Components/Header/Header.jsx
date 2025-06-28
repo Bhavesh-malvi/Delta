@@ -7,7 +7,7 @@ const Header = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('adminLoggedIn');
-        navigate('/deltaAdmin/login');
+        navigate('/deltaadmin/login');
     };
 
     return (

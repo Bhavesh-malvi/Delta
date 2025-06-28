@@ -23,43 +23,43 @@ function Sidebar() {
             <nav className="sidebar-nav">
                 <ul>
                     <li>
-                        <NavLink to="/deltaAdmin/home-content" end>
+                        <NavLink to="/deltaadmin/home-content" end>
                             <i className="fas fa-tachometer-alt"></i>
                             <span>Home Content</span>
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/deltaAdmin/home-service">
+                        <NavLink to="/deltaadmin/home-service">
                             <i className="fas fa-cogs"></i>
                             <span>Home Service</span>
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/deltaAdmin/home-courses">
+                        <NavLink to="/deltaadmin/home-courses">
                             <i className="fas fa-graduation-cap"></i>
                             <span>Home Courses</span>
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/deltaAdmin/career">
+                        <NavLink to="/deltaadmin/career">
                             <i className="fas fa-briefcase"></i>
                             <span>Career</span>
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/deltaAdmin/service-content">
+                        <NavLink to="/deltaadmin/service-content">
                             <i className="fas fa-cogs"></i>
                             <span>Service Content</span>
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/deltaAdmin/contact-data">
+                        <NavLink to="/deltaadmin/contact-data">
                             <i className="fas fa-address-book"></i>
                             <span>Contact Data</span>
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/deltaAdmin/enroll-data">
+                        <NavLink to="/deltaadmin/enroll-data">
                             <i className="fas fa-user-graduate"></i>
                             <span>Enroll Data</span>
                         </NavLink>
