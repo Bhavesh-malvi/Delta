@@ -152,3 +152,55 @@
         font-size: 1.1rem;
     }
 }
+
+/* Add media query for 335x735 screen size */
+@media screen and (max-width: 335px) {
+    .sidebar {
+        width: 40px;
+        padding: 0.4rem;
+        z-index: 900;
+    }
+    
+    .sidebar-logo {
+        padding: 0.5rem 0;
+    }
+    
+    .sidebar-logo h2 {
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-nav a {
+        padding: 0.4rem;
+        border-radius: 8px;
+    }
+    
+    .sidebar-nav a i {
+        font-size: 1rem;
+    }
+}
+
+/* Add media query for 485x735 screen size */
+@media screen and (min-width: 336px) and (max-width: 485px) {
+    .sidebar {
+        width: 60px;
+        padding: 0.5rem;
+        z-index: 900;
+    }
+    
+    .sidebar-logo {
+        padding: 0.8rem 0;
+    }
+    
+    .sidebar-logo h2 {
+        font-size: 1.1rem;
+    }
+    
+    .sidebar-nav a {
+        padding: 0.5rem;
+        border-radius: 10px;
+    }
+    
+    .sidebar-nav a i {
+        font-size: 1.2rem;
+    }
+}

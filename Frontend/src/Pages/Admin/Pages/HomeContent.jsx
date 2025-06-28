@@ -113,33 +113,49 @@ const HomeContent = () => {
 
     const handleImageChange = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
-
-        try {
-            // Show preview
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setPreviewImage(reader.result);
-                };
-                reader.readAsDataURL(file);
-
-            // Compress image
-            const compressedFile = await compressImage(file);
-            setFormData(prev => ({ ...prev, image: compressedFile }));
-        } catch (error) {
-            console.error('Error processing image:', error);
-            setMessage({
-                text: 'Error processing image. Please try again.',
-                type: 'error'
-            });
+        if (file) {
+            try {
+                const compressedFile = await compressImage(file);
+                setFormData(prev => ({ ...prev, image: compressedFile }));
+                setPreviewImage(URL.createObjectURL(compressedFile));
+            } catch (error) {
+                console.error('Error processing image:', error);
+                setMessage({ text: 'Error processing image', type: 'error' });
+            }
         }
     };
 
+    // Helper functions for drag and drop
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleImageChange({ target: { files: [file] } });
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleContainerClick = (e) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => handleImageChange(e);
+        input.click();
+    };
+
     const resetForm = () => {
-        setFormData({ title: '', image: null });
+        setFormData({
+            title: '',
+            image: null
+        });
         setPreviewImage(null);
         setEditingId(null);
-        setUploadProgress(0);
         setMessage({ text: '', type: '' });
     };
 
@@ -395,27 +411,3 @@ const HomeContent = () => {
 };
 
 export default HomeContent;
-
-// Add these functions here, outside of the JSX
-const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-        handleImageChange({ target: { files: [file] } });
-    }
-};
-
-const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-};
-
-const handleContainerClick = (e) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => handleImageChange(e);
-    input.click();
-};

@@ -128,6 +128,174 @@
     resize: vertical;
 }
 
+/* Course Select Container */
+.course-select-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.course-select-container select {
+    flex: 1;
+}
+
+.add-course-btn {
+    padding: 12px 15px;
+    background: rgba(0, 255, 187, 0.1);
+    border: 1px solid rgba(0, 255, 187, 0.3);
+    color: #00ffbb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 45px;
+    height: 45px;
+}
+
+.add-course-btn:hover {
+    background: rgba(0, 255, 187, 0.2);
+    border-color: #00ffbb;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 255, 187, 0.2);
+}
+
+.add-course-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.add-course-btn i {
+    font-size: 1rem;
+}
+
+/* Modal Styles */
+.add-course-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(0, 255, 187, 0.2);
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 30px rgba(0, 255, 187, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 255, 187, 0.1);
+}
+
+.modal-header h3 {
+    color: #00ffbb;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #00ffbb;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(0, 255, 187, 0.1);
+    transform: scale(1.1);
+}
+
+.modal-content .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-content .form-group label {
+    color: #00ffbb;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 187, 0.2);
+    background: rgba(0, 255, 187, 0.02);
+    color: #fff;
+    font-size: 1rem;
+}
+
+.modal-content .form-group input:focus,
+.modal-content .form-group textarea:focus {
+    outline: none;
+    border-color: #00ffbb;
+    box-shadow: 0 0 10px rgba(0, 255, 187, 0.2);
+}
+
+.modal-content .form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.required {
+    color: #ff3b3b;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.modal-buttons .submit-btn {
+    flex: 1;
+    margin: 0;
+}
+
+.modal-buttons .cancel-btn {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-buttons .cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
 .submit-btn {
     margin-top: 20px;
     padding: 15px;
@@ -144,6 +312,12 @@
 .submit-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 255, 187, 0.3);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .status-message {
@@ -181,6 +355,15 @@
     .enroll-form-right {
         padding: 40px;
     }
+
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 576px) {
@@ -195,5 +378,23 @@
 
     .enroll-form-left h2 {
         font-size: 1.8rem;
+    }
+
+    .course-select-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .add-course-btn {
+        width: 100%;
+        height: 45px;
+    }
+
+    .modal-content {
+        padding: 15px;
+    }
+
+    .modal-header h3 {
+        font-size: 1.3rem;
     }
 } 

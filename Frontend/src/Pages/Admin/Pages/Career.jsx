@@ -121,46 +121,46 @@ const Career = () => {
 
     const handleImageChange = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
-
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            setError('Please upload an image file');
-            e.target.value = '';
-            return;
+        if (file) {
+            try {
+                const compressedFile = await compressImage(file);
+                setFormData(prev => ({ ...prev, image: compressedFile }));
+                setPreviewImage(URL.createObjectURL(compressedFile));
+            } catch (error) {
+                console.error('Error processing image:', error);
+                setError('Error processing image. Please try again.');
+            }
         }
+    };
 
-        // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setError('Image size should be less than 5MB');
-            e.target.value = '';
-            return;
+    // Helper functions for drag and drop
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleImageChange({ target: { files: [file] } });
         }
+    };
 
-        try {
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setPreviewImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
 
-            // Compress image
-            const compressedFile = await compressImage(file);
-            setFormData(prev => ({ ...prev, image: compressedFile }));
-            setError(null);
-        } catch (error) {
-            console.error('Error processing image:', error);
-            setError('Error processing image. Please try again.');
-            e.target.value = '';
-        }
+    const handleContainerClick = (e) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => handleImageChange(e);
+        input.click();
     };
 
     const resetForm = () => {
         setFormData({
             title: '',
             description: '',
-            points: [''],
             image: null
         });
         setPreviewImage(null);
@@ -284,29 +284,6 @@ const Career = () => {
                 setLoading(false);
             }
         }
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            handleImageChange({ target: { files: [file] } });
-        }
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-
-    const handleContainerClick = (e) => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => handleImageChange(e);
-        input.click();
     };
 
     return (
