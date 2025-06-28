@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import {
     getAllHomeServices,
     createHomeService,
@@ -14,12 +15,16 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, '../uploads/services');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Configure multer for home service image uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, '../uploads/services');
-        console.log('📁 Upload destination:', uploadPath);
-        cb(null, uploadPath);
+        cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
         const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
@@ -47,18 +52,57 @@ const upload = multer({
             cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
         }
     }
-});
+}).single('image');
+
+// Middleware to handle multer errors
+const handleMulterError = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        return res.status(400).json({
+            success: false,
+            message: 'File upload error',
+            error: err.message
+        });
+    }
+    next(err);
+};
 
 // GET /api/homeService - Get all services
 router.get('/', getAllHomeServices);
 
 // POST /api/homeService - Create new service
-router.post('/', upload.single('image'), createHomeService);
+router.post('/', (req, res, next) => {
+    upload(req, res, (err) => {
+        if (err) {
+            console.error('Upload error:', err);
+            return res.status(400).json({
+                success: false,
+                message: 'File upload failed',
+                error: err.message
+            });
+        }
+        createHomeService(req, res, next);
+    });
+});
 
 // PUT /api/homeService/:id - Update service
-router.put('/:id', upload.single('image'), updateHomeService);
+router.put('/:id', (req, res, next) => {
+    upload(req, res, (err) => {
+        if (err) {
+            console.error('Upload error:', err);
+            return res.status(400).json({
+                success: false,
+                message: 'File upload failed',
+                error: err.message
+            });
+        }
+        updateHomeService(req, res, next);
+    });
+});
 
 // DELETE /api/homeService/:id - Delete service
 router.delete('/:id', deleteHomeService);
+
+// Error handling middleware
+router.use(handleMulterError);
 
 export default router; 

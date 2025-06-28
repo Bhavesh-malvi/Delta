@@ -3,16 +3,21 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, '../uploads/services');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Configure multer for home service image uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, '../uploads/services');
-        console.log('📁 Upload destination:', uploadPath);
-        cb(null, uploadPath);
+        cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
         const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
@@ -45,6 +50,7 @@ const upload = multer({
 // Helper function to check MongoDB connection
 const checkDbConnection = () => {
     const state = mongoose.connection.readyState;
+    console.log('MongoDB connection state:', state);
     if (state !== 1) {
         throw new Error('Database connection is not ready. Current state: ' + state);
     }
@@ -76,7 +82,7 @@ export const getAllHomeServices = async (req, res) => {
         checkDbConnection();
         console.log('Fetching all home services...');
         
-        const homeServices = await HomeService.find({ isActive: true }).sort({ position: 1, createdAt: -1 });
+        const homeServices = await HomeService.find().sort({ position: 1, createdAt: -1 });
         console.log(`Found ${homeServices.length} home services`);
         
         res.status(200).json({
