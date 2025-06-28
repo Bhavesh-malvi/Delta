@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
 import './HomeServiceSection.css';
+import fallbackImage from '../../assets/img/s1.png'; // Import a local fallback image
 
 const HomeServiceSection = () => {
     const [services, setServices] = useState([]);
@@ -39,7 +40,7 @@ const HomeServiceSection = () => {
     }, []);
 
     const getImageUrl = (image) => {
-        if (!image) return 'https://via.placeholder.com/400x300?text=Service+Image';
+        if (!image) return fallbackImage;
         
         // If the image path already contains the full URL, use it as is
         if (image.startsWith('http')) {
@@ -101,7 +102,7 @@ const HomeServiceSection = () => {
                                 onError={(e) => {
                                     console.error('Image failed to load:', e.target.src);
                                     e.target.onerror = null;
-                                    e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
+                                    e.target.src = fallbackImage;
                                 }}
                                 loading="lazy"
                             />
