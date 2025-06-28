@@ -252,24 +252,62 @@
 .error-state,
 .empty-state {
     text-align: center;
-    padding: 3rem 2rem;
-    font-size: 1.3rem;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin: 2rem auto;
-    max-width: 600px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    margin: 20px;
+    border: 1px solid rgba(0, 255, 135, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 255, 135, 0.1);
+    border-radius: 50%;
+    border-top-color: #00ff87;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .error-state {
     color: #ff4444;
-    border-color: rgba(255, 68, 68, 0.3);
+    border-color: rgba(255, 68, 68, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
-.empty-state {
+.error-state p {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.retry-button {
+    padding: 10px 25px;
+    background: rgba(0, 255, 135, 0.1);
+    border: 1px solid rgba(0, 255, 135, 0.3);
+    border-radius: 8px;
     color: #00ff87;
-    border-color: rgba(0, 255, 135, 0.3);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+    background: rgba(0, 255, 135, 0.2);
+    transform: translateY(-2px);
 } 

@@ -7,23 +7,30 @@ const HomeServiceSection = () => {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [retryCount, setRetryCount] = useState(0);
 
     useEffect(() => {
+        let isMounted = true;
+        let retryTimeout;
+
         const fetchServices = async () => {
             try {
                 console.log('Fetching services from:', ENDPOINTS.HOME_SERVICE);
                 const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
                 console.log('Response:', response.data);
                 
+                if (!isMounted) return;
+
                 if (response.data && response.data.data && Array.isArray(response.data.data)) {
                     setServices(response.data.data);
+                    setError(null);
                 } else if (response.data && Array.isArray(response.data)) {
                     setServices(response.data);
+                    setError(null);
                 } else {
                     console.error('Invalid data format:', response.data);
                     throw new Error('Invalid data format received');
                 }
-                setLoading(false);
             } catch (err) {
                 console.error('Error fetching services:', err);
                 console.error('Error details:', {
@@ -31,13 +38,38 @@ const HomeServiceSection = () => {
                     response: err.response?.data,
                     status: err.response?.status
                 });
+
+                if (!isMounted) return;
+
                 setError(err.message || 'Failed to fetch services');
-                setLoading(false);
+                
+                // If it's a 500 error and we haven't retried too many times, retry
+                if ((err.response?.status === 500 || !err.response) && retryCount < 2) {
+                    const delay = Math.min(1000 * Math.pow(2, retryCount), 5000);
+                    console.log(`Retrying in ${delay}ms... (Attempt ${retryCount + 1})`);
+                    retryTimeout = setTimeout(() => {
+                        if (isMounted) {
+                            setRetryCount(prev => prev + 1);
+                            setError('Retrying connection...');
+                        }
+                    }, delay);
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchServices();
-    }, []);
+
+        return () => {
+            isMounted = false;
+            if (retryTimeout) {
+                clearTimeout(retryTimeout);
+            }
+        };
+    }, [retryCount]); // Add retryCount as dependency to trigger retries
 
     const getImageUrl = (image) => {
         if (!image) return fallbackImage;
@@ -51,55 +83,75 @@ const HomeServiceSection = () => {
         return `${API_BASE_URL}/uploads/services/${image}`;
     };
 
-    if (loading) {
-        return (
-            <section className="service-section">
-                <div className="loading-state">Loading services...</div>
-            </section>
-        );
-    }
+    const handleImageError = (e, title) => {
+        console.error(`Image failed to load for ${title}:`, e.target.src);
+        e.target.onerror = null;
+        e.target.src = fallbackImage;
+    };
 
-    if (error) {
-        return (
-            <section className="service-section">
-                <div className="error-state">Error: {error}</div>
-            </section>
-        );
-    }
+    const renderContent = () => {
+        if (loading) {
+            return (
+                <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <p>Loading services...</p>
+                </div>
+            );
+        }
 
-    if (!services.length) {
+        if (error) {
+            return (
+                <div className="error-state">
+                    <p>{error}</p>
+                    {retryCount < 2 && (
+                        <button 
+                            className="retry-button"
+                            onClick={() => setRetryCount(prev => prev + 1)}
+                        >
+                            Retry
+                        </button>
+                    )}
+                </div>
+            );
+        }
+
+        if (!services.length) {
+            return <div className="empty-state">No services available</div>;
+        }
+
         return (
-            <section className="service-section">
-                <div className="empty-state">No services available</div>
-            </section>
+            <>
+                <h2 className="service-title">OUR-SERVICES</h2>
+                <div className="services-container">
+                    {services.map((service) => (
+                        <div 
+                            className="service-card" 
+                            key={service._id}
+                            data-aos="fade-up"
+                            data-aos-delay={200}
+                        >
+                            <div className="service-image-container">
+                                <img 
+                                    src={getImageUrl(service.image)}
+                                    alt={service.title} 
+                                    className="service-image"
+                                    onError={(e) => handleImageError(e, service.title)}
+                                    loading="lazy"
+                                />
+                                <div className="image-overlay"></div>
+                            </div>
+                            <h3 className="service-card-title">{service.title}</h3>
+                            <p className="service-description">{service.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </>
         );
-    }
+    };
 
     return (
         <section className="service-section">
-            <h2 className="service-title">OUR-SERVICES</h2>
-            <div className="services-container">
-                {services.map((service) => (
-                    <div className="service-card" key={service._id}>
-                        <div className="service-image-container">
-                            <img 
-                                src={getImageUrl(service.image)}
-                                alt={service.title} 
-                                className="service-image"
-                                onError={(e) => {
-                                    console.error('Image failed to load:', e.target.src);
-                                    e.target.onerror = null;
-                                    e.target.src = fallbackImage;
-                                }}
-                                loading="lazy"
-                            />
-                            <div className="image-overlay"></div>
-                        </div>
-                        <h3 className="service-card-title">{service.title}</h3>
-                        <p className="service-description">{service.description}</p>
-                    </div>
-                ))}
-            </div>
+            {renderContent()}
         </section>
     );
 };

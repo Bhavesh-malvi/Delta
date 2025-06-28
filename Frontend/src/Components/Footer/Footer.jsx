@@ -51,7 +51,7 @@ const Footer = () => {
 
             <div className="footer-bottom">
                 <p>deltawaresolution © 2025</p>
-                <Link to="/" className="enroll-btn">ENROLL</Link>
+                <Link to="/enroll" className="enroll-btn">ENROLL</Link>
             </div>
         </footer>
     );
