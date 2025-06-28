@@ -15,23 +15,9 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Configure multer for career image uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, '../uploads/careers');
-        console.log('📁 Upload destination:', uploadPath);
-        cb(null, uploadPath);
-    },
-    filename: function (req, file, cb) {
-        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        const finalName = uniqueName + path.extname(file.originalname);
-        console.log('📁 Generated filename:', finalName);
-        cb(null, finalName);
-    }
-});
-
+// Configure multer for career image uploads using memory storage
 const upload = multer({
-    storage,
+    storage: multer.memoryStorage(),
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB
     },

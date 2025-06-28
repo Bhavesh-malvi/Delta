@@ -1,4 +1,5 @@
 import Career from '../models/Career.js';
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
 // Get all careers
 export const getAllCareers = async (req, res) => {
@@ -66,12 +67,21 @@ export const createCareer = async (req, res) => {
             points: parsedPoints
         };
 
-        // Add image path if file was uploaded
+        // Upload image to Cloudinary if file was uploaded
         if (req.file) {
             console.log('🖼️ Image file received:', req.file);
-            console.log('📁 Image filename:', req.file.filename);
-            careerData.image = `careers/${req.file.filename}`;
-            console.log('✅ Image path added to careerData:', careerData.image);
+            try {
+                const imageUrl = await uploadToCloudinary(req.file.buffer);
+                careerData.image = imageUrl;
+                console.log('✅ Image uploaded to Cloudinary:', imageUrl);
+            } catch (uploadError) {
+                console.error('❌ Error uploading to Cloudinary:', uploadError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error uploading image',
+                    details: uploadError.message
+                });
+            }
         } else {
             console.log('❌ No image file received in request');
         }
@@ -127,11 +137,21 @@ export const updateCareer = async (req, res) => {
             }
         }
 
-        // If image uploaded, update path
+        // If new image uploaded, update with Cloudinary URL
         if (req.file) {
             console.log('🖼️ New image file received:', req.file);
-            career.image = `careers/${req.file.filename}`;
-            console.log('✅ Image path updated:', career.image);
+            try {
+                const imageUrl = await uploadToCloudinary(req.file.buffer);
+                career.image = imageUrl;
+                console.log('✅ Image uploaded to Cloudinary:', imageUrl);
+            } catch (uploadError) {
+                console.error('❌ Error uploading to Cloudinary:', uploadError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error uploading image',
+                    details: uploadError.message
+                });
+            }
         }
 
         career.title = title;

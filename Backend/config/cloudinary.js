@@ -22,7 +22,7 @@ try {
     throw error;
 }
 
-export const uploadToCloudinary = async (buffer) => {
+export const uploadToCloudinary = async (buffer, folder = 'delta/services') => {
     if (!buffer) {
         throw new Error('No buffer provided for upload');
     }
@@ -33,7 +33,7 @@ export const uploadToCloudinary = async (buffer) => {
         const dataURI = `data:image/jpeg;base64,${b64}`;
         
         const result = await cloudinary.uploader.upload(dataURI, {
-            folder: 'delta/services',
+            folder: folder,
             resource_type: 'auto'
         });
         
