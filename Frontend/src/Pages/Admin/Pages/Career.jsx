@@ -103,15 +103,13 @@ const Career = () => {
             title: '',
             description: '',
             points: [''],
-            image: null,
-            experience: '',
-            location: ''
+            image: null
         });
         setPreviewImage(null);
         setEditingId(null);
         setError(null);
         // Reset file input
-        const fileInput = document.getElementById('image');
+        const fileInput = document.getElementById('careerImage');
         if (fileInput) fileInput.value = '';
     };
 
@@ -137,11 +135,10 @@ const Career = () => {
             title: career.title,
             description: career.description,
             points: points,
-            image: null,
-            experience: career.experience,
-            location: career.location
+            image: null
         });
-        // Always prepend API_BASE_URL for local file paths
+        
+        // Set preview image path
         setPreviewImage(`${API_BASE_URL}${career.image}`);
         window.scrollTo(0, 0);
     };
@@ -168,9 +165,6 @@ const Career = () => {
             if (formData.image) {
                 formDataToSend.append('image', formData.image);
             }
-
-            formDataToSend.append('experience', formData.experience);
-            formDataToSend.append('location', formData.location);
 
             const config = {
                 headers: {
@@ -218,6 +212,29 @@ const Career = () => {
         }
     };
 
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleImageChange({ target: { files: [file] } });
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleContainerClick = (e) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => handleImageChange(e);
+        input.click();
+    };
+
     return (
         <Container className="career-container py-4">
             <h2 className="mb-4">{editingId ? 'Edit Career' : 'Add New Career'}</h2>
@@ -233,17 +250,15 @@ const Career = () => {
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Label>Upload Image {!editingId && <span className="text-danger">*</span>}</Form.Label>
-                            <div className="image-upload-container border rounded p-3">
-                                <Form.Control
-                                    type="file"
-                                    onChange={handleImageChange}
-                                    accept="image/*"
-                                    disabled={loading}
-                                    className="mb-3"
-                                />
+                            <div 
+                                className="image-upload-container"
+                                onClick={handleContainerClick}
+                                onDrop={handleDrop}
+                                onDragOver={handleDragOver}
+                            >
                                 {!previewImage ? (
-                                    <div className="text-center text-muted">
-                                        <i className="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                    <div className="upload-label">
+                                        <i className="fas fa-cloud-upload-alt"></i>
                                         <p>Choose an image or drag it here</p>
                                     </div>
                                 ) : (
@@ -251,10 +266,14 @@ const Career = () => {
                                         <img 
                                             src={previewImage} 
                                             alt="Preview" 
-                                            className="img-thumbnail mb-2"
-                                            style={{ maxHeight: '200px' }}
+                                            className="mb-2"
+                                            style={{ 
+                                                maxHeight: '200px', 
+                                                border: '2px solid rgba(0, 255, 135, 0.3)',
+                                                borderRadius: '8px'
+                                            }}
                                         />
-                                        <p className="text-muted">
+                                        <p>
                                             {formData.image ? formData.image.name : 'Current Image'}
                                         </p>
                                     </div>
@@ -289,36 +308,10 @@ const Career = () => {
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Experience Required <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="experience"
-                                value={formData.experience}
-                                onChange={handleInputChange}
-                                placeholder="Enter required experience"
-                                required
-                                disabled={loading}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Location <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="location"
-                                value={formData.location}
-                                onChange={handleInputChange}
-                                placeholder="Enter job location"
-                                required
-                                disabled={loading}
-                            />
-                        </Form.Group>
-
                         <div className="d-flex gap-2">
                             <Button 
                                 type="submit" 
-                                variant="primary"
+                                style={{ backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)' }}
                                 disabled={loading}
                             >
                                 {loading ? (
@@ -354,7 +347,7 @@ const Career = () => {
                 <Card.Header className="d-flex justify-content-between align-items-center">
                     <h3 className="mb-0">Existing Careers</h3>
                     <Button 
-                        variant="outline-primary"
+                        style={{ backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)', color: '#000' }}
                         onClick={fetchCareers}
                         disabled={loading}
                     >
@@ -376,11 +369,11 @@ const Career = () => {
                         <Row xs={1} md={2} lg={3} className="g-4">
                             {careers.map(career => (
                                 <Col key={career._id}>
-                                    <Card className="h-100">
+                                    <Card className="h-100 career-card">
                                         <div className="card-img-wrapper" style={{ height: '200px', overflow: 'hidden' }}>
                                             <Card.Img
                                                 variant="top"
-                                                src={career.image.startsWith('http') ? career.image : `${API_BASE_URL}/uploads/careers/${career.image}`}
+                                                src={`${API_BASE_URL}${career.image}`}
                                                 alt={career.title}
                                                 onError={(e) => {
                                                     e.target.onerror = null;
@@ -392,32 +385,24 @@ const Career = () => {
                                         <Card.Body>
                                             <Card.Title>{career.title}</Card.Title>
                                             <Card.Text>{career.description}</Card.Text>
-                                            <div className="mt-3">
-                                                <p className="mb-1">
-                                                    <strong>Experience:</strong> {career.experience}
-                                                </p>
-                                                <p className="mb-0">
-                                                    <strong>Location:</strong> {career.location}
-                                                </p>
-                                            </div>
                                         </Card.Body>
                                         <Card.Footer className="d-flex justify-content-end gap-2">
-                                            <Button
-                                                variant="primary"
+                                            <button
                                                 onClick={() => handleEdit(career)}
+                                                className="action-btn edit"
+                                                title="Edit"
                                                 disabled={loading}
-                                                size="sm"
                                             >
-                                                <i className="fas fa-edit me-1"></i> Edit
-                                            </Button>
-                                            <Button
-                                                variant="danger"
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button
                                                 onClick={() => handleDelete(career._id)}
+                                                className="action-btn delete"
+                                                title="Delete"
                                                 disabled={loading}
-                                                size="sm"
                                             >
-                                                <i className="fas fa-trash me-1"></i> Delete
-                                            </Button>
+                                                <i className="fas fa-trash"></i>
+                                            </button>
                                         </Card.Footer>
                                     </Card>
                                 </Col>
@@ -430,4 +415,4 @@ const Career = () => {
     );
 };
 
-export default Career; 
+export default Career;

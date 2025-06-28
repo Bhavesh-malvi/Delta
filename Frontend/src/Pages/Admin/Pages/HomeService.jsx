@@ -345,24 +345,23 @@ const HomeService = () => {
                                 <Card.Body className="d-flex flex-column">
                                     <Card.Title className="text-success">{service.title}</Card.Title>
                                     <Card.Text className="flex-grow-1">{service.description}</Card.Text>
-                                    <div className="mt-auto d-flex justify-content-end">
-                                        <Button 
-                                            variant="outline-success" 
-                                            size="sm" 
-                                            className="me-2"
+                                    <div className="mt-auto d-flex justify-content-end gap-3">
+                                        <button 
                                             onClick={() => handleEdit(service)}
+                                            className="action-btn edit"
+                                            title="Edit"
                                             disabled={loading}
                                         >
-                                            <FaEdit /> Edit
-                                        </Button>
-                                        <Button 
-                                            variant="outline-danger" 
-                                            size="sm"
+                                            <i className="fas fa-edit"></i>
+                                        </button>
+                                        <button 
                                             onClick={() => handleDelete(service._id)}
+                                            className="action-btn delete"
+                                            title="Delete"
                                             disabled={loading}
                                         >
-                                            <FaTrash /> Delete
-                                        </Button>
+                                            <i className="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </Card.Body>
                             </Card>

@@ -1,10 +1,10 @@
 .home-service-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+    padding: 2rem;
     color: #fff;
+    max-width: 100%;
+    overflow-x: hidden;
     min-height: 100vh;
+    background-color: #0a0a0a;
 }
 
 .home-service-container h2 {
@@ -231,8 +231,9 @@
 
 /* Card Footer Button Styling */
 .card-footer {
-    background: rgba(0, 0, 0, 0.3) !important;
+    background: transparent !important;
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 1rem !important;
 }
 
 .card-footer .btn {
@@ -332,47 +333,50 @@
 
 .service-actions {
     display: flex;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 0.75rem;
+    justify-content: flex-end;
 }
 
-.edit-btn,
-.delete-btn {
-    padding: 0.5rem 1rem;
+.action-btn {
+    width: 36px;
+    height: 36px;
     border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    flex: 1;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.edit-btn {
-    background: rgba(0, 255, 135, 0.1);
-    color: #00ff87;
-    border: 1px solid rgba(0, 255, 135, 0.2);
+.action-btn.edit {
+    background: #00ff87;
+    color: #000;
 }
 
-.delete-btn {
-    background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
-    border: 1px solid rgba(255, 68, 68, 0.2);
+.action-btn.delete {
+    background: #ff4444;
+    color: #fff;
 }
 
-.edit-btn:hover {
-    background: rgba(0, 255, 135, 0.2);
-    border-color: rgba(0, 255, 135, 0.3);
+.action-btn.edit:hover {
+    background: #00cc6a;
+    transform: scale(1.1);
 }
 
-.delete-btn:hover {
-    background: rgba(255, 68, 68, 0.2);
-    border-color: rgba(255, 68, 68, 0.3);
+.action-btn.delete:hover {
+    background: #ff3333;
+    transform: scale(1.1);
+}
+
+.action-btn i {
+    font-size: 1rem;
+}
+
+.card {
+    background: rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .loading,
@@ -542,8 +546,9 @@
 
 /* Card Footer styling */
 .card-footer {
-    background: rgba(0, 0, 0, 0.3) !important;
+    background: transparent !important;
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 1rem !important;
 }
 
 /* Button styling */

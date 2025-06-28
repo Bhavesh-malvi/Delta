@@ -1,13 +1,24 @@
-.home-courses-container {
+:root {
+    --primary-color: #0d6efd;
+    --primary-dark: #0b5ed7;
+    --primary-light: #3d8bfd;
+    --secondary-color: #6c757d;
+    --danger-color: #dc3545;
+    --success-color: #198754;
+    --white-color: #ffffff;
+    --light-color: #f8f9fa;
+}
+
+.home-course-container {
     padding: 2rem;
     color: #fff;
     max-width: 100%;
     overflow-x: hidden;
     min-height: 100vh;
-    background-color: #f8f9fa;
+    background-color: #0a0a0a;
 }
 
-.home-courses-container h2 {
+.home-course-container h2 {
     margin-bottom: 2rem;
     color: #00ff87;
     text-align: center;
@@ -121,29 +132,21 @@
     background: rgba(255, 68, 68, 0.2);
 }
 
-.courses-list {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 2rem;
-    width: 100%;
-    overflow: hidden;
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(496px, 1fr)) !important;
+.existing-courses {
+    margin-top: 3rem;
 }
 
-.courses-list h3 {
+.existing-courses h3 {
     color: #00ff87;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
-.courses-grid {
-    width: 100%;
+.courses-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
 }
 
 .course-item {
@@ -151,10 +154,8 @@
     backdrop-filter: blur(10px);
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
     transition: all 0.3s ease;
-    overflow: hidden;
-    position: relative;
-    padding: 20px;
 }
 
 .course-item:hover {
@@ -164,86 +165,84 @@
 }
 
 .course-content {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
 }
 
 .course-content h4 {
     color: #00ff87;
-    margin-bottom: 15px;
-    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
 }
 
 .course-content p {
-    margin: 10px 0;
     color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
 }
 
 .course-actions {
     display: flex;
-    gap: 10px;
+    gap: 0.75rem;
     justify-content: flex-end;
-    padding-top: 15px;
+    padding-top: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .action-btn {
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .action-btn.edit {
     background: rgba(0, 255, 135, 0.1);
-    border: 1px solid rgba(0, 255, 135, 0.3);
     color: #00ff87;
-}
-
-.action-btn.delete {
-    background: rgba(255, 59, 59, 0.1);
-    border: 1px solid rgba(255, 59, 59, 0.3);
-    color: #ff3b3b;
 }
 
 .action-btn.edit:hover {
     background: rgba(0, 255, 135, 0.2);
-    border-color: #00ff87;
     transform: scale(1.1);
+}
+
+.action-btn.delete {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
 }
 
 .action-btn.delete:hover {
-    background: rgba(255, 59, 59, 0.2);
-    border-color: #ff3b3b;
+    background: rgba(255, 68, 68, 0.2);
     transform: scale(1.1);
 }
 
-@media (max-width: 1024px) {
-    .course-item {
-        flex: 0 1 calc(50% - 0.75rem);
-        max-width: calc(50% - 0.75rem);
-    }
+.loading,
+.no-courses {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loading i,
+.no-courses i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #00ff87;
 }
 
 @media (max-width: 768px) {
-    .home-courses-container {
+    .home-course-container {
         padding: 1rem;
     }
 
     .courses-list {
-        padding: 1rem;
         grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .course-item {
-        width: 100%;
-        margin: 0;
     }
 
     .form-buttons {
@@ -254,66 +253,57 @@
     .cancel-btn {
         max-width: none;
     }
-
-    .form-group input,
-    .form-group textarea {
-        font-size: 16px; /* Prevents zoom on mobile */
-    }
-
-    .course-content h4 {
-        font-size: 1.2rem;
-    }
-
-    .course-actions {
-        padding-top: 10px;
-    }
 }
 
-@media (max-width: 480px) {
-    .home-courses-container {
-        padding: 0.5rem;
-    }
-
-    .course-form {
-        padding: 1rem;
-    }
-
-    .courses-list {
-        padding: 0.5rem;
-    }
-
-    .course-item {
-        padding: 15px;
-    }
+.required {
+    color: #ff4444;
+    margin-left: 0.25rem;
 }
 
 .image-upload-container {
-    background-color: #fff;
+    background-color: var(--white-color);
     transition: all 0.3s ease;
+    border: 2px dashed var(--primary-light) !important;
 }
 
 .image-upload-container:hover {
-    border-color: #0d6efd !important;
+    border-color: var(--primary-color) !important;
+    background-color: var(--light-color);
 }
 
-/* Hide the default file input button */
-input[type="file"] {
+/* Custom file input styling */
+.custom-file-input {
     color: transparent;
 }
 
-input[type="file"]::-webkit-file-upload-button {
+.custom-file-input::-webkit-file-upload-button {
     visibility: hidden;
 }
 
-/* Custom styles for the file input */
-input[type="file"]::before {
+.custom-file-input::before {
     content: 'Select File';
     display: inline-block;
-    background: #0d6efd;
-    color: white;
+    background: var(--primary-color);
+    color: var(--white-color);
     padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-file-input:hover::before {
+    background: var(--primary-dark);
+}
+
+/* Card styling */
+.course-card {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .card-img-wrapper img {
@@ -322,4 +312,61 @@ input[type="file"]::before {
 
 .card-img-wrapper:hover img {
     transform: scale(1.05);
+}
+
+/* Custom button styling */
+.custom-btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.custom-btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.custom-btn-outline {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.custom-btn-outline:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    transform: translateY(-1px);
+}
+
+.custom-btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    transition: all 0.3s ease;
+}
+
+.custom-btn-danger:hover:not(:disabled) {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+    transform: translateY(-1px);
+}
+
+.custom-btn-light {
+    background-color: var(--white-color);
+    border-color: var(--white-color);
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.custom-btn-light:hover:not(:disabled) {
+    background-color: var(--light-color);
+    border-color: var(--light-color);
+    color: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+/* Form control styling */
+.form-control:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 } 

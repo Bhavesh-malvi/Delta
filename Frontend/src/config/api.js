@@ -1,5 +1,5 @@
 // API Configuration
-const isDevelopment = true; // Switch to development mode for local testing
+const isDevelopment = window.location.hostname === 'localhost';
 
 // Base URLs
 export const API_BASE_URL = isDevelopment 
@@ -54,7 +54,7 @@ const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: API_TIMEOUT,
     headers: DEFAULT_HEADERS,
-    withCredentials: true // Enable sending cookies with requests
+    withCredentials: isDevelopment // Only use credentials in development
 });
 
 // Add response interceptor for error handling

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../../config/api';
+import axiosInstance, { ENDPOINTS } from '../../../config/api';
 import './HomeCourses.css';
 
 const HomeCourses = () => {
@@ -20,13 +20,27 @@ const HomeCourses = () => {
     const fetchCourses = async () => {
         try {
             setLoading(true);
-            const response = await axiosInstance.get(ENDPOINTS.HOME_COURSE);
-            const coursesData = response.data?.data || response.data || [];
-            setCourses(Array.isArray(coursesData) ? coursesData : []);
             setError(null);
+            console.log('Fetching courses from:', ENDPOINTS.HOME_COURSE);
+            
+            const response = await axiosInstance.get(ENDPOINTS.HOME_COURSE);
+            console.log('Courses API Response:', response);
+            
+            if (response.data?.success) {
+                const coursesData = response.data.data || [];
+                console.log('Parsed courses data:', coursesData);
+                setCourses(Array.isArray(coursesData) ? coursesData : []);
+            } else {
+                throw new Error(response.data?.message || 'Failed to fetch courses');
+            }
         } catch (err) {
             console.error('Error fetching courses:', err);
-            setError(err.userMessage || 'Failed to fetch courses');
+            console.error('Error details:', {
+                message: err.message,
+                response: err.response?.data,
+                status: err.response?.status
+            });
+            setError(err.response?.data?.message || err.message || 'Failed to fetch courses');
             setCourses([]);
         } finally {
             setLoading(false);
@@ -119,7 +133,7 @@ const HomeCourses = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="home-course-form">
+            <form onSubmit={handleSubmit} className="course-form">
                 <div className="form-group">
                     <label htmlFor="title">Course Title <span className="required">*</span></label>
                     <input
@@ -147,7 +161,7 @@ const HomeCourses = () => {
                     />
                 </div>
 
-                <div className="form-actions">
+                <div className="form-buttons">
                     <button type="submit" className="submit-btn" disabled={loading}>
                         {loading ? (
                             <>
@@ -187,32 +201,32 @@ const HomeCourses = () => {
                 ) : (
                     <div className="courses-list">
                         {courses.map(course => (
-                        <div key={course._id} className="course-item">
-                            <div className="course-content">
-                                <h4>{course.title}</h4>
-                                <p>{course.description}</p>
-                            </div>
-                            <div className="course-actions">
-                                <button
-                                    onClick={() => handleEdit(course)}
-                                        className="edit-btn"
-                                    title="Edit"
+                            <div key={course._id} className="course-item">
+                                <div className="course-content">
+                                    <h4>{course.title}</h4>
+                                    <p>{course.description}</p>
+                                </div>
+                                <div className="course-actions">
+                                    <button
+                                        onClick={() => handleEdit(course)}
+                                        className="action-btn edit"
+                                        title="Edit"
                                         disabled={loading}
-                                >
-                                    <i className="fas fa-edit"></i>
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(course._id)}
-                                        className="delete-btn"
-                                    title="Delete"
+                                    >
+                                        <i className="fas fa-edit"></i>
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(course._id)}
+                                        className="action-btn delete"
+                                        title="Delete"
                                         disabled={loading}
-                                >
-                                    <i className="fas fa-trash"></i>
-                                </button>
+                                    >
+                                        <i className="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>

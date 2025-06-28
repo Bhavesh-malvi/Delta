@@ -107,7 +107,7 @@ const ServiceContent = () => {
         setEditingId(null);
         setError(null);
         // Reset file input
-        const fileInput = document.getElementById('image');
+        const fileInput = document.getElementById('serviceImage');
         if (fileInput) fileInput.value = '';
     };
 
@@ -204,6 +204,29 @@ const ServiceContent = () => {
         }
     };
 
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleImageChange({ target: { files: [file] } });
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleContainerClick = (e) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => handleImageChange(e);
+        input.click();
+    };
+
     return (
         <Container className="service-content-container py-4">
             <h2 className="mb-4">{editingId ? 'Edit Content' : 'Add New Content'}</h2>
@@ -219,17 +242,15 @@ const ServiceContent = () => {
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Label>Upload Image {!editingId && <span className="text-danger">*</span>}</Form.Label>
-                            <div className="image-upload-container border rounded p-3">
-                                <Form.Control
-                                    type="file"
-                                    onChange={handleImageChange}
-                                    accept="image/*"
-                                    disabled={loading}
-                                    className="mb-3"
-                                />
+                            <div 
+                                className="image-upload-container"
+                                onClick={handleContainerClick}
+                                onDrop={handleDrop}
+                                onDragOver={handleDragOver}
+                            >
                                 {!previewImage ? (
-                                    <div className="text-center text-muted">
-                                        <i className="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                    <div className="upload-label">
+                                        <i className="fas fa-cloud-upload-alt"></i>
                                         <p>Choose an image or drag it here</p>
                                     </div>
                                 ) : (
@@ -237,10 +258,14 @@ const ServiceContent = () => {
                                         <img 
                                             src={previewImage} 
                                             alt="Preview" 
-                                            className="img-thumbnail mb-2"
-                                            style={{ maxHeight: '200px' }}
+                                            className="mb-2"
+                                            style={{ 
+                                                maxHeight: '200px', 
+                                                border: '2px solid rgba(0, 255, 135, 0.3)',
+                                                borderRadius: '8px'
+                                            }}
                                         />
-                                        <p className="text-muted">
+                                        <p>
                                             {formData.image ? formData.image.name : 'Current Image'}
                                         </p>
                                     </div>
@@ -316,7 +341,7 @@ const ServiceContent = () => {
                         <div className="d-flex gap-2">
                             <Button 
                                 type="submit" 
-                                variant="primary"
+                                style={{ backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)', color: '#000' }}
                                 disabled={loading}
                             >
                                 {loading ? (
@@ -350,9 +375,9 @@ const ServiceContent = () => {
 
             <Card>
                 <Card.Header className="d-flex justify-content-between align-items-center">
-                    <h3 className="mb-0">Existing Contents</h3>
+                    <h3 className="mb-0">Existing Content</h3>
                     <Button 
-                        variant="outline-primary"
+                        style={{ backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)', color: '#000' }}
                         onClick={fetchContents}
                         disabled={loading}
                     >
@@ -374,7 +399,7 @@ const ServiceContent = () => {
                         <Row xs={1} md={2} lg={3} className="g-4">
                             {contents.map(content => (
                                 <Col key={content._id}>
-                                    <Card className="h-100">
+                                    <Card className="h-100 service-content-card">
                                         <div className="card-img-wrapper" style={{ height: '200px', overflow: 'hidden' }}>
                                             <Card.Img
                                                 variant="top"
@@ -392,22 +417,22 @@ const ServiceContent = () => {
                                             <Card.Text>{content.description}</Card.Text>
                                         </Card.Body>
                                         <Card.Footer className="d-flex justify-content-end gap-2">
-                                            <Button
-                                                variant="primary"
+                                            <button
                                                 onClick={() => handleEdit(content)}
+                                                className="action-btn edit"
+                                                title="Edit"
                                                 disabled={loading}
-                                                size="sm"
                                             >
-                                                <i className="fas fa-edit me-1"></i> Edit
-                                            </Button>
-                                            <Button
-                                                variant="danger"
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button
                                                 onClick={() => handleDelete(content._id)}
+                                                className="action-btn delete"
+                                                title="Delete"
                                                 disabled={loading}
-                                                size="sm"
                                             >
-                                                <i className="fas fa-trash me-1"></i> Delete
-                                            </Button>
+                                                <i className="fas fa-trash"></i>
+                                            </button>
                                         </Card.Footer>
                                     </Card>
                                 </Col>
@@ -420,4 +445,4 @@ const ServiceContent = () => {
     );
 };
 
-export default ServiceContent; 
+export default ServiceContent;

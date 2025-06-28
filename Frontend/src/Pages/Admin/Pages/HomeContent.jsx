@@ -25,29 +25,37 @@ const HomeContent = () => {
 
     const fetchContent = async () => {
         try {
-        setContentLoading(true);
+            setContentLoading(true);
             setMessage({ text: '', type: '' });
+            console.log('Fetching content from:', ENDPOINTS.HOME_CONTENT);
             
             const response = await axiosInstance.get(ENDPOINTS.HOME_CONTENT);
+            console.log('Content API Response:', response);
             
-            if (response.data.success) {
+            if (response.data?.success) {
+                console.log('Parsed content data:', response.data.data);
                 setContents(response.data.data || []);
             } else {
-                throw new Error(response.data.message || 'Failed to fetch content');
+                throw new Error(response.data?.message || 'Failed to fetch content');
             }
         } catch (error) {
             console.error('Error fetching content:', error);
+            console.error('Error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                config: error.config
+            });
+            
             let errorMessage = 'Failed to fetch content';
             
             if (error.response) {
-                // Server responded with error
-                errorMessage = error.response.data.message || 'Server error occurred';
+                errorMessage = error.response.data?.message || 'Server error occurred';
                 console.error('Server error:', error.response.data);
             } else if (error.request) {
-                // No response received
                 errorMessage = 'No response from server. Please check your connection.';
+                console.error('Request error:', error.request);
             } else {
-                // Other error
                 errorMessage = error.message;
             }
             

@@ -108,4 +108,201 @@
     .enroll-card {
         margin-bottom: 15px;
     }
+}
+
+.enroll-data-container {
+    padding: 2rem;
+    color: #fff;
+    max-width: 100%;
+    overflow-x: hidden;
+    min-height: 100vh;
+    background-color: #0a0a0a;
+}
+
+.enroll-data-container h2 {
+    margin-bottom: 2rem;
+    color: #00ff87;
+    text-align: center;
+}
+
+.message {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.message.success {
+    color: #00ff87;
+    border: 1px solid #00ff87;
+}
+
+.message.error {
+    color: #ff4444;
+    border: 1px solid #ff4444;
+}
+
+.enrolls-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.enroll-item {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.enroll-item:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 135, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 255, 135, 0.1);
+}
+
+.enroll-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.enroll-header h4 {
+    color: #00ff87;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.enroll-date {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.enroll-info {
+    margin-bottom: 1.5rem;
+}
+
+.enroll-info p {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+.enroll-info p:last-child {
+    margin-bottom: 0;
+}
+
+.enroll-info i {
+    color: #00ff87;
+    width: 20px;
+    text-align: center;
+    margin-top: 3px;
+}
+
+.enroll-info strong {
+    color: #fff;
+    min-width: 80px;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-btn.edit {
+    background: #00ff87;
+    color: #000;
+}
+
+.action-btn.delete {
+    background: #ff4444;
+    color: #fff;
+}
+
+.action-btn.edit:hover {
+    background: #00cc6a;
+    transform: scale(1.1);
+}
+
+.action-btn.delete:hover {
+    background: #ff3333;
+    transform: scale(1.1);
+}
+
+.action-btn i {
+    font-size: 1rem;
+}
+
+.enroll-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loading, .no-enrolls {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loading i, .no-enrolls i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #00ff87;
+}
+
+@media (max-width: 768px) {
+    .enroll-data-container {
+        padding: 1rem;
+    }
+
+    .enrolls-list {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0;
+    }
+
+    .enroll-item {
+        padding: 1rem;
+    }
+
+    .enroll-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .enroll-info p {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .enroll-info strong {
+        min-width: auto;
+    }
 } 

@@ -7,7 +7,10 @@ const EnrollData = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Fetch enrollments
+    useEffect(() => {
+        fetchEnrolls();
+    }, []);
+
     const fetchEnrolls = async () => {
         try {
             setLoading(true);
@@ -24,7 +27,6 @@ const EnrollData = () => {
         }
     };
 
-    // Delete enrollment
     const handleDelete = async (id) => {
         try {
             setLoading(true);
@@ -39,80 +41,70 @@ const EnrollData = () => {
         }
     };
 
-    useEffect(() => {
-        fetchEnrolls();
-    }, []);
-
     return (
         <div className="enroll-data-container">
-            <h2>Enrollment Submissions</h2>
+            <h2>Enrollment Requests</h2>
 
             {error && (
                 <div className={`message ${typeof error === 'object' ? error.type : 'error'}`}>
                     {typeof error === 'object' ? error.text : error}
-                    {typeof error !== 'object' && (
-                        <button onClick={fetchEnrolls} className="retry-btn">
-                            <i className="fas fa-sync-alt"></i>
-                            Retry
-                        </button>
-                    )}
                 </div>
             )}
 
             {loading ? (
                 <div className="loading">
                     <i className="fas fa-spinner fa-spin"></i>
-                    Loading enrollments...
+                    <p>Loading enrollments...</p>
                 </div>
             ) : enrolls.length === 0 ? (
                 <div className="no-enrolls">
                     <i className="fas fa-inbox"></i>
-                    <p>No enrollment submissions found</p>
+                    <p>No enrollment requests available</p>
                 </div>
-                ) : (
+            ) : (
                 <div className="enrolls-list">
                     {enrolls.map(enroll => (
                         <div key={enroll._id} className="enroll-item">
-                            <div className="enroll-content">
-                                <div className="enroll-header">
-                                    <h4>{enroll.name}</h4>
-                                    <span className="enroll-date">
-                                        {new Date(enroll.createdAt).toLocaleDateString()}
-                                    </span>
-                                </div>
+                            <div className="enroll-header">
+                                <h4>{enroll.name}</h4>
+                                <span className="enroll-date">
+                                    {new Date(enroll.createdAt).toLocaleDateString()}
+                                </span>
+                            </div>
                             <div className="enroll-info">
-                                    <p>
-                                        <i className="fas fa-envelope"></i>
-                                        <strong>Email:</strong> {enroll.email}
-                                    </p>
-                                    <p>
-                                        <i className="fas fa-phone"></i>
-                                        <strong>Phone:</strong> {enroll.phone}
-                                    </p>
-                                    <p>
-                                        <i className="fas fa-book"></i>
-                                        <strong>Course:</strong> {enroll.course}
-                                    </p>
+                                <p>
+                                    <i className="fas fa-envelope"></i>
+                                    <strong>Email:</strong> {enroll.email}
+                                </p>
+                                <p>
+                                    <i className="fas fa-phone"></i>
+                                    <strong>Phone:</strong> {enroll.phone}
+                                </p>
+                                <p>
+                                    <i className="fas fa-graduation-cap"></i>
+                                    <strong>Course:</strong> {enroll.course}
+                                </p>
+                                {enroll.message && (
                                     <p>
                                         <i className="fas fa-comment"></i>
                                         <strong>Message:</strong> {enroll.message}
                                     </p>
-                                </div>
+                                )}
                             </div>
                             <div className="enroll-actions">
-                            <button 
+                                <button
                                     onClick={() => handleDelete(enroll._id)}
-                                className="delete-btn"
-                                title="Delete"
+                                    className="action-btn delete"
+                                    title="Delete"
                                     disabled={loading}
-                            >
+                                >
                                     <i className="fas fa-trash"></i>
-                            </button>
+                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
-                )}
+            )}
         </div>
     );
 };

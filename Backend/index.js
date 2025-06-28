@@ -27,10 +27,26 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-    origin: ['http://localhost:5173', 'https://delta-teal.vercel.app'],
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'https://delta-teal.vercel.app',
+            'https://delta-teal-frontend.vercel.app',
+            'https://modified-delta.vercel.app'
+        ];
+        
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range']
 };
 
 // Configure multer for handling file uploads
