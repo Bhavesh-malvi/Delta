@@ -1,8 +1,8 @@
 // API Configuration
 // Frontend URL: https://deltawaresolution.com
-// Backend URL: https://delta-backend.vercel.app (or your Vercel backend URL)
+// Backend URL: https://delta-teal.vercel.app
 export const API_BASE_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://delta-backend.vercel.app'  // Replace with your actual Vercel backend URL
+    ? 'https://delta-teal.vercel.app'  // Updated to the correct Vercel backend URL
     : 'http://localhost:5000';
 
 // Timeout configuration
