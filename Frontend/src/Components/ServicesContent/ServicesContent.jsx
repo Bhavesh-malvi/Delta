@@ -35,22 +35,7 @@ const ServicesContent = () => {
 
     const getImageUrl = (imagePath) => {
         if (!imagePath) return logo1;
-        
-        // If the image path already contains the full URL, use it as is
-        if (imagePath.startsWith('http')) {
-            return imagePath;
-        }
-        
-        // Remove any leading slashes from the image path
-        const cleanImagePath = imagePath.replace(/^\/+/, '');
-        
-        // If the path already includes 'uploads/services', don't add it again
-        if (cleanImagePath.startsWith('uploads/services/')) {
-            return `${UPLOAD_URLS.SERVICES}/${cleanImagePath}`;
-        }
-        
-        // Otherwise, construct the full URL with the services path
-        return `${UPLOAD_URLS.SERVICES}/${cleanImagePath}`;
+        return imagePath; // Cloudinary URLs are already complete URLs
     };
 
     const containerVariants = {

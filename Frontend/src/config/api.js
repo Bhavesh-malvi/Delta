@@ -21,14 +21,6 @@ export const ENDPOINTS = {
     ENROLL_COURSE: '/api/enrollCourse'
 };
 
-// Upload URLs
-export const UPLOAD_URLS = {
-    SERVICES: `${API_BASE_URL}/uploads/services`,
-    CAREERS: `${API_BASE_URL}/uploads/careers`,
-    CONTENT: `${API_BASE_URL}/uploads/content`,
-    HOME_CONTENT: `${API_BASE_URL}/uploads/content`
-};
-
 // Error messages
 export const ERROR_MESSAGES = {
     NETWORK_ERROR: 'Network error occurred. Please check your internet connection.',

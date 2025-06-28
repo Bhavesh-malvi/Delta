@@ -1,6 +1,7 @@
 import ServiceContent from '../models/ServiceContent.js';
 import path from 'path';
 import fs from 'fs';
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
 // Create new content
 export const createServiceContent = async (req, res) => {
@@ -14,7 +15,6 @@ export const createServiceContent = async (req, res) => {
                 parsedPoints = JSON.parse(points);
             } catch (error) {
                 console.error('Points parsing error:', error);
-                if (req.file) fs.unlinkSync(req.file.path);
                 return res.status(400).json({ 
                     success: false, 
                     message: 'Invalid points data format. Expected JSON array of strings.',
@@ -24,7 +24,6 @@ export const createServiceContent = async (req, res) => {
         } else if (Array.isArray(points)) {
             parsedPoints = points;
         } else {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'Points must be either a JSON string or an array' 
@@ -33,7 +32,6 @@ export const createServiceContent = async (req, res) => {
 
         // Validate required fields
         if (!title?.trim()) {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'Title is required' 
@@ -41,7 +39,6 @@ export const createServiceContent = async (req, res) => {
         }
 
         if (!description?.trim()) {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'Description is required' 
@@ -56,7 +53,6 @@ export const createServiceContent = async (req, res) => {
         }
 
         if (!Array.isArray(parsedPoints) || parsedPoints.length < 4) {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'At least 4 points are required' 
@@ -69,17 +65,19 @@ export const createServiceContent = async (req, res) => {
             .filter(point => point && point.length > 0);
 
         if (parsedPoints.length < 4) {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'At least 4 non-empty points are required' 
             });
         }
 
+        // Upload image to Cloudinary
+        const imageUrl = await uploadToCloudinary(req.file.buffer);
+
         const newContent = await ServiceContent.create({
             title: title.trim(),
             description: description.trim(),
-            image: req.file.filename,
+            image: imageUrl,
             points: parsedPoints
         });
 
@@ -96,7 +94,6 @@ export const createServiceContent = async (req, res) => {
         });
     } catch (error) {
         console.error('Service content creation error:', error);
-        if (req.file) fs.unlinkSync(req.file.path);
         res.status(500).json({ 
             success: false, 
             message: 'Error creating service content',
@@ -110,7 +107,6 @@ export const updateServiceContent = async (req, res) => {
     try {
         const content = await ServiceContent.findById(req.params.id);
         if (!content) {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(404).json({ 
                 success: false, 
                 message: 'Service content not found' 
@@ -126,7 +122,6 @@ export const updateServiceContent = async (req, res) => {
                 parsedPoints = JSON.parse(points);
             } catch (error) {
                 console.error('Points parsing error:', error);
-                if (req.file) fs.unlinkSync(req.file.path);
                 return res.status(400).json({ 
                     success: false, 
                     message: 'Invalid points data format. Expected JSON array of strings.',
@@ -136,7 +131,6 @@ export const updateServiceContent = async (req, res) => {
         } else if (Array.isArray(points)) {
             parsedPoints = points;
         } else {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'Points must be either a JSON string or an array' 
@@ -145,7 +139,6 @@ export const updateServiceContent = async (req, res) => {
 
         // Validate required fields
         if (!title?.trim()) {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'Title is required' 
@@ -153,7 +146,6 @@ export const updateServiceContent = async (req, res) => {
         }
 
         if (!description?.trim()) {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'Description is required' 
@@ -166,7 +158,6 @@ export const updateServiceContent = async (req, res) => {
             .filter(point => point && point.length > 0);
 
         if (parsedPoints.length < 4) {
-            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 success: false, 
                 message: 'At least 4 non-empty points are required' 
@@ -175,11 +166,8 @@ export const updateServiceContent = async (req, res) => {
 
         // Update image if new one is uploaded
         if (req.file) {
-            const oldImagePath = path.join('uploads/services', content.image);
-            if (content.image && fs.existsSync(oldImagePath)) {
-                fs.unlinkSync(oldImagePath);
-            }
-            content.image = req.file.filename;
+            const imageUrl = await uploadToCloudinary(req.file.buffer);
+            content.image = imageUrl;
         }
 
         content.title = title.trim();
@@ -200,7 +188,6 @@ export const updateServiceContent = async (req, res) => {
         });
     } catch (error) {
         console.error('Service content update error:', error);
-        if (req.file) fs.unlinkSync(req.file.path);
         res.status(500).json({ 
             success: false, 
             message: 'Error updating service content',
