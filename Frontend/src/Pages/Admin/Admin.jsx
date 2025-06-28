@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './Admin.css';
 import Header from './Components/Header/Header';
 import Sidebar from './Components/Sidebar/Sidebar';
@@ -14,6 +14,9 @@ import EnrollData from './Pages/EnrollData';
 import ScrollToTop from '../../Components/ScrollToTop/ScrollToTop';
 
 const Admin = () => {
+    const location = useLocation();
+    console.log('🔐 Admin Component - Current Path:', location.pathname);
+
     return (
         <div className="admin-container">
             <ScrollToTop />
@@ -22,15 +25,16 @@ const Admin = () => {
                 <Header />
                 <div className="admin-content">
                     <Routes>
-                        <Route path="/" element={<Navigate to="/deltaAdmin/home-content" replace />} />
-                        <Route path="/login" element={<LoginForm />} />
-                        <Route path="/home-content" element={<HomeContent />} />
-                        <Route path="/home-courses" element={<HomeCourses />} />
-                        <Route path="/home-service" element={<HomeService />} />
-                        <Route path="/service-content" element={<ServiceContent />} />
-                        <Route path="/career" element={<Career />} />
-                        <Route path="/contact-data" element={<ContactData />} />
-                        <Route path="/enroll-data" element={<EnrollData />} />
+                        <Route index element={<HomeContent />} />
+                        <Route path="dashboard" element={<HomeContent />} />
+                        <Route path="home-content" element={<HomeContent />} />
+                        <Route path="home-courses" element={<HomeCourses />} />
+                        <Route path="home-services" element={<HomeService />} />
+                        <Route path="service-content" element={<ServiceContent />} />
+                        <Route path="career" element={<Career />} />
+                        <Route path="contact-data" element={<ContactData />} />
+                        <Route path="enroll-data" element={<EnrollData />} />
+                        <Route path="*" element={<Navigate to="dashboard" replace />} />
                     </Routes>
                 </div>
             </div>

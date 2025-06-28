@@ -36,6 +36,7 @@ const AppLayout = () => {
       <ScrollToTop />
       {!isAdminRoute && !showLanding && <Navbar />}
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
@@ -46,22 +47,49 @@ const AppLayout = () => {
         {/* Admin Routes */}
         <Route path="/deltaAdmin" element={<Navigate to="/deltaAdmin/login" replace />} />
         <Route path="/deltaAdmin/login" element={<LoginForm />} />
-        <Route 
-          path="/deltaAdmin/dashboard/*" 
-          element={
-            <ProtectedRoute>
-              <Admin />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/deltaAdmin/*" 
-          element={
-            <ProtectedRoute>
-              <Admin />
-            </ProtectedRoute>
-          } 
-        />
+        
+        {/* Protected Admin Routes */}
+        <Route path="/deltaAdmin/dashboard" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/deltaAdmin/home-content" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/deltaAdmin/home-courses" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/deltaAdmin/home-services" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/deltaAdmin/service-content" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/deltaAdmin/career" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/deltaAdmin/contact-data" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/deltaAdmin/enroll-data" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
+
         {/* Catch all route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
