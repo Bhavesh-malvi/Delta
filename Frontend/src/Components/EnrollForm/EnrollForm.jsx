@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import axiosInstance, { ENDPOINTS } from '../../config/api';
 import './EnrollForm.css';
 
@@ -39,6 +38,9 @@ const EnrollForm = () => {
             ...prev,
             [name]: value
         }));
+        // Clear error and success messages when user starts typing
+        setError(null);
+        setSuccess(false);
     };
 
     const handleSubmit = async (e) => {
@@ -46,6 +48,13 @@ const EnrollForm = () => {
         setLoading(true);
         setError(null);
         setSuccess(false);
+
+        // Validate form data
+        if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.course || !formData.message.trim()) {
+            setError('All fields are required');
+            setLoading(false);
+            return;
+        }
 
         try {
             await axiosInstance.post(ENDPOINTS.ENROLL, formData);
@@ -66,64 +75,68 @@ const EnrollForm = () => {
     };
 
     return (
-        <Container className="enroll-form-container">
-            <Row className="justify-content-center">
-                <Col md={8} lg={6}>
-                    <div className="form-wrapper">
-                        <h2 className="text-center mb-4">Enroll Now</h2>
-                        
-                        {error && (
-                            <div className="alert alert-danger" role="alert">
-                                {error}
-                            </div>
-                        )}
-                        
-                        {success && (
-                            <div className="alert alert-success" role="alert">
-                                Enrollment submitted successfully! We'll contact you soon.
-                            </div>
-                        )}
+        <div className="enroll-form-container">
+            <div className="enroll-form-content">
+                <div className="enroll-form-left">
+                    <h2>Enroll Now</h2>
+                    <p>Join our courses and enhance your skills</p>
+                    <p>Fill out the form and we'll get back to you soon</p>
+                </div>
+                
+                <div className="enroll-form-right">
+                    {error && (
+                        <div className="status-message error">
+                            {error}
+                        </div>
+                    )}
+                    
+                    {success && (
+                        <div className="status-message success">
+                            Enrollment submitted successfully! We'll contact you soon.
+                        </div>
+                    )}
 
-                        <Form onSubmit={handleSubmit}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Name</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    required
-                                    placeholder="Enter your name"
-                                />
-                            </Form.Group>
+                    <form className="registration-form" onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label>Name <span className="required">*</span></label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                placeholder="Enter your name"
+                                required
+                            />
+                        </div>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Email</Form.Label>
-                                <Form.Control
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    required
-                                    placeholder="Enter your email"
-                                />
-                            </Form.Group>
+                        <div className="form-group">
+                            <label>Email <span className="required">*</span></label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                placeholder="Enter your email"
+                                required
+                            />
+                        </div>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Phone</Form.Label>
-                                <Form.Control
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleInputChange}
-                                    required
-                                    placeholder="Enter your phone number"
-                                />
-                            </Form.Group>
+                        <div className="form-group">
+                            <label>Phone <span className="required">*</span></label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                                placeholder="Enter your phone number"
+                                required
+                            />
+                        </div>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Course</Form.Label>
-                                <Form.Select
+                        <div className="form-group">
+                            <label>Course <span className="required">*</span></label>
+                            <div className="course-select-container">
+                                <select
                                     name="course"
                                     value={formData.course}
                                     onChange={handleInputChange}
@@ -135,33 +148,33 @@ const EnrollForm = () => {
                                             {course.courseName}
                                         </option>
                                     ))}
-                                </Form.Select>
-                            </Form.Group>
+                                </select>
+                            </div>
+                        </div>
 
-                            <Form.Group className="mb-4">
-                                <Form.Label>Message (Optional)</Form.Label>
-                                <Form.Control
-                                    as="textarea"
-                                    rows={4}
-                                    name="message"
-                                    value={formData.message}
-                                    onChange={handleInputChange}
-                                    placeholder="Any additional message..."
-                                />
-                            </Form.Group>
+                        <div className="form-group">
+                            <label>Message <span className="required">*</span></label>
+                            <textarea
+                                name="message"
+                                value={formData.message}
+                                onChange={handleInputChange}
+                                placeholder="Tell us about your learning goals..."
+                                required
+                                rows={4}
+                            />
+                        </div>
 
-                            <Button 
-                                type="submit" 
-                                className="w-100" 
-                                disabled={loading}
-                            >
-                                {loading ? 'Submitting...' : 'Submit Enrollment'}
-                            </Button>
-                        </Form>
-                    </div>
-                </Col>
-            </Row>
-        </Container>
+                        <button 
+                            type="submit" 
+                            className="submit-btn"
+                            disabled={loading}
+                        >
+                            {loading ? 'Submitting...' : 'Submit Enrollment'}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     );
 };
 
