@@ -26,12 +26,6 @@ export const UPLOAD_URLS = {
     HOME_CONTENT: `${API_BASE_URL}/uploads/content`
 };
 
-// Default headers
-export const DEFAULT_HEADERS = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-};
-
 // Error messages
 export const ERROR_MESSAGES = {
     NETWORK_ERROR: 'Network error occurred. Please check your internet connection.',
@@ -50,18 +44,15 @@ import axios from 'axios';
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: API_TIMEOUT,
-    headers: DEFAULT_HEADERS,
-    withCredentials: false
+    headers: {
+        'Content-Type': 'application/json'
+    }
 });
 
 // Add request interceptor for debugging
 axiosInstance.interceptors.request.use(
     config => {
         console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
-        // Remove CORS headers from request
-        delete config.headers['Access-Control-Allow-Origin'];
-        delete config.headers['Access-Control-Allow-Methods'];
-        delete config.headers['Access-Control-Allow-Headers'];
         return config;
     },
     error => {
@@ -78,14 +69,15 @@ axiosInstance.interceptors.response.use(
     },
     error => {
         if (error.response) {
-            console.error('❌ Server Error:', {
+            console.error('❌ API Error:', {
+                url: error.config.url,
+                method: error.config.method,
                 status: error.response.status,
-                data: error.response.data,
-                url: error.config.url
+                data: error.response.data
             });
             error.userMessage = error.response.data?.message || ERROR_MESSAGES[`STATUS_${error.response.status}`] || ERROR_MESSAGES.DEFAULT;
         } else if (error.request) {
-            console.error('❌ Network Error:', error.message);
+            console.error('🔍 Network Error:', error.message);
             error.userMessage = ERROR_MESSAGES.NETWORK_ERROR;
         } else {
             console.error('❌ Request Config Error:', error.message);
