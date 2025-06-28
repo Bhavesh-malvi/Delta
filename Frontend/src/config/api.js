@@ -29,10 +29,7 @@ export const UPLOAD_URLS = {
 // Default headers
 export const DEFAULT_HEADERS = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    'Accept': 'application/json'
 };
 
 // Error messages
@@ -54,13 +51,17 @@ const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: API_TIMEOUT,
     headers: DEFAULT_HEADERS,
-    withCredentials: false // Important for CORS
+    withCredentials: false
 });
 
 // Add request interceptor for debugging
 axiosInstance.interceptors.request.use(
     config => {
         console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
+        // Remove CORS headers from request
+        delete config.headers['Access-Control-Allow-Origin'];
+        delete config.headers['Access-Control-Allow-Methods'];
+        delete config.headers['Access-Control-Allow-Headers'];
         return config;
     },
     error => {
@@ -76,31 +77,20 @@ axiosInstance.interceptors.response.use(
         return response;
     },
     error => {
-        console.error('❌ API Error:', {
-            url: error.config?.url,
-            method: error.config?.method,
-            status: error.response?.status,
-            data: error.response?.data
-        });
-        
         if (error.response) {
-            // Server responded with error
-            const status = error.response.status;
-            const message = error.response.data?.message || ERROR_MESSAGES[`STATUS_${status}`] || ERROR_MESSAGES.DEFAULT;
-            error.userMessage = message;
-            
-            // Log specific error details
-            console.error(`🔍 Server Error (${status}):`, error.response.data);
+            console.error('❌ Server Error:', {
+                status: error.response.status,
+                data: error.response.data,
+                url: error.config.url
+            });
+            error.userMessage = error.response.data?.message || ERROR_MESSAGES[`STATUS_${error.response.status}`] || ERROR_MESSAGES.DEFAULT;
         } else if (error.request) {
-            // No response received
+            console.error('❌ Network Error:', error.message);
             error.userMessage = ERROR_MESSAGES.NETWORK_ERROR;
-            console.error('🔍 Network Error: No response received');
         } else {
-            // Error in request configuration
+            console.error('❌ Request Config Error:', error.message);
             error.userMessage = ERROR_MESSAGES.DEFAULT;
-            console.error('🔍 Request Config Error:', error.message);
         }
-        
         return Promise.reject(error);
     }
 );
