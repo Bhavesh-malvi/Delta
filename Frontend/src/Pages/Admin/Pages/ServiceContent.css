@@ -101,6 +101,7 @@
 .image-upload-container {
     width: 100%;
     min-height: 200px;
+    max-height: 300px;
     border: 1px solid var(--primary-color);
     border-radius: 4px;
     background: var(--darker-bg) !important;
@@ -110,6 +111,8 @@
     cursor: pointer;
     transition: all 0.3s ease;
     padding: 2rem;
+    overflow: hidden;
+    position: relative;
 }
 
 .image-upload-container:hover {
@@ -150,10 +153,12 @@
 
 .image-preview {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+    position: relative;
 }
 
 .image-preview img {
@@ -393,7 +398,65 @@
     }
 
     .image-upload-container {
-        height: 250px;
+        min-height: 150px;
+        max-height: 250px;
+        padding: 1rem;
+    }
+
+    .image-preview img {
+        max-height: 150px;
+    }
+
+    .point-input-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .point-input-container input {
+        width: 100%;
+    }
+
+    .remove-point-btn,
+    .add-point-btn {
+        width: 100%;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px; /* Prevents zoom on mobile */
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .service-content-container {
+        padding: 0.5rem;
+    }
+
+    .image-upload-container {
+        min-height: 120px;
+        max-height: 200px;
+        padding: 0.5rem;
+    }
+
+    .upload-label i {
+        font-size: 2rem;
+    }
+
+    .upload-label p {
+        font-size: 0.9rem;
+    }
+
+    .image-preview img {
+        max-height: 120px;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
     }
 }
 

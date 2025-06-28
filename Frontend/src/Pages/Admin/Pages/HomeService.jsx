@@ -64,24 +64,85 @@ const HomeService = () => {
         }));
     };
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (file.type.startsWith('image/')) {
-                setFormData(prev => ({
-                    ...prev,
-                    image: file
-                }));
-                // Create preview URL
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setPreviewImage(reader.result);
+    const compressImage = async (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        resolve(new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        }));
+                    }, 'image/jpeg', 0.7);
                 };
-                reader.readAsDataURL(file);
-            } else {
-                setError('Please upload an image file');
-                e.target.value = '';
-            }
+            };
+        });
+    };
+
+    const handleImageChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            setError('Please upload an image file');
+            e.target.value = '';
+            return;
+        }
+
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Image size should be less than 5MB');
+            e.target.value = '';
+            return;
+        }
+
+        try {
+            // Show preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+
+            // Compress image
+            const compressedFile = await compressImage(file);
+            setFormData(prev => ({
+                ...prev,
+                image: compressedFile
+            }));
+            setError(null);
+        } catch (error) {
+            console.error('Error processing image:', error);
+            setError('Error processing image. Please try again.');
+            e.target.value = '';
         }
     };
 

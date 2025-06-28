@@ -214,16 +214,18 @@ const HomeContent = () => {
     };
 
     const handleDelete = async (id) => {
-        try {
-            setLoading(true);
-            await axiosInstance.delete(`${ENDPOINTS.HOME_CONTENT}/${id}`);
-            setMessage({ text: 'Content deleted successfully!', type: 'success' });
-            fetchContent();
-        } catch (err) {
-            console.error('Error deleting content:', err);
-            setMessage(err.userMessage || 'Failed to delete content');
-        } finally {
-            setLoading(false);
+        if (window.confirm('Are you sure you want to delete this content?')) {
+            try {
+                setLoading(true);
+                await axiosInstance.delete(`${ENDPOINTS.HOME_CONTENT}/${id}`);
+                setMessage({ text: 'Content deleted successfully!', type: 'success' });
+                fetchContent();
+            } catch (err) {
+                console.error('Error deleting content:', err);
+                setMessage(err.userMessage || 'Failed to delete content');
+            } finally {
+                setLoading(false);
+            }
         }
     };
 

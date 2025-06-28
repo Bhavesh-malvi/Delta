@@ -1,41 +1,23 @@
 import HomeContent from '../models/HomeContent.js';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import debug from 'debug';
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
-const log = debug('app:homeContentController');
-
-// Setup __dirname for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Multer Disk Storage config (images saved to /uploads/content)
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, '../uploads/content/');
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname);
-        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
-        cb(null, uniqueName);
-    }
-});
-
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
 const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
     fileFilter: function (req, file, cb) {
-        const allowed = /jpeg|jpg|png|gif/;
-        const extname = allowed.test(file.originalname.toLowerCase());
-        const mimetype = allowed.test(file.mimetype);
-        if (extname && mimetype) cb(null, true);
-        else cb(new Error('Only image files are allowed!'));
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const mimetype = allowedTypes.test(file.mimetype);
+
+        if (mimetype) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
+        }
     }
 }).single('image');
 
@@ -73,11 +55,25 @@ export const createHomeContent = async (req, res) => {
         }
 
         try {
-            const imagePath = `/uploads/content/${req.file.filename}`;
-            const created = await HomeContent.create({ title, image: imagePath });
-            res.status(201).json({ success: true, message: 'Content created', data: created });
+            // Upload to Cloudinary
+            const imageUrl = await uploadToCloudinary(req.file.buffer);
+            
+            const created = await HomeContent.create({ 
+                title, 
+                image: imageUrl 
+            });
+            
+            res.status(201).json({ 
+                success: true, 
+                message: 'Content created', 
+                data: created 
+            });
         } catch (error) {
-            res.status(500).json({ success: false, message: 'Error saving content', error: error.message });
+            res.status(500).json({ 
+                success: false, 
+                message: 'Error saving content', 
+                error: error.message 
+            });
         }
     });
 };
@@ -103,13 +99,23 @@ export const updateHomeContent = async (req, res) => {
             content.title = title;
 
             if (req.file) {
-                content.image = `/uploads/content/${req.file.filename}`;
+                // Upload new image to Cloudinary
+                const imageUrl = await uploadToCloudinary(req.file.buffer);
+                content.image = imageUrl;
             }
 
             await content.save();
-            res.status(200).json({ success: true, message: 'Content updated', data: content });
+            res.status(200).json({ 
+                success: true, 
+                message: 'Content updated', 
+                data: content 
+            });
         } catch (error) {
-            res.status(500).json({ success: false, message: 'Error updating content', error: error.message });
+            res.status(500).json({ 
+                success: false, 
+                message: 'Error updating content', 
+                error: error.message 
+            });
         }
     });
 };
@@ -118,17 +124,24 @@ export const updateHomeContent = async (req, res) => {
 export const deleteHomeContent = async (req, res) => {
     try {
         const content = await HomeContent.findById(req.params.id);
-        if (!content) return res.status(404).json({ success: false, message: 'Content not found' });
-
-        // Optionally delete image file from uploads folder
-        const imagePath = path.join(__dirname, '..', content.image);
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
+        if (!content) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Content not found' 
+            });
         }
 
         await content.deleteOne();
-        res.status(200).json({ success: true, message: 'Content deleted' });
+        
+        res.status(200).json({ 
+            success: true, 
+            message: 'Content deleted successfully' 
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error deleting content', error: error.message });
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error deleting content', 
+            error: error.message 
+        });
     }
 };

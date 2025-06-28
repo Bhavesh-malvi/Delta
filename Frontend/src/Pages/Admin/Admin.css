@@ -2,6 +2,8 @@
     display: flex;
     min-height: 100vh;
     background: #0a0a0a;
+    position: relative;
+    z-index: 1;
 }
 
 .admin-sidebar {
@@ -9,6 +11,11 @@
     background-color: #111;
     border-right: 1px solid rgba(0, 255, 135, 0.1);
     padding: 20px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 10;
 }
 
 .admin-logo {

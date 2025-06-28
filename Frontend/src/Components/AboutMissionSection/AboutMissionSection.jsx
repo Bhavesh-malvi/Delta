@@ -22,7 +22,7 @@ function AboutMissionSection() {
 
             <div className="mission-cards">
                 <div className="mission-card">
-                    <h3>Get in Touch</h3>
+                    <h3>Our Mission</h3>
                     <p>Our mission is to fortify the digital landscape by providing top-tier security solutions and innovative web services.</p>
                     <p>We believe in Integrity, Innovation and Excellence, ensuring that our clients receive the highest level of protection and functionality for their online presence.</p>
                     <p>With a team of highly skilled professionals, we strive to stay ahead in the cybersecurity domain, helping organizations mitigate risks and strengthen their security posture.</p>
