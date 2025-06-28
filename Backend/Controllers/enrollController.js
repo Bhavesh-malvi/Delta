@@ -17,34 +17,53 @@ export const createEnroll = async (req, res) => {
             });
         }
 
-        console.log('Creating enrollment with data:', { name, email, phone, course, message });
-        
-        // Check if database is connected
-        if (mongoose.connection.readyState !== 1) {
-            console.log('Database not connected. ReadyState:', mongoose.connection.readyState);
-            console.log('Returning success response for testing (data not saved)');
-            return res.status(200).json({
-                success: true,
-                message: 'Enrollment submitted successfully (test mode - database not connected)',
-                data: { name, email, phone, course, message, _id: 'test-id-' + Date.now() }
+        // Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please enter a valid email address'
             });
         }
 
-        const enroll = new Enroll({ name, email, phone, course, message });
-        await enroll.save();
-        console.log('Enrollment saved successfully:', enroll);
+        // Phone number validation (basic)
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phone.replace(/[^\d]/g, ''))) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please enter a valid 10-digit phone number'
+            });
+        }
 
-        res.status(201).json({
-            success: true,
-            message: 'Enrollment submitted successfully',
-            data: enroll
-        });
+        console.log('Creating enrollment with data:', { name, email, phone, course, message });
+        
+        try {
+            const enroll = new Enroll({ name, email, phone, course, message });
+            await enroll.save();
+            console.log('Enrollment saved successfully:', enroll);
+
+            res.status(201).json({
+                success: true,
+                message: 'Enrollment submitted successfully',
+                data: enroll
+            });
+        } catch (dbError) {
+            console.error('Database error while saving enrollment:', dbError);
+            if (dbError.name === 'MongooseError' || dbError.name === 'MongoError') {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Database connection error. Please try again.',
+                    error: 'database_error'
+                });
+            }
+            throw dbError;
+        }
     } catch (error) {
         console.error('Error creating enrollment:', error);
         console.error('Error stack:', error.stack);
         res.status(500).json({
             success: false,
-            message: 'Failed to create enrollment',
+            message: 'Failed to create enrollment. Please try again.',
             error: error.message
         });
     }
