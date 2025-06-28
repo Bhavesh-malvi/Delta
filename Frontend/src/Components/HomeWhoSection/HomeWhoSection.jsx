@@ -32,36 +32,36 @@ const HomeWhoSection = () => {
     }, []);
 
     return (
-        <section className="who-section">
-            <div className="who-content">
-                <div className="who-left">
-                    <h2 className="who-title">
+        <section className="who-section1">
+            <div className="who-content1">
+                <div className="who-left1">
+                    <h2 className="who-title1">
                         <span>Who</span>
                         <span>Can</span>
                         <span>JOIN</span>
                     </h2>
-                    <p className="who-email">info@deltawaresolution.com</p>
-                    {loading && <div className="loading-state">Loading courses...</div>}
-                    {error && <div className="error-state">{error}</div>}
+                    <p className="who-email1">info@deltawaresolution.com</p>
+                    {loading && <div className="loading-state1">Loading courses...</div>}
+                    {error && <div className="error-state1">{error}</div>}
                 </div>
-                <div className="who-right">
+                <div className="who-right1">
                     {!loading && !error && courses.length > 0 && courses.map((course, index) => (
                         <div 
-                            className="course-card" 
+                            className="course-card1" 
                             key={course._id}
                             data-aos="fade-left"
                             data-aos-delay={index * 100}
                         >
-                            <div className="course-title-wrapper">
-                                <div className="course-title-slide">
-                                    <h3 className="course-title">{course.title}</h3>
-                                    <h3 className="course-title course-description">{course.description}</h3>
+                            <div className="course-title-wrapper1">
+                                <div className="course-title-slide1">
+                                    <h3 className="course-title1">{course.title}</h3>
+                                    <h3 className="course-title1 course-description1">{course.description}</h3>
                                 </div>
                             </div>
                         </div>
                     ))}
                     {!loading && !error && courses.length === 0 && (
-                        <div className="empty-state">No courses available</div>
+                        <div className="empty-state1">No courses available</div>
                     )}
                 </div>
             </div>
