@@ -15,7 +15,7 @@ const LoginForm = () => {
         if (password === "33402033delta") { // This is just an example, replace with your actual validation
             // Store login state
             localStorage.setItem('adminLoggedIn', 'true');
-            navigate('/deltaAdmin/dashboard');
+            navigate('/deltaadmin/dashboard');
         } else {
             setError('Invalid password. Please try again.');
             setPassword('');

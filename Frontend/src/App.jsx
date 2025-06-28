@@ -19,13 +19,13 @@ import './index.css';
 // Component to handle conditional rendering of Navbar and Footer
 const AppLayout = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/deltaAdmin');
+  const isAdminRoute = location.pathname.startsWith('/deltaadmin');
   const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
     // Handle direct navigation to admin routes
-    if (isAdminRoute && location.pathname === '/deltaAdmin') {
-      window.location.href = '/deltaAdmin/login';
+    if (isAdminRoute && location.pathname === '/deltaadmin') {
+      window.location.href = '/deltaadmin/login';
     }
   }, [location.pathname, isAdminRoute]);
 
@@ -52,46 +52,46 @@ const AppLayout = () => {
         <Route path="/enroll" element={<Enroll />} />
         
         {/* Admin Routes */}
-        <Route path="/deltaAdmin" element={<Navigate to="/deltaAdmin/login" replace />} />
-        <Route path="/deltaAdmin/login" element={<LoginForm />} />
+        <Route path="/deltaadmin" element={<Navigate to="/deltaadmin/login" replace />} />
+        <Route path="/deltaadmin/login" element={<LoginForm />} />
         
         {/* Protected Admin Routes */}
-        <Route path="/deltaAdmin/dashboard" element={
+        <Route path="/deltaadmin/dashboard" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
         } />
-        <Route path="/deltaAdmin/home-content" element={
+        <Route path="/deltaadmin/home-content" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
         } />
-        <Route path="/deltaAdmin/home-courses" element={
+        <Route path="/deltaadmin/home-courses" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
         } />
-        <Route path="/deltaAdmin/home-services" element={
+        <Route path="/deltaadmin/home-services" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
         } />
-        <Route path="/deltaAdmin/service-content" element={
+        <Route path="/deltaadmin/service-content" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
         } />
-        <Route path="/deltaAdmin/career" element={
+        <Route path="/deltaadmin/career" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
         } />
-        <Route path="/deltaAdmin/contact-data" element={
+        <Route path="/deltaadmin/contact-data" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
         } />
-        <Route path="/deltaAdmin/enroll-data" element={
+        <Route path="/deltaadmin/enroll-data" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>

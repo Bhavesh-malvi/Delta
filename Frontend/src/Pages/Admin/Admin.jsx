@@ -34,7 +34,7 @@ const Admin = () => {
                         <Route path="career" element={<Career />} />
                         <Route path="contact-data" element={<ContactData />} />
                         <Route path="enroll-data" element={<EnrollData />} />
-                        <Route path="*" element={<Navigate to="dashboard" replace />} />
+                        <Route path="*" element={<Navigate to="/deltaadmin/dashboard" replace />} />
                     </Routes>
                 </div>
             </div>
