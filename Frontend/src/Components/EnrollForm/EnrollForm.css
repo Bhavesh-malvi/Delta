@@ -77,6 +77,8 @@
 .form-group label {
     color: #00ffbb;
     font-size: 1rem;
+    text-align: left;
+    align-self: flex-start;
 }
 
 .form-group input[type="text"],
@@ -90,6 +92,8 @@
     background: rgba(0, 255, 187, 0.02);
     color: #fff;
     font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .form-group select {
@@ -133,10 +137,12 @@
     display: flex;
     gap: 10px;
     align-items: center;
+    width: 100%;
 }
 
 .course-select-container select {
     flex: 1;
+    width: 100%;
 }
 
 .add-course-btn {

@@ -1,7 +1,9 @@
 // API Configuration
 // Frontend URL: https://deltawaresolution.com
-// Backend URL: https://delta-teal.vercel.app
-export const API_BASE_URL = 'https://delta-teal.vercel.app';
+// Backend URL: https://delta-backend.vercel.app (or your Vercel backend URL)
+export const API_BASE_URL = process.env.NODE_ENV === 'production' 
+    ? 'https://delta-backend.vercel.app'  // Replace with your actual Vercel backend URL
+    : 'http://localhost:5000';
 
 // Timeout configuration
 export const API_TIMEOUT = 60000; // 60 seconds
@@ -47,13 +49,16 @@ const axiosInstance = axios.create({
     timeout: API_TIMEOUT,
     headers: {
         'Content-Type': 'application/json'
-    }
+    },
+    withCredentials: true
 });
 
 // Add request interceptor for debugging
 axiosInstance.interceptors.request.use(
     config => {
-        console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
+        if (process.env.NODE_ENV === 'development') {
+            console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
+        }
         return config;
     },
     error => {
@@ -65,7 +70,9 @@ axiosInstance.interceptors.request.use(
 // Add response interceptor for error handling
 axiosInstance.interceptors.response.use(
     response => {
-        console.log('✅ Response:', response.status, response.config.url);
+        if (process.env.NODE_ENV === 'development') {
+            console.log('✅ Response:', response.status, response.config.url);
+        }
         return response;
     },
     error => {

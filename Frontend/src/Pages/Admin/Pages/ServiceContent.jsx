@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Form, Container, Row, Col, Spinner } from 'react-bootstrap';
 import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
 import './ServiceContent.css';
 
@@ -294,222 +293,201 @@ const ServiceContent = () => {
     };
 
     return (
-        <Container className="service-content-container py-4">
-            <h2 className="mb-4">{editingId ? 'Edit Content' : 'Add New Content'}</h2>
+        <div className="service-content-container">
+            <h2>{editingId ? 'Edit Content' : 'Add New Content'}</h2>
 
             {error && (
-                <div className={`alert ${typeof error === 'object' ? (error.type === 'success' ? 'alert-success' : 'alert-danger') : 'alert-danger'} mb-4`}>
+                <div className={`message ${typeof error === 'object' ? (error.type === 'success' ? 'success' : 'error') : 'error'}`}>
                     {typeof error === 'object' ? error.text : error}
                 </div>
             )}
 
-            <Card className="mb-4">
-                <Card.Body>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Upload Image {!editingId && <span className="text-danger">*</span>}</Form.Label>
-                            <div 
-                                className="image-upload-container"
-                                onClick={handleContainerClick}
-                                onDrop={handleDrop}
-                                onDragOver={handleDragOver}
-                            >
-                                {!previewImage ? (
-                                    <div className="upload-label">
-                                        <i className="fas fa-cloud-upload-alt"></i>
-                                        <p>Choose an image or drag it here</p>
-                                    </div>
-                                ) : (
-                                    <div className="text-center">
-                                        <img 
-                                            src={previewImage} 
-                                            alt="Preview" 
-                                            className="mb-2"
-                                            style={{ 
-                                                maxHeight: '200px', 
-                                                border: '2px solid rgba(0, 255, 135, 0.3)',
-                                                borderRadius: '8px'
-                                            }}
-                                        />
-                                        <p>
-                                            {formData.image ? formData.image.name : 'Current Image'}
-                                        </p>
-                                    </div>
-                                )}
+            <form className="service-content-form" onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label>Upload Image {!editingId && <span className="required">*</span>}</label>
+                    <div 
+                        className="image-upload-container"
+                        onClick={handleContainerClick}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                    >
+                        {!previewImage ? (
+                            <div className="upload-label">
+                                <i className="fas fa-cloud-upload-alt"></i>
+                                <p>Choose an image or drag it here</p>
                             </div>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Content Title <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleInputChange}
-                                placeholder="Enter content title"
-                                required
-                                disabled={loading}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Content Description <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                                placeholder="Enter content description"
-                                required
-                                disabled={loading}
-                                rows={4}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Content Points <span className="text-danger">*</span></Form.Label>
-                            <p className="text-muted small">Please provide at least 4 points about this service</p>
-                            <div className="points-container">
-                                {formData.points.map((point, index) => (
-                                    <div key={index} className="d-flex gap-2 mb-2">
-                                        <Form.Control
-                                            type="text"
-                                            value={point}
-                                            onChange={(e) => handlePointChange(index, e.target.value)}
-                                            placeholder={`Point ${index + 1}`}
-                                            required={index < 4}
-                                            disabled={loading}
-                                        />
-                                        {index >= 4 && (
-                                            <Button
-                                                variant="danger"
-                                                onClick={() => deletePoint(index)}
-                                                disabled={loading}
-                                                className="flex-shrink-0"
-                                            >
-                                                <i className="fas fa-trash-alt"></i>
-                                            </Button>
-                                        )}
-                                    </div>
-                                ))}
-                                {formData.points.length < 10 && (
-                                    <Button
-                                        variant="success"
-                                        onClick={addNewPoint}
-                                        disabled={loading}
-                                        className="mt-2"
-                                    >
-                                        <i className="fas fa-plus me-2"></i>
-                                        Add More Point
-                                    </Button>
-                                )}
+                        ) : (
+                            <div className="image-preview">
+                                <img 
+                                    src={previewImage} 
+                                    alt="Preview" 
+                                />
+                                <p className="file-name">
+                                    {formData.image ? formData.image.name : 'Current Image'}
+                                </p>
                             </div>
-                        </Form.Group>
+                        )}
+                    </div>
+                </div>
 
-                        <div className="d-flex gap-2">
-                            <Button 
-                                type="submit" 
-                                variant="primary"
-                                disabled={loading}
-                                className="flex-grow-1"
-                            >
-                                {loading ? (
-                                    <>
-                                        <Spinner
-                                            as="span"
-                                            animation="border"
-                                            size="sm"
-                                            className="me-2"
-                                        />
-                                        {editingId ? 'Updating...' : 'Creating...'}
-                                    </>
-                                ) : (
-                                    editingId ? 'Update Content' : 'Create Content'
-                                )}
-                            </Button>
-                            {editingId && (
-                                <Button 
-                                    variant="secondary"
-                                    onClick={resetForm}
+                <div className="form-group">
+                    <label>Content Title <span className="required">*</span></label>
+                    <input
+                        type="text"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        placeholder="Enter content title"
+                        required
+                        disabled={loading}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Content Description <span className="required">*</span></label>
+                    <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        placeholder="Enter content description"
+                        required
+                        disabled={loading}
+                        rows={4}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Content Points <span className="required">*</span></label>
+                    <p className="text-muted">Please provide at least 4 points about this service</p>
+                    <div className="points-section">
+                        {formData.points.map((point, index) => (
+                            <div key={index} className="point-input-container">
+                                <input
+                                    type="text"
+                                    value={point}
+                                    onChange={(e) => handlePointChange(index, e.target.value)}
+                                    placeholder={`Point ${index + 1}`}
+                                    required={index < 4}
                                     disabled={loading}
-                                >
-                                    Cancel
-                                </Button>
-                            )}
-                        </div>
-                    </Form>
-                </Card.Body>
-            </Card>
+                                />
+                                {index >= 4 && (
+                                    <button
+                                        type="button"
+                                        className="remove-point-btn"
+                                        onClick={() => deletePoint(index)}
+                                        disabled={loading}
+                                    >
+                                        <i className="fas fa-trash-alt"></i>
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        {formData.points.length < 10 && (
+                            <button
+                                type="button"
+                                className="add-point-btn"
+                                onClick={addNewPoint}
+                                disabled={loading}
+                            >
+                                <i className="fas fa-plus"></i>
+                                Add More Point
+                            </button>
+                        )}
+                    </div>
+                </div>
 
-            <Card>
-                <Card.Header>
-                    <h4 className="mb-0">Service Contents</h4>
-                </Card.Header>
-                <Card.Body>
+                <div className="form-buttons">
+                    <button 
+                        type="submit" 
+                        className="submit-btn"
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <>
+                                <i className="fas fa-spinner fa-spin"></i>
+                                {editingId ? 'Updating...' : 'Creating...'}
+                            </>
+                        ) : (
+                            editingId ? 'Update Content' : 'Create Content'
+                        )}
+                    </button>
+                    {editingId && (
+                        <button 
+                            type="button"
+                            className="cancel-btn"
+                            onClick={resetForm}
+                            disabled={loading}
+                        >
+                            Cancel
+                        </button>
+                    )}
+                </div>
+            </form>
+
+            <div className="existing-services">
+                <h3>Service Contents</h3>
+                <div className="services-list">
                     {loading && !contents.length ? (
-                        <div className="text-center py-4">
-                            <Spinner animation="border" />
+                        <div className="loading">
+                            <i className="fas fa-spinner fa-spin"></i>
+                            <p>Loading...</p>
                         </div>
                     ) : contents.length === 0 ? (
-                        <div className="text-center py-4">
-                            <p className="mb-0">No service contents found</p>
+                        <div className="no-content">
+                            <p>No service contents found</p>
                         </div>
                     ) : (
-                        <Row xs={1} md={2} lg={3} className="g-4">
-                            {contents.map(content => (
-                                <Col key={content._id}>
-                                    <Card className="h-100 content-card">
-                                        <div className="card-img-wrapper">
-                                            <Card.Img 
-                                                variant="top" 
-                                                src={getImageUrl(content.image)}
-                                                alt={content.title}
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
-                                                }}
-                                            />
+                        contents.map(content => (
+                            <div key={content._id} className="service-item">
+                                <div className="service-image-container">
+                                    <img 
+                                        src={getImageUrl(content.image)}
+                                        alt={content.title}
+                                        className="service-image"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
+                                        }}
+                                    />
+                                </div>
+                                <div className="service-content">
+                                    <h4>{content.title}</h4>
+                                    <p>{content.description}</p>
+                                    {Array.isArray(content.points) && content.points.length > 0 && (
+                                        <div className="points-list">
+                                            <strong>Points:</strong>
+                                            <ul>
+                                                {content.points.map((point, index) => (
+                                                    <li key={index}>{point}</li>
+                                                ))}
+                                            </ul>
                                         </div>
-                                        <Card.Body>
-                                            <Card.Title>{content.title}</Card.Title>
-                                            <Card.Text>{content.description}</Card.Text>
-                                            {Array.isArray(content.points) && content.points.length > 0 && (
-                                                <div className="points-list">
-                                                    <strong>Points:</strong>
-                                                    <ul>
-                                                        {content.points.map((point, index) => (
-                                                            <li key={index}>{point}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-                                        </Card.Body>
-                                        <Card.Footer className="d-flex justify-content-end gap-2">
-                                            <Button
-                                                variant="primary"
-                                                size="sm"
-                                                onClick={() => handleEdit(content)}
-                                                disabled={loading}
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                variant="danger"
-                                                size="sm"
-                                                onClick={() => handleDelete(content._id)}
-                                                disabled={loading}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </Card.Footer>
-                                    </Card>
-                                </Col>
-                            ))}
-                        </Row>
+                                    )}
+                                </div>
+                                <div className="service-actions">
+                                    <button
+                                        className="action-btn edit"
+                                        onClick={() => handleEdit(content)}
+                                        disabled={loading}
+                                    >
+                                        <i className="fas fa-edit"></i>
+                                        Edit
+                                    </button>
+                                    <button
+                                        className="action-btn delete"
+                                        onClick={() => handleDelete(content._id)}
+                                        disabled={loading}
+                                    >
+                                        <i className="fas fa-trash-alt"></i>
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))
                     )}
-                </Card.Body>
-            </Card>
-        </Container>
+                </div>
+            </div>
+        </div>
     );
 };
 

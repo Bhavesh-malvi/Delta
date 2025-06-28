@@ -11,11 +11,13 @@ import ServiceContent from './Pages/ServiceContent';
 import Career from './Pages/Career';
 import ContactData from './Pages/ContactData';
 import EnrollData from './Pages/EnrollData';
+import Courses from './Pages/Courses';
 import ScrollToTop from '../../Components/ScrollToTop/ScrollToTop';
 
 const Admin = () => {
     const location = useLocation();
     console.log('🔐 Admin Component - Current Path:', location.pathname);
+    console.log('🔐 Admin Component - Full URL:', window.location.href);
 
     return (
         <div className="admin-container">
@@ -27,14 +29,15 @@ const Admin = () => {
                     <Routes>
                         <Route index element={<HomeContent />} />
                         <Route path="dashboard" element={<HomeContent />} />
+                        <Route path="home-services" element={<HomeService />} />
                         <Route path="home-content" element={<HomeContent />} />
                         <Route path="home-courses" element={<HomeCourses />} />
-                        <Route path="home-services" element={<HomeService />} />
                         <Route path="service-content" element={<ServiceContent />} />
                         <Route path="career" element={<Career />} />
                         <Route path="contact-data" element={<ContactData />} />
                         <Route path="enroll-data" element={<EnrollData />} />
-                        <Route path="*" element={<Navigate to="/deltaadmin/dashboard" replace />} />
+                        <Route path="courses" element={<Courses />} />
+                        <Route path="*" element={<Navigate to="/deltaadmin/courses" replace />} />
                     </Routes>
                 </div>
             </div>

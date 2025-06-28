@@ -14,6 +14,14 @@ const homeServiceSchema = new mongoose.Schema({
     image: {
         type: String,
         required: [true, 'Image is required']
+    },
+    position: {
+        type: Number,
+        default: 0
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

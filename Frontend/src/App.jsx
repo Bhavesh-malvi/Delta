@@ -40,9 +40,14 @@ const AppLayout = () => {
       window.location.replace('/deltaadmin/login');
     }
 
-  // Debug logging
-  console.log('📍 Current pathname:', location.pathname);
-  console.log('🔐 Is admin route:', isAdminRoute);
+    // Log deployment info only in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📍 Current pathname:', location.pathname);
+      console.log('🔐 Is admin route:', isAdminRoute);
+      console.log('🚀 Frontend deployed to: https://deltawaresolution.com');
+      console.log('🔗 Backend API URL: ', API_BASE_URL);
+      console.log('✅ API Configuration loaded successfully');
+    }
   }, [location.pathname, isAdminRoute]);
 
   const handleLandingComplete = () => {

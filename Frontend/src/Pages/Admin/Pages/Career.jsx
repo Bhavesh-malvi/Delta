@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
 import './Career.css';
 
 const Career = () => {
@@ -7,9 +7,7 @@ const Career = () => {
         title: '',
         description: '',
         points: [''],
-        image: null,
-        experience: '',
-        location: ''
+        image: null
     });
     const [careers, setCareers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -90,9 +88,7 @@ const Career = () => {
             title: '',
             description: '',
             points: [''],
-            image: null,
-            experience: '',
-            location: ''
+            image: null
         });
         setPreviewImage(null);
         setEditingId(null);
@@ -105,11 +101,9 @@ const Career = () => {
             title: career.title || '',
             description: career.description || '',
             points: Array.isArray(career.points) && career.points.length > 0 ? career.points : [''],
-            image: null,
-            experience: career.experience || '',
-            location: career.location || ''
+            image: null
         });
-        setPreviewImage(career.image ? `${UPLOAD_URLS.CAREERS}/${career.image}` : null);
+        setPreviewImage(career.image ? `${API_BASE_URL}/uploads/${career.image}` : null);
         window.scrollTo(0, 0);
     };
 
@@ -124,11 +118,6 @@ const Career = () => {
 
         if (!formData.description?.trim()) {
             setError('Description is required');
-            return;
-        }
-
-        if (!editingId && !formData.image) {
-            setError('Please select an image');
             return;
         }
 
@@ -147,17 +136,33 @@ const Career = () => {
             data.append('title', formData.title.trim());
             data.append('description', formData.description.trim());
             data.append('points', JSON.stringify(validPoints));
-            data.append('experience', formData.experience.trim());
-            data.append('location', formData.location.trim());
 
             if (formData.image) {
                 data.append('image', formData.image);
+                console.log('📁 Image being sent:', formData.image);
+                console.log('📁 Image name:', formData.image.name);
+                console.log('📁 Image type:', formData.image.type);
+                console.log('📁 Image size:', formData.image.size);
+            } else {
+                console.log('📁 No image selected');
             }
 
+            console.log('📤 FormData contents:');
+            for (let [key, value] of data.entries()) {
+                console.log(`${key}:`, value);
+            }
+
+            // Set correct headers for multipart/form-data
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
             if (editingId) {
-                await axiosInstance.put(`${ENDPOINTS.CAREER}/${editingId}`, data);
+                await axiosInstance.put(`${ENDPOINTS.CAREER}/${editingId}`, data, config);
             } else {
-                await axiosInstance.post(ENDPOINTS.CAREER, data);
+                await axiosInstance.post(ENDPOINTS.CAREER, data, config);
             }
 
             resetForm();
@@ -199,7 +204,7 @@ const Career = () => {
 
             <form className="career-form" onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Upload Image {!editingId && <span className="required">*</span>}</label>
+                    <label>Upload Image</label>
                     <div className="image-upload-container">
                         <input
                             type="file"
@@ -244,28 +249,6 @@ const Career = () => {
                         placeholder="Enter career description"
                         required
                         rows={4}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Experience</label>
-                    <input
-                        type="text"
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleInputChange}
-                        placeholder="Enter required experience"
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Location</label>
-                    <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        placeholder="Enter job location"
                     />
                 </div>
 
@@ -347,20 +330,27 @@ const Career = () => {
                             <div key={career._id} className="career-item">
                                 <div className="career-image-container">
                                     <img
-                                        src={career.image ? `${UPLOAD_URLS.CAREERS}/${career.image}` : 'https://via.placeholder.com/400x300?text=Career+Image'}
+                                        src={career.image ? (() => {
+                                            const imageUrl = `${API_BASE_URL}/uploads/${career.image}`;
+                                            console.log('🖼️ Career image URL:', imageUrl);
+                                            console.log('📁 Career image path:', career.image);
+                                            return imageUrl;
+                                        })() : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='}
                                         alt={career.title}
                                         className="career-image"
                                         onError={(e) => {
+                                            console.log('❌ Image failed to load:', e.target.src);
                                             e.target.onerror = null;
-                                            e.target.src = 'https://via.placeholder.com/400x300?text=Career+Image';
+                                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';
+                                        }}
+                                        onLoad={(e) => {
+                                            console.log('✅ Image loaded successfully:', e.target.src);
                                         }}
                                     />
                                 </div>
                                 <div className="career-content">
                                     <h4>{career.title}</h4>
                                     <p>{career.description}</p>
-                                    {career.experience && <p><strong>Experience:</strong> {career.experience}</p>}
-                                    {career.location && <p><strong>Location:</strong> {career.location}</p>}
                                     {Array.isArray(career.points) && career.points.length > 0 && (
                                         <ul>
                                             {career.points.map((point, index) => (

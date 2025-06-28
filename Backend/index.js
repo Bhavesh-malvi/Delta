@@ -30,25 +30,28 @@ const app = express();
 const corsOptions = {
     origin: function (origin, callback) {
         const allowedOrigins = [
+            'http://localhost:3000',
             'http://localhost:5173',
             'https://delta-teal.vercel.app',
             'https://delta-teal-frontend.vercel.app',
             'https://modified-delta.vercel.app',
             'https://delta-frco.vercel.app',
-            'https://deltawaresolution.com'
+            'https://deltawaresolution.com',
+            'https://www.deltawaresolution.com'
         ];
         
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.log('CORS blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     optionsSuccessStatus: 204,
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
     exposedHeaders: ['Content-Range', 'X-Content-Range']
 };
 

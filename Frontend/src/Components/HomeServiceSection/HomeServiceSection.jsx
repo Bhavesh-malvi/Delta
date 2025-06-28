@@ -31,7 +31,7 @@ const HomeServiceSection = () => {
 
     const getImageUrl = (image) => {
         if (!image) return 'https://via.placeholder.com/400x300?text=Service+Image';
-        return image.startsWith('http') ? image : `${API_BASE_URL}${image}`;
+        return image.startsWith('http') ? image : `${API_BASE_URL}/uploads/${image}`;
     };
 
     if (loading) {

@@ -33,12 +33,12 @@ function Sidebar() {
                 <ul>
                     <li>
                         <NavLink to="/deltaadmin/home-content" end>
-                            <i className="fas fa-tachometer-alt"></i>
+                            <i className="fas fa-home"></i>
                             <span>Home Content</span>
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/deltaadmin/home-service">
+                        <NavLink to="/deltaadmin/home-services">
                             <i className="fas fa-cogs"></i>
                             <span>Home Service</span>
                         </NavLink>
@@ -71,6 +71,12 @@ function Sidebar() {
                         <NavLink to="/deltaadmin/enroll-data">
                             <i className="fas fa-user-graduate"></i>
                             <span>Enroll Data</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/deltaadmin/courses">
+                            <i className="fas fa-book"></i>
+                            <span>Courses</span>
                         </NavLink>
                     </li>
                 </ul>

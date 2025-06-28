@@ -1,26 +1,46 @@
 import HomeService from '../models/HomeService.js';
 import multer from 'multer';
-import { uploadToCloudinary } from '../config/cloudinary.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 
-// Configure multer for memory storage
-const storage = multer.memoryStorage();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Configure multer for home service image uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadPath = path.join(__dirname, '../uploads/services');
+        console.log('📁 Upload destination:', uploadPath);
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        const finalName = uniqueName + path.extname(file.originalname);
+        console.log('📁 Generated filename:', finalName);
+        cb(null, finalName);
+    }
+});
+
 const upload = multer({
-    storage: storage,
+    storage,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+        fileSize: 5 * 1024 * 1024 // 5MB
     },
     fileFilter: function (req, file, cb) {
+        console.log('🔍 Checking file:', file.originalname, file.mimetype);
         const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
         const mimetype = allowedTypes.test(file.mimetype);
-
-        if (mimetype) {
-            return cb(null, true);
+        if (extname && mimetype) {
+            console.log('✅ File accepted');
+            cb(null, true);
         } else {
+            console.log('❌ File rejected');
             cb(new Error('Only image files (jpeg, jpg, png, gif) are allowed!'));
         }
     }
-}).single('image');
+});
 
 // Helper function to check MongoDB connection
 const checkDbConnection = () => {
@@ -56,7 +76,7 @@ export const getAllHomeServices = async (req, res) => {
         checkDbConnection();
         console.log('Fetching all home services...');
         
-        const homeServices = await HomeService.find().sort({ createdAt: -1 });
+        const homeServices = await HomeService.find({ isActive: true }).sort({ position: 1, createdAt: -1 });
         console.log(`Found ${homeServices.length} home services`);
         
         res.status(200).json({
@@ -111,82 +131,65 @@ export const getHomeService = async (req, res) => {
 
 // Create new home service
 export const createHomeService = async (req, res) => {
-    upload(req, res, async (err) => {
-        if (err) {
-            console.error('Multer error:', err);
+    console.log('🔥 createHomeService function called!');
+    console.log('🔥 req.file:', req.file);
+    console.log('🔥 req.body:', req.body);
+    
+    try {
+        checkDbConnection();
+        console.log('Creating new home service...');
+
+        const { title, description, position } = req.body;
+        
+        // Validate service data
+        const validationErrors = validateServiceData(title, description);
+        if (validationErrors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: err.message || 'Error uploading file'
+                message: 'Validation failed',
+                errors: validationErrors
             });
         }
 
-        try {
-            checkDbConnection();
-            console.log('Creating new home service...');
-            console.log('Request body:', {
-                title: req.body.title,
-                description: req.body.description,
-                hasFile: !!req.file
-            });
-
-            const { title, description } = req.body;
-            
-            // Validate service data
-            const validationErrors = validateServiceData(title, description);
-            if (validationErrors.length > 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Validation failed',
-                    errors: validationErrors
-                });
-            }
-
-            if (!req.file) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Please upload an image'
-                });
-            }
-
-            // Upload to Cloudinary
-            let imageUrl;
-            try {
-                imageUrl = await uploadToCloudinary(req.file.buffer);
-                console.log('Image uploaded successfully:', imageUrl);
-            } catch (cloudinaryError) {
-                console.error('Cloudinary upload error:', cloudinaryError);
-                return res.status(500).json({
-                    success: false,
-                    message: 'Error uploading image to cloud storage',
-                    error: cloudinaryError.message
-                });
-            }
-
-            const service = await HomeService.create({
-                title: title.trim(),
-                description: description.trim(),
-                image: imageUrl
-            });
-
-            console.log('Service created successfully:', service._id);
-
-            res.status(201).json({
-                success: true,
-                message: 'Service created successfully',
-                data: service
-            });
-        } catch (error) {
-            console.error('Error in createHomeService:', error);
-            console.error('Stack trace:', error.stack);
-            
-            res.status(500).json({
+        if (!req.file) {
+            return res.status(400).json({
                 success: false,
-                message: 'Error creating service',
-                error: error.message,
-                dbState: mongoose.connection.readyState
+                message: 'Please upload an image'
             });
         }
-    });
+
+        // Create service data object
+        const serviceData = {
+            title: title.trim(),
+            description: description.trim(),
+            image: `services/${req.file.filename}`,
+            position: position ? parseInt(position) : 0
+        };
+
+        console.log('🖼️ Image file received:', req.file);
+        console.log('📁 Image filename:', req.file.filename);
+        console.log('✅ Image path added to serviceData:', serviceData.image);
+
+        const service = await HomeService.create(serviceData);
+
+        console.log('Service created successfully:', service._id);
+
+        res.status(201).json({
+            success: true,
+            message: 'Service created successfully',
+            data: service
+        });
+    } catch (error) {
+        console.error('Error in createHomeService:', error);
+        console.error('Stack trace:', error.stack);
+        
+        res.status(500).json({
+            success: false,
+            message: 'Error creating service',
+            error: error.message,
+            dbState: mongoose.connection.readyState
+        });
+    }
 };
 
 // Update service
