@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './ServicesContent.css';
 import { motion } from 'framer-motion';
 import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
+import logo1 from '../../assets/img/logo1.jpg';
 
 const ServicesContent = () => {
     const [content, setContent] = useState([]);
@@ -33,7 +34,7 @@ const ServicesContent = () => {
     }, []);
 
     const getImageUrl = (imagePath) => {
-        if (!imagePath) return 'https://via.placeholder.com/400x300?text=Service+Image';
+        if (!imagePath) return logo1;
         
         // If the image path already contains the full URL, use it as is
         if (imagePath.startsWith('http')) {
@@ -119,7 +120,7 @@ const ServicesContent = () => {
                                 onError={(e) => {
                                     console.error('Image failed to load:', e.target.src);
                                     e.target.onerror = null;
-                                    e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
+                                    e.target.src = logo1;
                                 }}
                             />
                         </div>

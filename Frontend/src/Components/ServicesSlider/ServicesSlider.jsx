@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesSlider.css';
 import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
+import logo1 from '../../assets/img/logo1.jpg';
 
 function ServicesSlider() {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -35,7 +36,7 @@ function ServicesSlider() {
     }, []);
 
     const getImageUrl = (imagePath) => {
-        if (!imagePath) return 'https://via.placeholder.com/400x300?text=Content+Image';
+        if (!imagePath) return logo1;
         
         // If the image path already contains the full URL, use it as is
         if (imagePath.startsWith('http')) {
@@ -144,7 +145,7 @@ function ServicesSlider() {
                                     onError={(e) => {
                                         console.error('Image failed to load:', e.target.src);
                                         e.target.onerror = null;
-                                        e.target.src = 'https://via.placeholder.com/400x300?text=Content+Image';
+                                        e.target.src = logo1;
                                     }}
                                 />
                                 <h3>{slide.title}</h3>

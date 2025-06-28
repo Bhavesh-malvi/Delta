@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
 import './ServiceContent.css';
+import logo1 from '../../../assets/img/logo1.jpg';
 
 const ServiceContent = () => {
     const [formData, setFormData] = useState({
@@ -288,7 +289,7 @@ const ServiceContent = () => {
     };
 
     const getImageUrl = (imagePath) => {
-        if (!imagePath) return 'https://via.placeholder.com/400x300?text=Service+Image';
+        if (!imagePath) return logo1;
         return imagePath.startsWith('http') ? imagePath : `${UPLOAD_URLS.SERVICES}/${imagePath}`;
     };
 
@@ -446,7 +447,7 @@ const ServiceContent = () => {
                                         className="service-image"
                                         onError={(e) => {
                                             e.target.onerror = null;
-                                            e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
+                                            e.target.src = logo1;
                                         }}
                                     />
                                 </div>

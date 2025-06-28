@@ -1,4 +1,4 @@
-.career-courses {
+.career-courses1 {
     padding: 80px 20px;
     background-color: #0a0a0a;
     min-height: 100vh;
@@ -6,7 +6,7 @@
     overflow: hidden;
 }
 
-.career-courses::before {
+.career-courses1::before {
     content: '';
     position: absolute;
     top: 0;
@@ -18,7 +18,7 @@
     z-index: 1;
 }
 
-.career-courses h2 {
+.career-courses1 h2 {
     text-align: center;
     color: #00ff87;
     font-size: 3.5rem;
@@ -32,7 +32,7 @@
     letter-spacing: 2px;
 }
 
-.career-intro {
+.career-intro1 {
     max-width: 800px;
     margin: 0 auto 50px;
     text-align: center;
@@ -44,7 +44,7 @@
     text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
 }
 
-.courses-grid {
+.courses-grid1 {
     max-width: 1400px;
     margin: 0 auto;
     display: grid;
@@ -55,7 +55,7 @@
     z-index: 2;
 }
 
-.course-card {
+.course-card1 {
     background: rgba(255, 255, 255, 0.03);
     border-radius: 15px;
     overflow: hidden;
@@ -64,13 +64,12 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    min-height: 350px;
-    max-width: 100%;
-    position: relative;
+    min-height: 450px;
     backdrop-filter: blur(10px);
+    position: relative;
 }
 
-.course-card::before {
+.course-card1::before {
     content: '';
     position: absolute;
     top: 0;
@@ -87,34 +86,36 @@
     z-index: 1;
 }
 
-.course-card:hover::before {
+.course-card1:hover::before {
     left: 100%;
 }
 
-.course-card:hover {
+.course-card1:hover {
     transform: translateY(-5px) scale(1.02);
     box-shadow: 0 10px 30px rgba(0, 255, 135, 0.2);
     border-color: rgba(0, 255, 135, 0.4);
 }
 
-.course-image {
+.career-image1 {
     width: 100%;
     height: 250px;
     overflow: hidden;
+    position: relative;
+    border-radius: 15px 15px 0 0;
 }
 
-.course-image img {
+.career-image1 img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.course-card:hover .course-image img {
+.course-card1:hover .career-image1 img {
     transform: scale(1.1);
 }
 
-.course-content {
+.course-content1 {
     padding: 25px;
     flex-grow: 1;
     display: flex;
@@ -123,7 +124,7 @@
     z-index: 2;
 }
 
-.course-content h3 {
+.career-title1 {
     color: #00ff87;
     font-size: 1.5rem;
     margin-bottom: 15px;
@@ -131,16 +132,16 @@
     transition: all 0.3s ease;
 }
 
-.course-card:hover .course-content h3 {
+.course-card1:hover .career-title1 {
     text-shadow: 0 0 15px rgba(0, 255, 135, 0.5);
 }
 
-.description-container {
+.description-container1 {
     margin-bottom: 20px;
     flex-grow: 1;
 }
 
-.description-container p {
+.description-container1 p {
     color: rgba(255, 255, 255, 0.9);
     font-size: 1rem;
     line-height: 1.6;
@@ -148,11 +149,11 @@
     transition: color 0.3s ease;
 }
 
-.course-card:hover .description-container p {
+.course-card1:hover .description-container1 p {
     color: #ffffff;
 }
 
-.read-more-btn {
+.read-more-btn1 {
     background: none;
     border: none;
     color: #00ff87;
@@ -164,51 +165,24 @@
     text-shadow: 0 0 5px rgba(0, 255, 135, 0.3);
 }
 
-.read-more-btn:hover {
+.read-more-btn1:hover {
     text-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
     color: #ffffff;
 }
 
-.course-content ul {
+.career-points1 {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 255, 135, 0.1);
+}
+
+.career-points1 ul {
     list-style: none;
     padding: 0;
     margin: 0;
-    flex-grow: 1;
 }
 
-.course-content li {
-    color: #ffffff;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: 8px;
-    padding-left: 20px;
-    position: relative;
-}
-
-.course-content li::before {
-    content: '•';
-    color: #00ff87;
-    position: absolute;
-    left: 0;
-}
-
-.career-points {
-    margin-top: auto;
-}
-
-.career-points h4 {
-    color: #00ff87;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.career-points ul {
-    list-style: none;
-    padding: 0;
-    margin: 15px 0 0;
-}
-
-.career-points li {
+.career-points1 li {
     color: rgba(255, 255, 255, 0.9);
     font-size: 0.95rem;
     line-height: 1.6;
@@ -218,7 +192,7 @@
     transition: all 0.3s ease;
 }
 
-.career-points li:before {
+.career-points1 li:before {
     content: '•';
     color: #00ff87;
     position: absolute;
@@ -226,17 +200,17 @@
     transition: all 0.3s ease;
 }
 
-.course-card:hover .career-points li {
+.course-card1:hover .career-points1 li {
     color: #ffffff;
 }
 
-.course-card:hover .career-points li:before {
+.course-card1:hover .career-points1 li:before {
     text-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
 }
 
-.loading,
-.error,
-.no-data {
+.loading1,
+.error1,
+.no-data1 {
     text-align: center;
     padding: 30px;
     margin: 20px auto;
@@ -249,102 +223,88 @@
     font-size: 1.2rem;
 }
 
-.loading {
-    animation: pulse 1.5s infinite;
+.loading1 {
+    animation: pulse1 1.5s infinite;
 }
 
-@keyframes pulse {
+@keyframes pulse1 {
     0% { opacity: 0.6; }
     50% { opacity: 1; }
     100% { opacity: 0.6; }
 }
 
-.error {
+.error1 {
     color: #ff4444;
     border-color: rgba(255, 68, 68, 0.2);
 }
 
-.no-data {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.career-image {
-    width: 100%;
-    height: 250px;
-    overflow: hidden;
-    position: relative;
-}
-
-.career-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.course-card:hover .career-image img {
-    transform: scale(1.1);
-}
-
 @media (max-width: 1200px) {
-    .courses-grid {
+    .courses-grid1 {
         grid-template-columns: repeat(2, 1fr);
         gap: 25px;
         max-width: 900px;
     }
+
+    .course-card1 {
+        min-height: 400px;
+    }
 }
 
 @media (max-width: 768px) {
-    .career-courses h2 {
+    .career-courses1 h2 {
         font-size: 2.5rem;
     }
 
-    .career-intro {
+    .career-intro1 {
         font-size: 1.1rem;
         padding: 0 20px;
     }
 
-    .courses-grid {
+    .courses-grid1 {
         grid-template-columns: 1fr;
         max-width: 600px;
     }
 
-    .career-image {
+    .career-image1 {
         height: 200px;
     }
 
-    .course-content h3 {
+    .career-title1 {
         font-size: 1.3rem;
     }
 
-    .description-container p {
+    .description-container1 p {
         font-size: 0.95rem;
     }
 }
 
 @media (max-width: 480px) {
-    .career-courses h2 {
+    .career-courses1 h2 {
         font-size: 2rem;
     }
 
-    .career-intro {
+    .career-intro1 {
         font-size: 1rem;
     }
 
-    .career-image {
+    .career-image1 {
         height: 180px;
     }
 
-    .course-content {
+    .course-content1 {
         padding: 20px;
     }
 
-    .course-content h3 {
+    .career-title1 {
         font-size: 1.2rem;
     }
 
-    .description-container p,
-    .career-points li {
+    .description-container1 p,
+    .career-points1 li {
         font-size: 0.9rem;
+    }
+
+    .course-card1 {
+        min-height: 350px;
     }
 } 

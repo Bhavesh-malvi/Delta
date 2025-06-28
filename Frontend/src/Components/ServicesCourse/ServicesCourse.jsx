@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import whoImg from '../../assets/img/who.webp';
 import who2Img from '../../assets/img/who2.webp';
 import who3Img from '../../assets/img/who3.webp';
+import logo1 from '../../assets/img/logo1.jpg';
 
 const ServicesCourse = () => {
     const clients = [
@@ -63,7 +64,7 @@ const ServicesCourse = () => {
                                 onError={(e) => {
                                     console.error('Image failed to load:', e.target.src);
                                     e.target.onerror = null;
-                                    e.target.src = 'https://via.placeholder.com/400x300?text=Client+Image';
+                                    e.target.src = logo1;
                                 }}
                             />
                         </div>
