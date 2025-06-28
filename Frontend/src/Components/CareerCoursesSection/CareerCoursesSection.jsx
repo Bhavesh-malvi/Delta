@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './CareerCoursesSection.css';
 import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
+import logo1 from '../../assets/img/logo1.jpg';
 
 function CareerCoursesSection() {
     const [expandedCards, setExpandedCards] = useState({});
@@ -49,26 +50,32 @@ function CareerCoursesSection() {
     };
 
     const getImageUrl = (imagePath) => {
-        console.log('🔍 getImageUrl called with:', imagePath);
+        console.log('🔍 Processing image path:', imagePath);
         
         if (!imagePath) {
-            console.log('❌ No image path provided, using placeholder');
-            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+';
+            console.log('❌ No image path provided, using fallback');
+            return logo1;
         }
         
+        // If it's already a full URL (including our API base URL), return as is
         if (imagePath.startsWith('http')) {
             console.log('✅ Full URL detected:', imagePath);
             return imagePath;
         }
         
-        if (imagePath.startsWith('careers/')) {
-            const fullUrl = `${API_BASE_URL}/uploads/${imagePath}`;
-            console.log('🔗 Constructed URL (careers/):', fullUrl);
+        // Remove any leading slashes
+        const cleanPath = imagePath.replace(/^\/+/, '');
+        
+        // If path already includes 'uploads' or 'careers', don't add them again
+        if (cleanPath.includes('uploads/') || cleanPath.includes('careers/')) {
+            const fullUrl = `${API_BASE_URL}/${cleanPath}`;
+            console.log('🔗 Constructed URL from clean path:', fullUrl);
             return fullUrl;
         }
         
-        const fullUrl = `${API_BASE_URL}/uploads/careers/${imagePath}`;
-        console.log('🔗 Constructed URL:', fullUrl);
+        // Otherwise, construct the full path
+        const fullUrl = `${API_BASE_URL}/uploads/careers/${cleanPath}`;
+        console.log('🔗 Constructed URL with full path:', fullUrl);
         return fullUrl;
     };
 
@@ -99,7 +106,7 @@ function CareerCoursesSection() {
                                         onError={(e) => {
                                             console.error('❌ Image failed to load:', e.target.src);
                                             e.target.onerror = null;
-                                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+';
+                                            e.target.src = logo1;
                                         }}
                                         onLoad={(e) => {
                                             console.log('✅ Image loaded successfully:', e.target.src);
