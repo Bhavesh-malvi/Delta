@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css';
+import { FaGraduationCap } from 'react-icons/fa';
 
 function Sidebar() {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -14,6 +15,14 @@ function Sidebar() {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    const menuItems = [
+        {
+            path: '/admin/enroll-courses',
+            name: 'Enroll Courses',
+            icon: <FaGraduationCap />
+        },
+    ];
 
     return (
         <div className="sidebar">

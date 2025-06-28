@@ -15,7 +15,8 @@ export const ENDPOINTS = {
     CAREER: '/api/career',
     CONTACT: '/api/contact',
     ENROLL: '/api/enroll',
-    HEALTH: '/api/health'
+    HEALTH: '/api/health',
+    ENROLL_COURSE: '/api/enrollCourse'
 };
 
 // Upload URLs

@@ -16,6 +16,7 @@ import serviceContentRoutes from './Routes/serviceContentRoutes.js';
 import careerRoutes from './Routes/careerRoutes.js';
 import contactRoutes from './Routes/contactRoutes.js';
 import enrollRoutes from './Routes/enrollRoutes.js';
+import enrollCourseRoutes from './Routes/enrollCourseRoutes.js';
 
 const log = debug('app:server');
 
@@ -101,6 +102,7 @@ app.use('/api/serviceContent', serviceContentRoutes);
 app.use('/api/career', careerRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/enroll', enrollRoutes);
+app.use('/api/enrollCourse', enrollCourseRoutes);
 
 // Root
 app.get('/', (req, res) => {
@@ -120,7 +122,8 @@ app.get('/api/health', (req, res) => {
             '/api/serviceContent',
             '/api/career',
             '/api/contact',
-            '/api/enroll'
+            '/api/enroll',
+            '/api/enrollCourse'
         ]
     });
 });
@@ -147,7 +150,8 @@ app.use('*', (req, res) => {
             'GET /api/serviceContent',
             'GET /api/career',
             'GET /api/contact',
-            'GET /api/enroll'
+            'GET /api/enroll',
+            'GET /api/enrollCourse'
         ]
     });
 });
