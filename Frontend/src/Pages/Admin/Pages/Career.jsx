@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
+import axiosInstance, { ENDPOINTS } from '../../../config/api';
+import logo1 from '../../../assets/img/logo1.jpg';
 import './Career.css';
 
 const Career = () => {
@@ -103,7 +104,7 @@ const Career = () => {
             points: Array.isArray(career.points) && career.points.length > 0 ? career.points : [''],
             image: null
         });
-        setPreviewImage(career.image ? `${API_BASE_URL}/uploads/${career.image}` : null);
+        setPreviewImage(career.image ? career.image : logo1);
         window.scrollTo(0, 0);
     };
 
@@ -190,6 +191,11 @@ const Career = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const getImageUrl = (imagePath) => {
+        if (!imagePath) return logo1;
+        return imagePath; // Cloudinary URLs are already complete URLs
     };
 
     return (
@@ -330,18 +336,13 @@ const Career = () => {
                             <div key={career._id} className="career-item">
                                 <div className="career-image-container">
                                     <img
-                                        src={career.image ? (() => {
-                                            const imageUrl = `${API_BASE_URL}/uploads/${career.image}`;
-                                            console.log('🖼️ Career image URL:', imageUrl);
-                                            console.log('📁 Career image path:', career.image);
-                                            return imageUrl;
-                                        })() : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='}
+                                        src={getImageUrl(career.image)}
                                         alt={career.title}
                                         className="career-image"
                                         onError={(e) => {
                                             console.log('❌ Image failed to load:', e.target.src);
                                             e.target.onerror = null;
-                                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';
+                                            e.target.src = logo1;
                                         }}
                                         onLoad={(e) => {
                                             console.log('✅ Image loaded successfully:', e.target.src);

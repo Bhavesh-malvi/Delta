@@ -4,7 +4,8 @@ import { API_BASE_URL } from '../../../config/api';
 import { Card, Form, Button, Row, Col, Container, Alert } from 'react-bootstrap';
 import { FaCloudUploadAlt, FaEdit, FaTrash, FaSpinner } from 'react-icons/fa';
 import './HomeContent.css';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
+import axiosInstance, { ENDPOINTS } from '../../../config/api';
+import logo1 from '../../../assets/img/logo1.jpg';
 
 const HomeContent = () => {
     const [formData, setFormData] = useState({

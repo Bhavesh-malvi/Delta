@@ -25,31 +25,62 @@ const upload = multer({
 // Helper function to check MongoDB connection
 const checkDbConnection = () => {
     const state = mongoose.connection.readyState;
+    const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+    console.log(`MongoDB connection state: ${states[state]}`);
     if (state !== 1) {
-        throw new Error('Database connection is not ready. Current state: ' + state);
+        throw new Error(`Database connection is not ready. Current state: ${states[state]}`);
     }
+};
+
+// Helper function to handle errors
+const handleError = (error, res, operation) => {
+    console.error(`Error in ${operation}:`, error);
+    console.error('Stack trace:', error.stack);
+    console.error('MongoDB connection state:', mongoose.connection.readyState);
+    
+    // Check for specific error types
+    if (error.name === 'MongoServerSelectionError') {
+        return res.status(500).json({
+            success: false,
+            message: 'Database connection error',
+            error: 'Failed to connect to database. Please try again later.',
+            dbState: mongoose.connection.readyState
+        });
+    }
+    
+    if (error.name === 'ValidationError') {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation error',
+            error: Object.values(error.errors).map(err => err.message).join(', '),
+            dbState: mongoose.connection.readyState
+        });
+    }
+    
+    return res.status(500).json({
+        success: false,
+        message: `Failed to ${operation}`,
+        error: error.message,
+        dbState: mongoose.connection.readyState
+    });
 };
 
 // ✅ GET all content
 export const getAllHomeContent = async (req, res) => {
     try {
+        console.log('Attempting to fetch all home content...');
         checkDbConnection();
-        console.log('Fetching all home content...');
         
         const data = await HomeContent.find().sort({ createdAt: -1 });
-        console.log(`Found ${data.length} home content items`);
+        console.log(`Successfully found ${data.length} home content items`);
         
-        res.status(200).json({ success: true, data });
-    } catch (error) {
-        console.error('Error in getAllHomeContent:', error);
-        console.error('Stack trace:', error.stack);
-        
-        res.status(500).json({ 
-            success: false, 
-            message: 'Failed to fetch content', 
-            error: error.message,
-            dbState: mongoose.connection.readyState
+        res.status(200).json({ 
+            success: true, 
+            count: data.length,
+            data 
         });
+    } catch (error) {
+        handleError(error, res, 'fetch content');
     }
 };
 
@@ -67,15 +98,7 @@ export const getHomeContent = async (req, res) => {
         
         res.status(200).json({ success: true, data: item });
     } catch (error) {
-        console.error('Error in getHomeContent:', error);
-        console.error('Stack trace:', error.stack);
-        
-        res.status(500).json({ 
-            success: false, 
-            message: 'Failed to fetch content', 
-            error: error.message,
-            dbState: mongoose.connection.readyState
-        });
+        handleError(error, res, 'fetch content');
     }
 };
 
@@ -112,15 +135,7 @@ export const createHomeContent = async (req, res) => {
                 data: created 
             });
         } catch (error) {
-            console.error('Error in createHomeContent:', error);
-            console.error('Stack trace:', error.stack);
-            
-            res.status(500).json({ 
-                success: false, 
-                message: 'Error saving content', 
-                error: error.message,
-                dbState: mongoose.connection.readyState
-            });
+            handleError(error, res, 'save content');
         }
     });
 };
@@ -166,15 +181,7 @@ export const updateHomeContent = async (req, res) => {
                 data: content 
             });
         } catch (error) {
-            console.error('Error in updateHomeContent:', error);
-            console.error('Stack trace:', error.stack);
-            
-            res.status(500).json({ 
-                success: false, 
-                message: 'Error updating content', 
-                error: error.message,
-                dbState: mongoose.connection.readyState
-            });
+            handleError(error, res, 'update content');
         }
     });
 };
@@ -202,14 +209,6 @@ export const deleteHomeContent = async (req, res) => {
             message: 'Content deleted successfully' 
         });
     } catch (error) {
-        console.error('Error in deleteHomeContent:', error);
-        console.error('Stack trace:', error.stack);
-        
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error deleting content', 
-            error: error.message,
-            dbState: mongoose.connection.readyState
-        });
+        handleError(error, res, 'delete content');
     }
 };

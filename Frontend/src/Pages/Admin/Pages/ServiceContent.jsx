@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
+import axiosInstance, { ENDPOINTS } from '../../../config/api';
 import './ServiceContent.css';
 import logo1 from '../../../assets/img/logo1.jpg';
 
@@ -290,7 +290,7 @@ const ServiceContent = () => {
 
     const getImageUrl = (imagePath) => {
         if (!imagePath) return logo1;
-        return imagePath.startsWith('http') ? imagePath : `${UPLOAD_URLS.SERVICES}/${imagePath}`;
+        return imagePath; // Cloudinary URLs are already complete URLs
     };
 
     return (

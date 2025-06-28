@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesSlider.css';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
+import axiosInstance, { ENDPOINTS } from '../../config/api';
 import logo1 from '../../assets/img/logo1.jpg';
 
 function ServicesSlider() {
@@ -38,18 +38,18 @@ function ServicesSlider() {
     const getImageUrl = (imagePath) => {
         if (!imagePath) return logo1;
         
-        // If the image path already contains the full URL, use it as is
+        // If it's already a full URL (including Cloudinary), use it as is
         if (imagePath.startsWith('http')) {
             return imagePath;
         }
         
-        // If it starts with a slash, it's a relative path from the API base
+        // If it's a relative path, assume it's from the current domain and needs to be fixed
         if (imagePath.startsWith('/')) {
-            return `https://delta-teal.vercel.app${imagePath}`;
+            return `${process.env.REACT_APP_BACKEND_URL || 'https://delta-teal.vercel.app'}${imagePath}`;
         }
         
-        // If it's just a filename, construct the full URL
-        return `${UPLOAD_URLS.HOME_CONTENT}/${imagePath}`;
+        // If it's just a filename, assume it's from the current domain and needs to be fixed
+        return `${process.env.REACT_APP_BACKEND_URL || 'https://delta-teal.vercel.app'}/${imagePath}`;
     };
 
     useEffect(() => {

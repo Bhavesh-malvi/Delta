@@ -12,20 +12,14 @@ const ServicesContent = () => {
     useEffect(() => {
         const fetchContent = async () => {
             try {
+                console.log('Fetching service content...');
                 const response = await axiosInstance.get(ENDPOINTS.SERVICE_CONTENT);
                 console.log('Fetched service content:', response.data);
-                if (response.data && Array.isArray(response.data)) {
-                    setContent(response.data);
-                } else if (response.data && Array.isArray(response.data.data)) {
-                    setContent(response.data.data);
-                } else {
-                    console.error('Unexpected data format:', response.data);
-                    setError('Invalid data format received');
-                }
+                setContent(response.data.data);
                 setLoading(false);
             } catch (err) {
-                console.error('Error fetching service content:', err);
-                setError('Failed to fetch content: ' + err.message);
+                console.error('Error fetching content:', err);
+                setError(err.message);
                 setLoading(false);
             }
         };
@@ -35,7 +29,19 @@ const ServicesContent = () => {
 
     const getImageUrl = (imagePath) => {
         if (!imagePath) return logo1;
-        return imagePath; // Cloudinary URLs are already complete URLs
+        
+        // If it's already a full URL (including Cloudinary), use it as is
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        
+        // If it's a relative path, assume it's from the current domain and needs to be fixed
+        if (imagePath.startsWith('/')) {
+            return `${process.env.REACT_APP_BACKEND_URL || 'https://delta-teal.vercel.app'}${imagePath}`;
+        }
+        
+        // If it's just a filename, assume it's from the current domain and needs to be fixed
+        return `${process.env.REACT_APP_BACKEND_URL || 'https://delta-teal.vercel.app'}/${imagePath}`;
     };
 
     const containerVariants = {
