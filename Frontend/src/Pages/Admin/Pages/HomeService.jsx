@@ -22,31 +22,18 @@ const HomeService = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
-            console.log('Raw API Response:', response);
-            console.log('Services data:', response.data);
             
             if (response.data && Array.isArray(response.data.data)) {
-                const services = response.data.data.map(service => ({
-                    ...service,
-                    image: service.image || 'https://via.placeholder.com/400x300?text=Service+Image'
-                }));
-                console.log('Processed services:', services);
-                setServices(services);
+                setServices(response.data.data);
             } else if (response.data && Array.isArray(response.data)) {
-                const services = response.data.map(service => ({
-                    ...service,
-                    image: service.image || 'https://via.placeholder.com/400x300?text=Service+Image'
-                }));
-                console.log('Processed services:', services);
-                setServices(services);
+                setServices(response.data);
             } else {
-                setError('Invalid data format received');
-                console.error('Invalid data format:', response.data);
+                throw new Error('Invalid data format received');
             }
             setError(null);
         } catch (err) {
             console.error('Error fetching services:', err);
-            setError(err.userMessage || 'Failed to fetch services');
+            setError(err.message || 'Failed to fetch services');
         } finally {
             setLoading(false);
         }
@@ -120,7 +107,6 @@ const HomeService = () => {
         }
     };
 
-    // Helper functions for drag and drop
     const handleDrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -136,11 +122,11 @@ const HomeService = () => {
         e.stopPropagation();
     };
 
-    const handleContainerClick = (e) => {
+    const handleContainerClick = () => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
-        input.onchange = (e) => handleImageChange(e);
+        input.onchange = handleImageChange;
         input.click();
     };
 
@@ -153,9 +139,6 @@ const HomeService = () => {
         setPreviewImage(null);
         setEditingId(null);
         setError(null);
-        // Reset file input
-        const fileInput = document.getElementById('image');
-        if (fileInput) fileInput.value = '';
     };
 
     const handleEdit = (service) => {
@@ -165,7 +148,6 @@ const HomeService = () => {
             description: service.description,
             image: null
         });
-        // Handle both Cloudinary and local URLs
         const imageUrl = service.image.startsWith('http') ? service.image : `${API_BASE_URL}${service.image}`;
         setPreviewImage(imageUrl);
         window.scrollTo(0, 0);
@@ -178,10 +160,10 @@ const HomeService = () => {
             return;
         }
 
-        setLoading(true);
-        setError(null);
-
         try {
+            setLoading(true);
+            setError(null);
+
             const formDataToSend = new FormData();
             formDataToSend.append('title', formData.title);
             formDataToSend.append('description', formData.description);
@@ -189,24 +171,16 @@ const HomeService = () => {
                 formDataToSend.append('image', formData.image);
             }
 
-            const config = {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            };
-
             if (editingId) {
                 await axiosInstance.put(
                     `${ENDPOINTS.HOME_SERVICE}/${editingId}`, 
-                    formDataToSend, 
-                    config
+                    formDataToSend
                 );
                 setError({ text: 'Service updated successfully!', type: 'success' });
             } else {
                 await axiosInstance.post(
                     ENDPOINTS.HOME_SERVICE, 
-                    formDataToSend, 
-                    config
+                    formDataToSend
                 );
                 setError({ text: 'Service added successfully!', type: 'success' });
             }
@@ -214,8 +188,8 @@ const HomeService = () => {
             resetForm();
             fetchServices();
         } catch (err) {
-            console.error(editingId ? 'Error updating service:' : 'Error adding service:', err);
-            setError(err.userMessage || (editingId ? 'Failed to update service' : 'Failed to add service'));
+            console.error('Error:', err);
+            setError(err.message || 'Failed to process your request');
         } finally {
             setLoading(false);
         }
@@ -230,7 +204,7 @@ const HomeService = () => {
                 fetchServices();
             } catch (err) {
                 console.error('Error deleting service:', err);
-                setError(err.userMessage || 'Failed to delete service');
+                setError(err.message || 'Failed to delete service');
             } finally {
                 setLoading(false);
             }
@@ -239,7 +213,9 @@ const HomeService = () => {
 
     return (
         <Container fluid className="home-service-container py-4">
-            <h2 className="text-center mb-4 text-success">{editingId ? 'Edit Service' : 'Add New Service'}</h2>
+            <h2 className="text-center mb-4 text-success">
+                {editingId ? 'Edit Service' : 'Add New Service'}
+            </h2>
             
             {error && (
                 <div className={`alert ${typeof error === 'object' ? (error.type === 'success' ? 'alert-success' : 'alert-danger') : 'alert-danger'} mb-4`}>
@@ -250,81 +226,69 @@ const HomeService = () => {
             <Card className="mb-4 bg-dark text-white border-success">
                 <Card.Body>
                     <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label className="text-success">Upload Image {!editingId && <span className="text-danger">*</span>}</Form.Label>
-                            <div className="image-upload-container bg-dark border border-success rounded p-3"
-                                onClick={handleContainerClick}
-                                onDrop={handleDrop}
-                                onDragOver={handleDragOver}
-                            >
-                                <Form.Control
-                                    type="file"
-                                    id="image"
-                                    onChange={handleImageChange}
-                                    accept="image/*"
-                                    className="d-none"
-                                    disabled={loading}
-                                />
-                                <label htmlFor="image" className="w-100 h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer">
-                                    {!previewImage ? (
-                                        <>
-                                            <FaCloudUploadAlt size={40} className="mb-2 text-success" />
-                                            <span>Choose an image or drag it here</span>
-                                        </>
-                                    ) : (
-                                        <div className="position-relative w-100 h-100">
-                                            <img src={previewImage} alt="Preview" className="img-fluid rounded" style={{maxHeight: '300px', objectFit: 'contain'}} />
-                                        </div>
-                                    )}
-                                </label>
-                            </div>
-                        </Form.Group>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Title</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        required
+                                        className="bg-dark text-white"
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Description</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={3}
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                        required
+                                        className="bg-dark text-white"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label className="text-success">Title <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleInputChange}
-                                required
-                                className="bg-dark text-white border-success"
-                                placeholder="Enter service title"
-                            />
-                        </Form.Group>
+                        <div
+                            className="image-upload-container mb-3"
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                            onClick={handleContainerClick}
+                        >
+                            {previewImage ? (
+                                <div className="preview-container">
+                                    <img src={previewImage} alt="Preview" className="preview-image" />
+                                </div>
+                            ) : (
+                                <div className="upload-placeholder">
+                                    <FaCloudUploadAlt className="upload-icon" />
+                                    <p>Choose an image or drag it here</p>
+                                </div>
+                            )}
+                        </div>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label className="text-success">Description <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                                required
-                                className="bg-dark text-white border-success"
-                                placeholder="Enter service description"
-                                rows={4}
-                            />
-                        </Form.Group>
-
-                        <div className="d-flex gap-3">
+                        <div className="d-flex justify-content-between">
                             <Button 
-                                type="submit" 
                                 variant="success" 
-                                className="flex-grow-1"
+                                type="submit" 
                                 disabled={loading}
                             >
                                 {loading ? 'Processing...' : (editingId ? 'Update Service' : 'Add Service')}
                             </Button>
                             {editingId && (
                                 <Button 
-                                    type="button" 
-                                    variant="outline-danger" 
-                                    className="flex-grow-1"
+                                    variant="secondary" 
                                     onClick={resetForm}
                                     disabled={loading}
                                 >
-                                    Cancel
+                                    Cancel Edit
                                 </Button>
                             )}
                         </div>
@@ -332,105 +296,39 @@ const HomeService = () => {
                 </Card.Body>
             </Card>
 
-            <h3 className="text-center mb-4 text-success">Existing Services</h3>
-            
-            {loading && (
-                <div className="text-center">
-                    <div className="spinner-border text-success" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            )}
-            
-            {!loading && services.length === 0 && (
-                <div className="text-center text-muted">
-                    <FaCloudUploadAlt size={40} className="mb-2" />
-                    <p>No services added yet</p>
-                </div>
-            )}
-            
-            <Row className="g-4">
-                {services.map((service, index) => {
-                    // Handle different URL formats and provide fallback
-                    let imageUrl;
-                    try {
-                        if (!service.image) {
-                            imageUrl = 'https://via.placeholder.com/400x300?text=Service+Image';
-                        } else if (service.image.startsWith('http')) {
-                            imageUrl = service.image;
-                        } else if (service.image.startsWith('/')) {
-                            imageUrl = `${API_BASE_URL}${service.image}`;
-                        } else {
-                            imageUrl = `${API_BASE_URL}/${service.image}`;
-                        }
-                    } catch (error) {
-                        console.error('Error processing image URL:', error);
-                        imageUrl = 'https://via.placeholder.com/400x300?text=Service+Image';
-                    }
-                    
-                    console.log(`Rendering service ${index + 1}:`, {
-                        id: service._id,
-                        title: service.title,
-                        originalImage: service.image,
-                        computedUrl: imageUrl
-                    });
-                    
-                    return (
-                        <Col key={service._id} xs={12} sm={6} lg={4}>
-                            <Card className="h-100 bg-dark text-white border-success hover-card">
-                                <div className="card-img-container">
-                                    <Card.Img 
-                                        variant="top" 
-                                        src={imageUrl}
-                                        alt={service.title}
-                                        className="service-image"
-                                        onError={(e) => {
-                                            console.error('Image failed to load:', {
-                                                originalSrc: e.target.src,
-                                                serviceImage: service.image,
-                                                computedUrl: imageUrl,
-                                                serviceId: service._id,
-                                                error: e.error
-                                            });
-                                            e.target.onerror = null;
-                                            e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
-                                        }}
-                                        onLoad={() => {
-                                            console.log('Image loaded successfully:', {
-                                                serviceId: service._id,
-                                                title: service.title,
-                                                originalImage: service.image,
-                                                computedUrl: imageUrl
-                                            });
-                                        }}
-                                    />
+            <Row>
+                {services.map((service) => (
+                    <Col key={service._id} lg={4} md={6} className="mb-4">
+                        <Card className="h-100 bg-dark text-white border-success">
+                            <Card.Img 
+                                variant="top" 
+                                src={service.image.startsWith('http') ? service.image : `${API_BASE_URL}${service.image}`}
+                                alt={service.title}
+                                className="service-image"
+                            />
+                            <Card.Body>
+                                <Card.Title>{service.title}</Card.Title>
+                                <Card.Text>{service.description}</Card.Text>
+                                <div className="d-flex justify-content-between mt-3">
+                                    <Button
+                                        variant="outline-success"
+                                        onClick={() => handleEdit(service)}
+                                        disabled={loading}
+                                    >
+                                        <FaEdit /> Edit
+                                    </Button>
+                                    <Button
+                                        variant="outline-danger"
+                                        onClick={() => handleDelete(service._id)}
+                                        disabled={loading}
+                                    >
+                                        <FaTrash /> Delete
+                                    </Button>
                                 </div>
-                                <Card.Body className="d-flex flex-column">
-                                    <Card.Title className="text-success">{service.title}</Card.Title>
-                                    <Card.Text className="flex-grow-1">{service.description}</Card.Text>
-                                    <div className="mt-auto d-flex justify-content-end gap-3">
-                                        <button 
-                                            onClick={() => handleEdit(service)}
-                                            className="action-btn edit"
-                                            title="Edit"
-                                            disabled={loading}
-                                        >
-                                            <i className="fas fa-edit"></i>
-                                        </button>
-                                        <button 
-                                            onClick={() => handleDelete(service._id)}
-                                            className="action-btn delete"
-                                            title="Delete"
-                                            disabled={loading}
-                                        >
-                                            <i className="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    );
-                })}
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                ))}
             </Row>
         </Container>
     );

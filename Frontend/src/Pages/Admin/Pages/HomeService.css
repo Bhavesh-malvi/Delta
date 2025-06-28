@@ -1,16 +1,12 @@
 .home-service-container {
-    padding: 2rem;
-    color: #fff;
-    max-width: 100%;
-    overflow-x: hidden;
-    min-height: 100vh;
+    padding: 20px;
     background-color: #0a0a0a;
+    min-height: 100vh;
 }
 
 .home-service-container h2 {
-    margin-bottom: 2rem;
     color: #00ff87;
-    text-align: center;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
 }
 
 .home-service-form {
@@ -57,74 +53,118 @@
     resize: vertical;
 }
 
-.image-upload-container {
-    border: 2px dashed rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    text-align: center;
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    position: relative;
-    min-height: 200px;
+.card {
+    background-color: #070707 !important;
+    border: 1px solid #00ff87 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 135, 0.1);
     transition: all 0.3s ease;
 }
 
-.image-upload-container:hover {
-    border-color: #00ff87;
-    box-shadow: 0 0 0 2px rgba(0, 255, 135, 0.2);
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 255, 135, 0.2);
 }
 
-.image-input {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    opacity: 0;
+.form-control, .form-select {
+    background-color: #111 !important;
+    border: 1px solid #00ff87 !important;
+    color: white !important;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 135, 0.25);
+}
+
+.btn-success {
+    background-color: #00ff87 !important;
+    border-color: #00ff87 !important;
+    color: #000 !important;
+}
+
+.btn-success:hover {
+    background-color: #00cc6a !important;
+    border-color: #00cc6a !important;
+}
+
+.btn-outline-success {
+    color: #00ff87 !important;
+    border-color: #00ff87 !important;
+}
+
+.btn-outline-success:hover {
+    background-color: #00ff87 !important;
+    color: #000 !important;
+}
+
+.btn-outline-danger {
+    color: #ff4444 !important;
+    border-color: #ff4444 !important;
+}
+
+.btn-outline-danger:hover {
+    background-color: #ff4444 !important;
+    color: #fff !important;
+}
+
+.image-upload-container {
+    border: 2px dashed #00ff87;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
     cursor: pointer;
-    z-index: 2;
+    background-color: rgba(0, 255, 135, 0.05);
+    transition: all 0.3s ease;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.upload-label {
+.image-upload-container:hover {
+    background-color: rgba(0, 255, 135, 0.1);
+    border-color: #00cc6a;
+}
+
+.upload-placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 15px;
-    color: rgba(0, 255, 135, 0.8);
-}
-
-.upload-label i {
-    font-size: 2rem;
     color: #00ff87;
 }
 
-.image-preview-container {
-    text-align: center;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 20px;
+.upload-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
 }
 
-.image-preview {
-    max-width: 300px;
-    margin: 0 auto;
-}
-
-.image-preview img {
-    max-width: 100%;
-    max-height: 200px;
-    object-fit: contain;
-    border: 2px solid rgba(0, 255, 135, 0.3);
+.preview-container {
+    width: 100%;
+    max-height: 300px;
+    overflow: hidden;
     border-radius: 8px;
 }
 
-.file-name {
-    display: block;
-    margin-top: 10px;
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.service-image {
+    height: 200px;
+    object-fit: cover;
+}
+
+.alert-success {
+    background-color: rgba(0, 255, 135, 0.1) !important;
+    border-color: #00ff87 !important;
+    color: #00ff87 !important;
+}
+
+.alert-danger {
+    background-color: rgba(255, 68, 68, 0.1) !important;
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
 }
 
 .button-group {
@@ -426,7 +466,11 @@
 
 @media (max-width: 768px) {
     .home-service-container {
-        padding: 1rem;
+        padding: 10px;
+    }
+
+    .card {
+        margin-bottom: 20px;
     }
 
     .services-grid {
@@ -444,7 +488,7 @@
     }
     
     .service-image-container {
-        height: 180px;
+        height: 150px;
     }
 
     .service-content {
@@ -462,12 +506,20 @@
     .image-upload-container {
         min-height: 150px;
     }
+
+    .service-image {
+        height: 120px;
+    }
 }
 
 @media (max-width: 576px) {
     .btn {
-        padding: 0.5rem;
-        font-size: 0.9rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .service-image {
+        height: 120px;
     }
 }
 

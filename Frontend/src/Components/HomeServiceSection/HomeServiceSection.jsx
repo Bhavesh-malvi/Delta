@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
+import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
 import './HomeServiceSection.css';
 
 const HomeServiceSection = () => {
@@ -11,18 +11,17 @@ const HomeServiceSection = () => {
         const fetchServices = async () => {
             try {
                 const response = await axiosInstance.get(ENDPOINTS.HOME_SERVICE);
-                console.log('Fetched services:', response.data);
-                if (response.data && Array.isArray(response.data)) {
-                    setServices(response.data);
-                } else if (response.data && Array.isArray(response.data.data)) {
+                if (response.data && Array.isArray(response.data.data)) {
                     setServices(response.data.data);
+                } else if (response.data && Array.isArray(response.data)) {
+                    setServices(response.data);
                 } else {
-                    setError('Invalid data format received');
+                    throw new Error('Invalid data format received');
                 }
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching services:', err);
-                setError(err.userMessage || 'Failed to fetch services');
+                setError(err.message || 'Failed to fetch services');
                 setLoading(false);
             }
         };
@@ -32,10 +31,7 @@ const HomeServiceSection = () => {
 
     const getImageUrl = (image) => {
         if (!image) return 'https://via.placeholder.com/400x300?text=Service+Image';
-        // If it's already a full URL (Cloudinary)
-        if (image.startsWith('http')) return image;
-        // If it's just a filename, construct the full path
-        return `${UPLOAD_URLS.SERVICES}/${image}`;
+        return image.startsWith('http') ? image : `${API_BASE_URL}${image}`;
     };
 
     if (loading) {
