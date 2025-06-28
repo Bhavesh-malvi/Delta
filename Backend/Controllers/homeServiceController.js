@@ -3,29 +3,13 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
-import fs from 'fs';
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure uploads directory exists
-const uploadDir = path.join(__dirname, '../uploads/services');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configure multer for home service image uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        const finalName = uniqueName + path.extname(file.originalname);
-        console.log('📁 Generated filename:', finalName);
-        cb(null, finalName);
-    }
-});
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
 
 const upload = multer({
     storage,
@@ -164,17 +148,17 @@ export const createHomeService = async (req, res) => {
             });
         }
 
+        // Upload image to Cloudinary
+        const imageUrl = await uploadToCloudinary(req.file.buffer);
+        console.log('Image uploaded to Cloudinary:', imageUrl);
+
         // Create service data object
         const serviceData = {
             title: title.trim(),
             description: description.trim(),
-            image: `services/${req.file.filename}`,
+            image: imageUrl,
             position: position ? parseInt(position) : 0
         };
-
-        console.log('🖼️ Image file received:', req.file);
-        console.log('📁 Image filename:', req.file.filename);
-        console.log('✅ Image path added to serviceData:', serviceData.image);
 
         const service = await HomeService.create(serviceData);
 
@@ -198,81 +182,66 @@ export const createHomeService = async (req, res) => {
     }
 };
 
-// Update service
+// Update home service
 export const updateHomeService = async (req, res) => {
-    upload(req, res, async (err) => {
-        if (err) {
-            console.error('Multer error:', err);
+    try {
+        checkDbConnection();
+        console.log(`Updating home service with ID: ${req.params.id}`);
+        
+        const { title, description, position } = req.body;
+        
+        // Validate service data
+        const validationErrors = validateServiceData(title, description);
+        if (validationErrors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: err.message || 'Error uploading file'
+                message: 'Validation failed',
+                errors: validationErrors
             });
         }
 
-        try {
-            checkDbConnection();
-            console.log(`Updating home service with ID: ${req.params.id}`);
-            
-            const service = await HomeService.findById(req.params.id);
-            if (!service) {
-                console.log(`No service found with ID: ${req.params.id}`);
-                return res.status(404).json({
-                    success: false,
-                    message: 'Service not found'
-                });
-            }
+        let updateData = {
+            title: title.trim(),
+            description: description.trim(),
+            position: position ? parseInt(position) : 0
+        };
 
-            const { title, description } = req.body;
-            
-            // Validate service data
-            const validationErrors = validateServiceData(title, description);
-            if (validationErrors.length > 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Validation failed',
-                    errors: validationErrors
-                });
-            }
+        // If a new image is uploaded, update it
+        if (req.file) {
+            const imageUrl = await uploadToCloudinary(req.file.buffer);
+            console.log('New image uploaded to Cloudinary:', imageUrl);
+            updateData.image = imageUrl;
+        }
 
-            // If new image is uploaded, update it
-            if (req.file) {
-                try {
-                    const imageUrl = await uploadToCloudinary(req.file.buffer);
-                    console.log('New image uploaded successfully:', imageUrl);
-                    service.image = imageUrl;
-                } catch (cloudinaryError) {
-                    console.error('Cloudinary upload error:', cloudinaryError);
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Error uploading new image',
-                        error: cloudinaryError.message
-                    });
-                }
-            }
+        const service = await HomeService.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true, runValidators: true }
+        );
 
-            service.title = title.trim();
-            service.description = description.trim();
-            await service.save();
-
-            console.log('Service updated successfully');
-
-            res.status(200).json({
-                success: true,
-                message: 'Service updated successfully',
-                data: service
-            });
-        } catch (error) {
-            console.error('Error in updateHomeService:', error);
-            console.error('Stack trace:', error.stack);
-            
-            res.status(500).json({
+        if (!service) {
+            return res.status(404).json({
                 success: false,
-                message: 'Error updating service',
-                error: error.message,
-                dbState: mongoose.connection.readyState
+                message: 'Home service not found'
             });
         }
-    });
+
+        res.status(200).json({
+            success: true,
+            message: 'Service updated successfully',
+            data: service
+        });
+    } catch (error) {
+        console.error('Error in updateHomeService:', error);
+        console.error('Stack trace:', error.stack);
+        
+        res.status(500).json({
+            success: false,
+            message: 'Error updating service',
+            error: error.message,
+            dbState: mongoose.connection.readyState
+        });
+    }
 };
 
 // Delete home service
@@ -281,18 +250,15 @@ export const deleteHomeService = async (req, res) => {
         checkDbConnection();
         console.log(`Deleting home service with ID: ${req.params.id}`);
         
-        const service = await HomeService.findById(req.params.id);
+        const service = await HomeService.findByIdAndDelete(req.params.id);
+        
         if (!service) {
-            console.log(`No service found with ID: ${req.params.id}`);
             return res.status(404).json({
                 success: false,
-                message: 'Service not found'
+                message: 'Home service not found'
             });
         }
-
-        await service.deleteOne();
-        console.log('Service deleted successfully');
-
+        
         res.status(200).json({
             success: true,
             message: 'Service deleted successfully'
@@ -308,4 +274,6 @@ export const deleteHomeService = async (req, res) => {
             dbState: mongoose.connection.readyState
         });
     }
-}; 
+};
+
+export { upload }; 

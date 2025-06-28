@@ -42,26 +42,13 @@ const HomeServiceSection = () => {
     const getImageUrl = (image) => {
         if (!image) return fallbackImage;
         
-        // If the image path already contains the full URL, use it as is
+        // If it's a Cloudinary URL or any other full URL, use it as is
         if (image.startsWith('http')) {
             return image;
         }
         
-        // Remove any leading slashes from the image path
-        const cleanImagePath = image.replace(/^\/+/, '');
-        
-        // If the path already includes 'uploads/services', don't add it again
-        if (cleanImagePath.startsWith('uploads/services/')) {
-            return `${API_BASE_URL}/${cleanImagePath}`;
-        }
-        
-        // If the path starts with 'services/', add 'uploads/'
-        if (cleanImagePath.startsWith('services/')) {
-            return `${API_BASE_URL}/uploads/${cleanImagePath}`;
-        }
-        
-        // Otherwise, construct the full URL with the services path
-        return `${API_BASE_URL}/uploads/services/${cleanImagePath}`;
+        // For legacy images that might still be using the old path format
+        return `${API_BASE_URL}/uploads/services/${image}`;
     };
 
     if (loading) {
