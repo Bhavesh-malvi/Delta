@@ -134,6 +134,29 @@ app.post('/api/test', (req, res) => {
     res.json({success: true, message: 'Test endpoint working', data: req.body});
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    console.error('Stack:', err.stack);
+    
+    // Check if headers have already been sent
+    if (res.headersSent) {
+        return next(err);
+    }
+    
+    // Check database connection
+    const dbStatus = mongoose.connection.readyState;
+    console.log('Database connection state:', dbStatus);
+    
+    // Send appropriate error response
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? err : {},
+        dbConnected: dbStatus === 1
+    });
+});
+
 // 404 handler for undefined routes
 app.use('*', (req, res) => {
     console.log(`404 - Route not found: ${req.method} ${req.originalUrl}`);
