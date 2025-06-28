@@ -1,7 +1,7 @@
-const EnrollCourse = require('../models/EnrollCourse');
+import EnrollCourse from '../models/EnrollCourse.js';
 
 // Get all enrollment courses
-exports.getAllEnrollCourses = async (req, res) => {
+export const getAllEnrollCourses = async (req, res) => {
     try {
         const courses = await EnrollCourse.find({ isActive: true });
         res.status(200).json({
@@ -17,7 +17,7 @@ exports.getAllEnrollCourses = async (req, res) => {
 };
 
 // Create new enrollment course
-exports.createEnrollCourse = async (req, res) => {
+export const createEnrollCourse = async (req, res) => {
     try {
         const { courseName } = req.body;
         
@@ -46,7 +46,7 @@ exports.createEnrollCourse = async (req, res) => {
 };
 
 // Update enrollment course
-exports.updateEnrollCourse = async (req, res) => {
+export const updateEnrollCourse = async (req, res) => {
     try {
         const { id } = req.params;
         const { courseName, isActive } = req.body;
@@ -77,7 +77,7 @@ exports.updateEnrollCourse = async (req, res) => {
 };
 
 // Delete enrollment course
-exports.deleteEnrollCourse = async (req, res) => {
+export const deleteEnrollCourse = async (req, res) => {
     try {
         const { id } = req.params;
         const course = await EnrollCourse.findByIdAndDelete(id);
