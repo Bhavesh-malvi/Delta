@@ -14,9 +14,9 @@
     --text-light: #888888;
 }
 
-.career-container {
+.career-admin-container {
     padding: 20px;
-    background-color: #0a0a0a;
+    background-color: #f8f9fa;
     min-height: 100vh;
 }
 
@@ -95,13 +95,13 @@
 
 /* Image Upload Styles */
 .image-upload-container {
-    border: 2px dashed #00ff87;
-    border-radius: 10px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
     padding: 20px;
     text-align: center;
     cursor: pointer;
-    background-color: rgba(0, 255, 135, 0.05);
     transition: all 0.3s ease;
+    background-color: #fff;
     min-height: 200px;
     display: flex;
     align-items: center;
@@ -546,9 +546,8 @@
 
 .point-input-group {
     display: flex;
-    align-items: center;
     gap: 10px;
-    background-color: var(--darker-bg) !important;
+    align-items: center;
 }
 
 .point-input-group .btn {
@@ -862,7 +861,7 @@ input[type="file"]::before {
 .required {
     color: var(--primary-color);
     margin-left: 4px;
-}
+    }
 
 .card {
     background-color: #070707 !important;
@@ -1075,4 +1074,94 @@ select.form-select {
 .btn-primary:hover {
     color: #000 !important;
     background-color: rgba(0, 255, 135, 0.8) !important;
+}
+
+.career-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.career-card {
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.career-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.career-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.points-list {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.points-list ul {
+    margin: 10px 0 0;
+    padding-left: 20px;
+}
+
+.points-list li {
+    margin-bottom: 5px;
+    color: #666;
+}
+
+/* Form Styling */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .career-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .career-admin-container {
+        padding: 10px;
+    }
+
+    .career-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .point-input-group {
+        flex-direction: column;
+    }
+
+    .point-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
 }

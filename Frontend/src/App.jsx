@@ -39,10 +39,10 @@ const AppLayout = () => {
     if (location.pathname.toLowerCase() === '/deltaadmin') {
       window.location.replace('/deltaadmin/login');
     }
-    
-    // Debug logging
-    console.log('📍 Current pathname:', location.pathname);
-    console.log('🔐 Is admin route:', isAdminRoute);
+
+  // Debug logging
+  console.log('📍 Current pathname:', location.pathname);
+  console.log('🔐 Is admin route:', isAdminRoute);
   }, [location.pathname, isAdminRoute]);
 
   const handleLandingComplete = () => {
@@ -69,9 +69,9 @@ const AppLayout = () => {
         
         {/* Protected Admin Routes */}
         <Route path="/deltaadmin/*" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
         } />
 
         {/* Catch all route */}
@@ -89,9 +89,9 @@ function App() {
   console.log('✅ API Configuration loaded successfully');
 
   return (
-    <Router>
-      <AppLayout />
-    </Router>
+      <Router>
+        <AppLayout />
+      </Router>
   );
 }
 

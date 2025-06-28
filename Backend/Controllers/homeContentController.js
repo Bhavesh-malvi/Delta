@@ -91,10 +91,10 @@ export const createHomeContent = async (req, res) => {
             checkDbConnection();
             console.log('Creating new home content...');
 
-            const { title } = req.body;
-            if (!title || !req.file) {
-                return res.status(400).json({ success: false, message: 'Title and image are required' });
-            }
+        const { title } = req.body;
+        if (!title || !req.file) {
+            return res.status(400).json({ success: false, message: 'Title and image are required' });
+        }
 
             // Upload to Cloudinary
             const imageUrl = await uploadToCloudinary(req.file.buffer);
@@ -137,10 +137,10 @@ export const updateHomeContent = async (req, res) => {
             checkDbConnection();
             console.log(`Updating home content with ID: ${req.params.id}`);
 
-            const { title } = req.body;
-            if (!title) {
-                return res.status(400).json({ success: false, message: 'Title is required' });
-            }
+        const { title } = req.body;
+        if (!title) {
+            return res.status(400).json({ success: false, message: 'Title is required' });
+        }
 
             const content = await HomeContent.findById(req.params.id);
             if (!content) {

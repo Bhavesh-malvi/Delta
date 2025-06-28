@@ -61,10 +61,12 @@ const Career = () => {
     };
 
     const addPoint = () => {
-        setFormData(prev => ({
-            ...prev,
-            points: [...prev.points, '']
-        }));
+        if (formData.points.length < 10) { // Limit to 10 points
+            setFormData(prev => ({
+                ...prev,
+                points: [...prev.points, '']
+            }));
+        }
     };
 
     const removePoint = (index) => {
@@ -149,7 +151,7 @@ const Career = () => {
         e.stopPropagation();
     };
 
-    const handleContainerClick = (e) => {
+    const handleContainerClick = () => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
@@ -161,6 +163,7 @@ const Career = () => {
         setFormData({
             title: '',
             description: '',
+            points: [''],
             image: null
         });
         setPreviewImage(null);
@@ -187,281 +190,260 @@ const Career = () => {
 
     const handleEdit = (career) => {
         setEditingId(career._id);
-        
-        // Convert old Point fields to points array if they exist
-        let points = [''];
-        if (career.points && Array.isArray(career.points)) {
-            points = career.points;
-        } else {
-            // Handle legacy Point1, Point2, etc. fields
-            const legacyPoints = [];
-            for (let i = 1; i <= 7; i++) {
-                if (career[`Point${i}`]) {
-                    legacyPoints.push(career[`Point${i}`]);
-                }
-            }
-            points = legacyPoints.length > 0 ? legacyPoints : [''];
-        }
-
         setFormData({
-            title: career.title,
-            description: career.description,
-            points: points,
+            title: career.title || '',
+            description: career.description || '',
+            points: Array.isArray(career.points) && career.points.length > 0 ? career.points : [''],
             image: null
         });
-        
-        // Set preview image path
         setPreviewImage(getImageUrl(career.image));
-        window.scrollTo(0, 0);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!editingId && !formData.image) {
-            setError('Please select an image');
-            return;
-        }
-
         setLoading(true);
         setError(null);
-        
+
         try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('title', formData.title);
-            formDataToSend.append('description', formData.description);
-            
-            // Filter out empty points and send as JSON string
-            const filteredPoints = formData.points.filter(point => point.trim() !== '');
-            formDataToSend.append('points', JSON.stringify(filteredPoints));
+            // Validate points
+            const validPoints = formData.points.filter(point => point.trim().length > 0);
+            if (validPoints.length === 0) {
+                throw new Error('At least one point is required');
+            }
+
+            const data = new FormData();
+            data.append('title', formData.title);
+            data.append('description', formData.description);
+            data.append('points', JSON.stringify(validPoints));
             
             if (formData.image) {
-                formDataToSend.append('image', formData.image);
+                data.append('image', formData.image);
             }
-
-            const config = {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            };
 
             if (editingId) {
-                await axiosInstance.put(
-                    `${ENDPOINTS.CAREER}/${editingId}`, 
-                    formDataToSend, 
-                    config
-                );
-                setError({ text: 'Career updated successfully!', type: 'success' });
+                await axiosInstance.put(`${ENDPOINTS.CAREER}/${editingId}`, data);
             } else {
-                await axiosInstance.post(
-                    ENDPOINTS.CAREER, 
-                    formDataToSend, 
-                    config
-                );
-                setError({ text: 'Career added successfully!', type: 'success' });
+                await axiosInstance.post(ENDPOINTS.CAREER, data);
             }
 
+            await fetchCareers();
             resetForm();
-            fetchCareers();
         } catch (err) {
-            console.error(editingId ? 'Error updating career:' : 'Error adding career:', err);
-            setError(err.userMessage || (editingId ? 'Failed to update career' : 'Failed to add career'));
+            console.error('Error submitting career:', err);
+            setError(err.response?.data?.message || err.message || 'Failed to submit career');
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this career?')) {
-            try {
-                setLoading(true);
-                await axiosInstance.delete(`${ENDPOINTS.CAREER}/${id}`);
-                setError({ text: 'Career deleted successfully!', type: 'success' });
-                fetchCareers();
-            } catch (err) {
-                console.error('Error deleting career:', err);
-                setError(err.userMessage || 'Failed to delete career');
-            } finally {
-                setLoading(false);
-            }
+        if (!window.confirm('Are you sure you want to delete this career?')) return;
+        
+        try {
+            setLoading(true);
+            await axiosInstance.delete(`${ENDPOINTS.CAREER}/${id}`);
+            await fetchCareers();
+        } catch (err) {
+            console.error('Error deleting career:', err);
+            setError(err.response?.data?.message || 'Failed to delete career');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <Container className="career-container py-4">
-            <h2 className="mb-4">{editingId ? 'Edit Career' : 'Add New Career'}</h2>
-
-            {error && (
-                <div className={`alert ${typeof error === 'object' ? (error.type === 'success' ? 'alert-success' : 'alert-danger') : 'alert-danger'} mb-4`}>
-                    {typeof error === 'object' ? error.text : error}
-                </div>
-            )}
-
-            <Card className="mb-4">
-                <Card.Body>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Upload Image {!editingId && <span className="text-danger">*</span>}</Form.Label>
-                            <div 
-                                className="image-upload-container"
-                                onClick={handleContainerClick}
-                                onDrop={handleDrop}
-                                onDragOver={handleDragOver}
-                            >
-                                {!previewImage ? (
-                                    <div className="upload-label">
-                                        <i className="fas fa-cloud-upload-alt"></i>
-                                        <p>Choose an image or drag it here</p>
-                                    </div>
-                                ) : (
-                                    <div className="text-center">
-                                        <img 
-                                            src={previewImage} 
-                                            alt="Preview" 
-                                            className="mb-2"
-                                            style={{ 
-                                                maxHeight: '200px', 
-                                                border: '2px solid rgba(0, 255, 135, 0.3)',
-                                                borderRadius: '8px'
-                                            }}
-                                        />
-                                        <p>
-                                            {formData.image ? formData.image.name : 'Current Image'}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Career Title <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleInputChange}
-                                placeholder="Enter career title"
-                                required
-                                disabled={loading}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Career Description <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                                placeholder="Enter career description"
-                                required
-                                disabled={loading}
-                                rows={4}
-                            />
-                        </Form.Group>
-
-                        <div className="d-flex gap-2">
-                            <Button 
-                                type="submit" 
-                                style={{ backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)' }}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <Spinner
-                                            as="span"
-                                            animation="border"
-                                            size="sm"
-                                            className="me-2"
-                                        />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    editingId ? 'Update Career' : 'Add Career'
-                                )}
-                            </Button>
-
-                            {editingId && (
-                                <Button 
-                                    variant="secondary"
-                                    onClick={resetForm}
-                                    disabled={loading}
-                                >
-                                    Cancel
-                                </Button>
+        <Container fluid className="career-admin-container">
+            <Row>
+                <Col md={12} lg={4}>
+                    <Card className="mb-4">
+                        <Card.Header>
+                            <h4>{editingId ? 'Edit Career' : 'Add New Career'}</h4>
+                        </Card.Header>
+                        <Card.Body>
+                            {error && (
+                                <div className="alert alert-danger">{error}</div>
                             )}
-                        </div>
-                    </Form>
-                </Card.Body>
-            </Card>
+                            
+                            <Form onSubmit={handleSubmit}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Title</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </Form.Group>
 
-            <Card>
-                <Card.Header className="d-flex justify-content-between align-items-center">
-                    <h3 className="mb-0">Existing Careers</h3>
-                    <Button 
-                        style={{ backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)', color: '#000' }}
-                        onClick={fetchCareers}
-                        disabled={loading}
-                    >
-                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
-                    </Button>
-                </Card.Header>
-                <Card.Body>
-                    {loading ? (
-                        <div className="text-center py-5">
-                            <Spinner animation="border" variant="primary" />
-                            <p className="mt-2">Loading careers...</p>
-                        </div>
-                    ) : careers.length === 0 ? (
-                        <div className="text-center py-5 text-muted">
-                            <i className="fas fa-inbox fa-3x mb-3"></i>
-                            <p>No careers available</p>
-                        </div>
-                    ) : (
-                        <Row xs={1} md={2} lg={3} className="g-4">
-                            {careers.map(career => (
-                                <Col key={career._id}>
-                                    <Card className="h-100 career-card">
-                                        <div className="card-img-wrapper" style={{ height: '200px', overflow: 'hidden' }}>
-                                            <Card.Img
-                                                variant="top"
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Description</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={3}
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Points</Form.Label>
+                                    {formData.points.map((point, index) => (
+                                        <div key={index} className="point-input-group mb-2">
+                                            <Form.Control
+                                                type="text"
+                                                value={point}
+                                                onChange={(e) => handlePointChange(index, e.target.value)}
+                                                placeholder={`Point ${index + 1}`}
+                                            />
+                                            <div className="point-actions">
+                                                {index > 0 && (
+                                                    <Button 
+                                                        variant="danger" 
+                                                        size="sm"
+                                                        onClick={() => removePoint(index)}
+                                                    >
+                                                        Remove
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {formData.points.length < 10 && (
+                                        <Button 
+                                            variant="secondary" 
+                                            size="sm" 
+                                            onClick={addPoint}
+                                            className="mt-2"
+                                        >
+                                            Add Point
+                                        </Button>
+                                    )}
+                                </Form.Group>
+
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Image</Form.Label>
+                                    <div
+                                        className="image-upload-container"
+                                        onDrop={handleDrop}
+                                        onDragOver={handleDragOver}
+                                        onClick={handleContainerClick}
+                                    >
+                                        {previewImage ? (
+                                            <img
+                                                src={previewImage}
+                                                alt="Preview"
+                                                className="preview-image"
+                                            />
+                                        ) : (
+                                            <div className="upload-placeholder">
+                                                <i className="fas fa-cloud-upload-alt"></i>
+                                                <p>Click or drag image here</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Form.Group>
+
+                                <div className="d-flex gap-2">
+                                    <Button 
+                                        type="submit" 
+                                        disabled={loading}
+                                        className="flex-grow-1"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Spinner size="sm" className="me-2" />
+                                                {editingId ? 'Updating...' : 'Creating...'}
+                                            </>
+                                        ) : (
+                                            editingId ? 'Update Career' : 'Create Career'
+                                        )}
+                                    </Button>
+                                    {editingId && (
+                                        <Button 
+                                            variant="secondary"
+                                            onClick={resetForm}
+                                            disabled={loading}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </div>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+                </Col>
+
+                <Col md={12} lg={8}>
+                    <Card>
+                        <Card.Header>
+                            <h4>Career Listings</h4>
+                        </Card.Header>
+                        <Card.Body>
+                            {loading && !careers.length ? (
+                                <div className="text-center py-4">
+                                    <Spinner animation="border" />
+                                </div>
+                            ) : careers.length === 0 ? (
+                                <div className="text-center py-4">
+                                    <p className="mb-0">No careers found</p>
+                                </div>
+                            ) : (
+                                <div className="career-grid">
+                                    {careers.map(career => (
+                                        <Card key={career._id} className="career-card">
+                                            <Card.Img 
+                                                variant="top" 
                                                 src={getImageUrl(career.image)}
-                                                alt={career.title}
                                                 onError={(e) => {
                                                     e.target.onerror = null;
                                                     e.target.src = 'https://via.placeholder.com/400x300?text=Career+Image';
                                                 }}
-                                                style={{ height: '100%', objectFit: 'cover' }}
                                             />
-                                        </div>
-                                        <Card.Body>
-                                            <Card.Title>{career.title}</Card.Title>
-                                            <Card.Text>{career.description}</Card.Text>
-                                        </Card.Body>
-                                        <Card.Footer className="d-flex justify-content-end gap-2">
-                                            <button
-                                                onClick={() => handleEdit(career)}
-                                                className="action-btn edit"
-                                                title="Edit"
-                                                disabled={loading}
-                                            >
-                                                <i className="fas fa-edit"></i>
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(career._id)}
-                                                className="action-btn delete"
-                                                title="Delete"
-                                                disabled={loading}
-                                            >
-                                                <i className="fas fa-trash"></i>
-                                            </button>
-                                        </Card.Footer>
-                                    </Card>
-                                </Col>
-                            ))}
-                        </Row>
-                    )}
-                </Card.Body>
-            </Card>
+                                            <Card.Body>
+                                                <Card.Title>{career.title}</Card.Title>
+                                                <Card.Text>{career.description}</Card.Text>
+                                                
+                                                {Array.isArray(career.points) && career.points.length > 0 && (
+                                                    <div className="points-list">
+                                                        <strong>Points:</strong>
+                                                        <ul>
+                                                            {career.points.map((point, index) => (
+                                                                <li key={index}>{point}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                
+                                                <div className="d-flex gap-2 mt-3">
+                                                    <Button
+                                                        variant="primary"
+                                                        size="sm"
+                                                        onClick={() => handleEdit(career)}
+                                                        disabled={loading}
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        variant="danger"
+                                                        size="sm"
+                                                        onClick={() => handleDelete(career._id)}
+                                                        disabled={loading}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            </Card.Body>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
         </Container>
     );
 };

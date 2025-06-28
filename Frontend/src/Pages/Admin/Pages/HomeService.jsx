@@ -161,8 +161,8 @@ const HomeService = () => {
         }
 
         try {
-            setLoading(true);
-            setError(null);
+        setLoading(true);
+        setError(null);
 
             const formDataToSend = new FormData();
             formDataToSend.append('title', formData.title);
@@ -228,31 +228,31 @@ const HomeService = () => {
                     <Form onSubmit={handleSubmit}>
                         <Row>
                             <Col md={6}>
-                                <Form.Group className="mb-3">
+                        <Form.Group className="mb-3">
                                     <Form.Label>Title</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="title"
-                                        value={formData.title}
-                                        onChange={handleInputChange}
-                                        required
+                            <Form.Control
+                                type="text"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleInputChange}
+                                required
                                         className="bg-dark text-white"
-                                    />
-                                </Form.Group>
+                            />
+                        </Form.Group>
                             </Col>
                             <Col md={6}>
-                                <Form.Group className="mb-3">
+                        <Form.Group className="mb-3">
                                     <Form.Label>Description</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
+                            <Form.Control
+                                as="textarea"
                                         rows={3}
-                                        name="description"
-                                        value={formData.description}
-                                        onChange={handleInputChange}
-                                        required
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                required
                                         className="bg-dark text-white"
-                                    />
-                                </Form.Group>
+                            />
+                        </Form.Group>
                             </Col>
                         </Row>
 
@@ -300,38 +300,38 @@ const HomeService = () => {
                 {services.map((service) => (
                     <Col key={service._id} lg={4} md={6} className="mb-4">
                         <Card className="h-100 bg-dark text-white border-success">
-                            <Card.Img 
-                                variant="top" 
+                                    <Card.Img 
+                                        variant="top" 
                                 src={service.image.startsWith('http') ? service.image : `${API_BASE_URL}${service.image}`}
-                                alt={service.title}
-                                className="service-image"
+                                        alt={service.title}
+                                        className="service-image"
                             />
                             <Card.Body>
                                 <Card.Title>{service.title}</Card.Title>
                                 <Card.Text>{service.description}</Card.Text>
                                 <div className="d-flex justify-content-between mt-3">
-                                    <Button
-                                        variant="outline-success"
-                                        onClick={() => handleEdit(service)}
-                                        disabled={loading}
-                                    >
-                                        <FaEdit /> Edit
-                                    </Button>
-                                    <Button
-                                        variant="outline-danger"
-                                        onClick={() => handleDelete(service._id)}
-                                        disabled={loading}
-                                    >
-                                        <FaTrash /> Delete
-                                    </Button>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
+                                        <Button 
+                                            variant="outline-success" 
+                                            onClick={() => handleEdit(service)}
+                                            disabled={loading}
+                                        >
+                                            <FaEdit /> Edit
+                                        </Button>
+                                        <Button 
+                                            variant="outline-danger" 
+                                            onClick={() => handleDelete(service._id)}
+                                            disabled={loading}
+                                        >
+                                            <FaTrash /> Delete
+                                        </Button>
+                                    </div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
                 ))}
             </Row>
         </Container>
     );
 };
 
-export default HomeService;
+export default HomeService; 
