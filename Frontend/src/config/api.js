@@ -1,8 +1,7 @@
 // API Configuration
-// Frontend URL: https://delta-frco.vercel.app
-// Backend URL: https://deltawaresolution.com
-// Base URLs - Always use production URL
-export const API_BASE_URL = 'https://deltawaresolution.com';
+// Frontend URL: https://deltawaresolution.com
+// Backend URL: https://delta-teal.vercel.app
+export const API_BASE_URL = 'https://delta-teal.vercel.app';
 
 // Timeout configuration
 export const API_TIMEOUT = 60000; // 60 seconds
