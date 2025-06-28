@@ -61,29 +61,29 @@ const EnrollData = () => {
                     <i className="fas fa-inbox"></i>
                     <p>No enrollment requests available</p>
                 </div>
-            ) : (
+                ) : (
                 <div className="enrolls-list">
                     {enrolls.map(enroll => (
                         <div key={enroll._id} className="enroll-item">
-                            <div className="enroll-header">
-                                <h4>{enroll.name}</h4>
-                                <span className="enroll-date">
-                                    {new Date(enroll.createdAt).toLocaleDateString()}
-                                </span>
-                            </div>
+                                <div className="enroll-header">
+                                    <h4>{enroll.name}</h4>
+                                    <span className="enroll-date">
+                                        {new Date(enroll.createdAt).toLocaleDateString()}
+                                    </span>
+                                </div>
                             <div className="enroll-info">
-                                <p>
-                                    <i className="fas fa-envelope"></i>
-                                    <strong>Email:</strong> {enroll.email}
-                                </p>
-                                <p>
-                                    <i className="fas fa-phone"></i>
-                                    <strong>Phone:</strong> {enroll.phone}
-                                </p>
-                                <p>
+                                    <p>
+                                        <i className="fas fa-envelope"></i>
+                                        <strong>Email:</strong> {enroll.email}
+                                    </p>
+                                    <p>
+                                        <i className="fas fa-phone"></i>
+                                        <strong>Phone:</strong> {enroll.phone}
+                                    </p>
+                                    <p>
                                     <i className="fas fa-graduation-cap"></i>
-                                    <strong>Course:</strong> {enroll.course}
-                                </p>
+                                        <strong>Course:</strong> {enroll.course}
+                                    </p>
                                 {enroll.message && (
                                     <p>
                                         <i className="fas fa-comment"></i>
@@ -92,19 +92,19 @@ const EnrollData = () => {
                                 )}
                             </div>
                             <div className="enroll-actions">
-                                <button
+                            <button 
                                     onClick={() => handleDelete(enroll._id)}
                                     className="action-btn delete"
-                                    title="Delete"
+                                title="Delete"
                                     disabled={loading}
-                                >
+                            >
                                     <i className="fas fa-trash"></i>
-                                </button>
+                            </button>
                             </div>
                         </div>
                     ))}
                 </div>
-            )}
+                )}
         </div>
     );
 };

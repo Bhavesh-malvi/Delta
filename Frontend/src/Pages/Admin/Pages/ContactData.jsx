@@ -74,28 +74,28 @@ const ContactData = () => {
                 <div className="contacts-list">
                     {contacts.map(contact => (
                         <div key={contact._id} className="contact-item">
-                            <div className="contact-header">
-                                <h4>{contact.name}</h4>
-                                <span className="contact-date">
+                                <div className="contact-header">
+                                    <h4>{contact.name}</h4>
+                                    <span className="contact-date">
                                     {formatDate(contact.createdAt)}
-                                </span>
-                            </div>
-                            <div className="contact-info">
-                                <p>
-                                    <i className="fas fa-envelope"></i>
+                                    </span>
+                                </div>
+                                <div className="contact-info">
+                                    <p>
+                                        <i className="fas fa-envelope"></i>
                                     <strong>Email:</strong>
                                     <span>{contact.email}</span>
-                                </p>
-                                <p>
-                                    <i className="fas fa-phone"></i>
+                                    </p>
+                                    <p>
+                                        <i className="fas fa-phone"></i>
                                     <strong>Phone:</strong>
                                     <span>{contact.phone}</span>
-                                </p>
-                                <p>
-                                    <i className="fas fa-comment"></i>
+                                    </p>
+                                    <p>
+                                        <i className="fas fa-comment"></i>
                                     <strong>Message:</strong>
                                     <span>{contact.message}</span>
-                                </p>
+                                    </p>
                             </div>
                             <div className="contact-actions">
                                 <button

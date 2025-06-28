@@ -29,7 +29,7 @@ const HomeCourses = () => {
             if (response.data?.success) {
                 const coursesData = response.data.data || [];
                 console.log('Parsed courses data:', coursesData);
-                setCourses(Array.isArray(coursesData) ? coursesData : []);
+            setCourses(Array.isArray(coursesData) ? coursesData : []);
             } else {
                 throw new Error(response.data?.message || 'Failed to fetch courses');
             }
@@ -201,32 +201,32 @@ const HomeCourses = () => {
                 ) : (
                     <div className="courses-list">
                         {courses.map(course => (
-                            <div key={course._id} className="course-item">
-                                <div className="course-content">
-                                    <h4>{course.title}</h4>
-                                    <p>{course.description}</p>
-                                </div>
-                                <div className="course-actions">
-                                    <button
-                                        onClick={() => handleEdit(course)}
-                                        className="action-btn edit"
-                                        title="Edit"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-edit"></i>
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(course._id)}
-                                        className="action-btn delete"
-                                        title="Delete"
-                                        disabled={loading}
-                                    >
-                                        <i className="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                        <div key={course._id} className="course-item">
+                            <div className="course-content">
+                                <h4>{course.title}</h4>
+                                <p>{course.description}</p>
                             </div>
-                        ))}
-                    </div>
+                            <div className="course-actions">
+                                <button
+                                    onClick={() => handleEdit(course)}
+                                        className="action-btn edit"
+                                    title="Edit"
+                                        disabled={loading}
+                                >
+                                    <i className="fas fa-edit"></i>
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(course._id)}
+                                        className="action-btn delete"
+                                    title="Delete"
+                                        disabled={loading}
+                                >
+                                    <i className="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
                 )}
             </div>
         </div>
