@@ -5,6 +5,11 @@
       "destination": "/index.html"
     }
   ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/deltaAdmin.*", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

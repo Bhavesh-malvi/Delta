@@ -20,6 +20,11 @@ import './index.css';
 const AppLayout = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/deltaAdmin');
+  const [showLanding, setShowLanding] = useState(true);
+
+  const handleLandingComplete = () => {
+    setShowLanding(false);
+  };
 
   // Debug logging
   console.log('📍 Current pathname:', location.pathname);
@@ -27,8 +32,9 @@ const AppLayout = () => {
 
   return (
     <>
+      {showLanding && <LandingPage onComplete={handleLandingComplete} />}
       <ScrollToTop />
-      {!isAdminRoute && <Navbar />}
+      {!isAdminRoute && !showLanding && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -41,7 +47,7 @@ const AppLayout = () => {
         <Route path="/deltaAdmin" element={<Navigate to="/deltaAdmin/login" replace />} />
         <Route path="/deltaAdmin/login" element={<LoginForm />} />
         <Route 
-          path="/deltaAdmin/dashboard" 
+          path="/deltaAdmin/dashboard/*" 
           element={
             <ProtectedRoute>
               <Admin />
@@ -56,31 +62,24 @@ const AppLayout = () => {
             </ProtectedRoute>
           } 
         />
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !showLanding && <Footer />}
     </>
   );
 };
 
 function App() {
-  const [showLanding, setShowLanding] = useState(true);
-
   // Log the API configuration for verification
-  console.log('🚀 Frontend deployed to: https://delta-frco.vercel.app');
+  console.log('🚀 Frontend deployed to: https://deltawaresolution.com');
   console.log('🔗 Backend API URL: ', API_BASE_URL);
   console.log('✅ API Configuration loaded successfully');
 
-  const handleLandingComplete = () => {
-    setShowLanding(false);
-  };
-
   return (
-    <>
-      {showLanding && <LandingPage onComplete={handleLandingComplete} />}
-      <Router>
-        <AppLayout />
-      </Router>
-    </>
+    <Router>
+      <AppLayout />
+    </Router>
   );
 }
 
