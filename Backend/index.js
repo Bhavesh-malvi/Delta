@@ -33,7 +33,8 @@ const corsOptions = {
             'https://delta-teal.vercel.app',
             'https://delta-teal-frontend.vercel.app',
             'https://modified-delta.vercel.app',
-            'https://delta-frco.vercel.app'
+            'https://delta-frco.vercel.app',
+            'https://deltawaresolution.com'
         ];
         
         // Allow requests with no origin (like mobile apps or curl requests)

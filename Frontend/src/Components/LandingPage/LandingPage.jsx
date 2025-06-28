@@ -30,7 +30,10 @@ const LandingPage = ({ onComplete }) => {
             <div className="landing-content">
                 <div className="welcome-text">
                     <h1 className="main-title">Welcome to</h1>
-                    <h1 className="delta-title">DELTA</h1>
+                    <h1 className="company-name">
+                        <span className="delta-text">Delta</span>
+                        <span className="ware-text">ware</span>
+                    </h1>
                     <p className="subtitle">Where Innovation Meets Excellence</p>
                 </div>
                 

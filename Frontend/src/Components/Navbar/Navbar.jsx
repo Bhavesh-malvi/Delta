@@ -1,6 +1,5 @@
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../../assets/img/logo1.jpg';
 import './Navbar.css';
 
 const NavigationBar = () => {
@@ -13,7 +12,7 @@ const NavigationBar = () => {
         <Navbar expand="lg" className="custom-navbar" fixed="top">
             <Container>
                 <Navbar.Brand as={Link} to="/" className="brand">
-                    <img src={logo} alt="Logo" className="brand-logo"/>
+                    <img src="/assets/img/logo1.jpg" alt="Logo" className="brand-logo"/>
                     <p>Delta<span>ware</span></p>
                 </Navbar.Brand>
 
