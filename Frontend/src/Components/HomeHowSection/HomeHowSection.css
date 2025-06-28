@@ -160,4 +160,246 @@
     .step-description {
         font-size: 1.1rem;
     }
+}
+
+.how-section2 {
+    min-height: 100vh;
+    background-color: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.how-section2::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(0, 255, 135, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.how-content2 {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    gap: 60px;
+    position: relative;
+}
+
+.how-left2 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.how-title2 {
+    font-size: 5rem;
+    font-weight: bold;
+    color: #00ff87;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    margin-bottom: 30px;
+}
+
+.how-title2 span {
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.5),
+                 0 0 20px rgba(0, 255, 135, 0.3),
+                 0 0 30px rgba(0, 255, 135, 0.1);
+    transform: translateX(-100px);
+    opacity: 0;
+    animation: slideIn2 0.5s forwards;
+}
+
+.how-title2 span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.how-title2 span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes slideIn2 {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.how-email2 {
+    color: #00ff87;
+    font-size: 1.2rem;
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeIn2 0.5s forwards 0.6s;
+}
+
+@keyframes fadeIn2 {
+    to {
+        opacity: 1;
+    }
+}
+
+.how-right2 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.course-card2 {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    transform: translateX(100px);
+    opacity: 0;
+    animation: slideInRight2 0.5s forwards;
+    cursor: pointer;
+}
+
+.course-card2:hover {
+    border-color: rgba(0, 255, 135, 0.4);
+    box-shadow: 0 0 30px rgba(0, 255, 135, 0.2);
+    transform: translateY(-5px) scale(1.02);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+@keyframes slideInRight2 {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.card-header2 {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.step-number2 {
+    min-width: 50px;
+    height: 50px;
+    background: #00ff87;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #0a0a0a;
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
+    transition: all 0.3s ease;
+}
+
+.course-card2:hover .step-number2 {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(0, 255, 135, 0.4);
+}
+
+.step-title2 {
+    color: #00ff87;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+    transition: all 0.3s ease;
+}
+
+.course-card2:hover .step-title2 {
+    transform: translateX(10px);
+}
+
+.step-description2 {
+    color: #ffffff;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    padding-left: 70px;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.course-card2:hover .step-description2 {
+    opacity: 1;
+    transform: translateX(5px);
+}
+
+@media (max-width: 1024px) {
+    .how-content2 {
+        gap: 40px;
+    }
+
+    .how-title2 {
+        font-size: 4rem;
+    }
+
+    .step-title2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .how-content2 {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .how-title2 {
+        font-size: 3.5rem;
+        text-align: center;
+    }
+
+    .how-email2 {
+        text-align: center;
+    }
+
+    .step-description2 {
+        padding-left: 0;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .card-header2 {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .step-title2 {
+        font-size: 1.4rem;
+    }
+
+    .course-card2:hover .step-title2,
+    .course-card2:hover .step-description2 {
+        transform: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .how-title2 {
+        font-size: 3rem;
+    }
+
+    .step-number2 {
+        min-width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .step-title2 {
+        font-size: 1.2rem;
+    }
+
+    .step-description2 {
+        font-size: 1rem;
+    }
 } 
