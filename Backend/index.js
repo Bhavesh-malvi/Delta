@@ -32,17 +32,13 @@ const corsOptions = {
         const allowedOrigins = [
             'http://localhost:3000',
             'http://localhost:5173',
-            'https://delta-teal.vercel.app',
-            'https://delta-teal-frontend.vercel.app',
-            'https://modified-delta.vercel.app',
-            'https://delta-frco.vercel.app',
             'https://deltawaresolution.com',
             'https://www.deltawaresolution.com'
         ];
         
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, origin || true);
+            callback(null, origin);
         } else {
             console.log('CORS blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
