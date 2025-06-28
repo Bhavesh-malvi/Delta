@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Form, Container, Row, Col, Spinner } from 'react-bootstrap';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
 import './ServiceContent.css';
 
 const ServiceContent = () => {
@@ -22,8 +22,13 @@ const ServiceContent = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get(ENDPOINTS.SERVICE_CONTENT);
-            setContents(response.data.data);
-            setError(null);
+            if (response.data && Array.isArray(response.data)) {
+                setContents(response.data);
+            } else if (response.data && Array.isArray(response.data.data)) {
+                setContents(response.data.data);
+            } else {
+                setError('Invalid data format received');
+            }
         } catch (err) {
             console.error('Error fetching contents:', err);
             setError(err.userMessage || 'Failed to fetch contents');
@@ -47,33 +52,30 @@ const ServiceContent = () => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.type.startsWith('image/')) {
-                setFormData(prev => ({
-                    ...prev,
-                    image: file
-                }));
-                // Create preview URL
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setPreviewImage(reader.result);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                setError('Please upload an image file');
-                e.target.value = '';
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                setError('Image size should be less than 5MB');
+                return;
             }
+            
+            if (!file.type.startsWith('image/')) {
+                setError('Please select a valid image file');
+                return;
+            }
+
+            setFormData(prev => ({ ...prev, image: file }));
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setPreviewImage(e.target.result);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
     const handlePointChange = (index, value) => {
-        setFormData(prev => {
-            const newPoints = [...prev.points];
-            newPoints[index] = value;
-            return {
-                ...prev,
-                points: newPoints
-            };
-        });
+        const newPoints = [...formData.points];
+        newPoints[index] = value;
+        setFormData(prev => ({ ...prev, points: newPoints }));
     };
 
     const addNewPoint = () => {
@@ -84,16 +86,12 @@ const ServiceContent = () => {
     };
 
     const deletePoint = (indexToDelete) => {
-        // Don't allow deleting if only 4 points remain
-        if (formData.points.length <= 4) {
-            setError('Minimum 4 points are required');
-            return;
+        if (formData.points.length > 4) {
+            setFormData(prev => ({
+                ...prev,
+                points: prev.points.filter((_, index) => index !== indexToDelete)
+            }));
         }
-
-        setFormData(prev => ({
-            ...prev,
-            points: prev.points.filter((_, index) => index !== indexToDelete)
-        }));
     };
 
     const resetForm = () => {
@@ -101,14 +99,11 @@ const ServiceContent = () => {
             title: '',
             description: '',
             image: null,
-            points: ['', '', '', ''] // Reset points too
+            points: ['', '', '', '']
         });
         setPreviewImage(null);
         setEditingId(null);
         setError(null);
-        // Reset file input
-        const fileInput = document.getElementById('serviceImage');
-        if (fileInput) fileInput.value = '';
     };
 
     const handleEdit = (content) => {
@@ -119,7 +114,7 @@ const ServiceContent = () => {
             image: null,
             points: content.points || ['', '', '', ''] // Handle existing points
         });
-        setPreviewImage(content.image.startsWith('http') ? content.image : `${API_BASE_URL}/uploads/services/${content.image}`);
+        setPreviewImage(content.image.startsWith('http') ? content.image : `${UPLOAD_URLS.SERVICES}/${content.image}`);
         window.scrollTo(0, 0);
     };
 
@@ -225,6 +220,18 @@ const ServiceContent = () => {
         input.accept = 'image/*';
         input.onchange = (e) => handleImageChange(e);
         input.click();
+    };
+
+    const getImageUrl = (imagePath) => {
+        if (!imagePath) return 'https://via.placeholder.com/400x300?text=Service+Image';
+        
+        // If the image path already contains the full URL, use it as is
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        
+        // If it's just a filename, construct the full URL
+        return `${UPLOAD_URLS.SERVICES}/${imagePath}`;
     };
 
     return (
@@ -403,11 +410,11 @@ const ServiceContent = () => {
                                         <div className="card-img-wrapper" style={{ height: '200px', overflow: 'hidden' }}>
                                             <Card.Img
                                                 variant="top"
-                                                src={content.image.startsWith('http') ? content.image : `${API_BASE_URL}/uploads/services/${content.image}`}
+                                                src={getImageUrl(content.image)}
                                                 alt={content.title}
                                                 onError={(e) => {
                                                     e.target.onerror = null;
-                                                    e.target.src = '/placeholder-content.jpg';
+                                                    e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
                                                 }}
                                                 style={{ height: '100%', objectFit: 'cover' }}
                                             />

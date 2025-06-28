@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Form, Container, Row, Col, Spinner } from 'react-bootstrap';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS, API_BASE_URL } from '../../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../../config/api';
 import './Career.css';
 
 const Career = () => {
@@ -80,21 +80,23 @@ const Career = () => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.type.startsWith('image/')) {
-                setFormData(prev => ({
-                    ...prev,
-                    image: file
-                }));
-                // Create preview URL
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setPreviewImage(reader.result);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                setError('Please upload an image file');
-                e.target.value = '';
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                setError('Image size should be less than 5MB');
+                return;
             }
+            
+            if (!file.type.startsWith('image/')) {
+                setError('Please select a valid image file');
+                return;
+            }
+
+            setFormData(prev => ({ ...prev, image: file }));
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setPreviewImage(e.target.result);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -108,9 +110,23 @@ const Career = () => {
         setPreviewImage(null);
         setEditingId(null);
         setError(null);
-        // Reset file input
-        const fileInput = document.getElementById('careerImage');
-        if (fileInput) fileInput.value = '';
+    };
+
+    const getImageUrl = (imagePath) => {
+        if (!imagePath) return 'https://via.placeholder.com/400x300?text=Career+Image';
+        
+        // If the image path already contains the full URL, use it as is
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        
+        // If it starts with a slash, it's a relative path from the API base
+        if (imagePath.startsWith('/')) {
+            return `https://delta-teal.vercel.app${imagePath}`;
+        }
+        
+        // If it's just a filename, construct the full URL
+        return `${UPLOAD_URLS.CAREERS}/${imagePath}`;
     };
 
     const handleEdit = (career) => {
@@ -139,7 +155,7 @@ const Career = () => {
         });
         
         // Set preview image path
-        setPreviewImage(`${API_BASE_URL}${career.image}`);
+        setPreviewImage(getImageUrl(career.image));
         window.scrollTo(0, 0);
     };
 
@@ -373,11 +389,11 @@ const Career = () => {
                                         <div className="card-img-wrapper" style={{ height: '200px', overflow: 'hidden' }}>
                                             <Card.Img
                                                 variant="top"
-                                                src={`${API_BASE_URL}${career.image}`}
+                                                src={getImageUrl(career.image)}
                                                 alt={career.title}
                                                 onError={(e) => {
                                                     e.target.onerror = null;
-                                                    e.target.src = '/placeholder-career.jpg';
+                                                    e.target.src = 'https://via.placeholder.com/400x300?text=Career+Image';
                                                 }}
                                                 style={{ height: '100%', objectFit: 'cover' }}
                                             />

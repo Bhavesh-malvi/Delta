@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import './AutoSlider.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
 
 const AutoSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -30,6 +30,23 @@ const AutoSlider = () => {
 
     fetchContent();
   }, []);
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://via.placeholder.com/400x300?text=Content+Image';
+    
+    // If the image path already contains the full URL, use it as is
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // If it starts with a slash, it's a relative path from the API base
+    if (imagePath.startsWith('/')) {
+      return `https://delta-teal.vercel.app${imagePath}`;
+    }
+    
+    // If it's just a filename, construct the full URL
+    return `${UPLOAD_URLS.HOME_CONTENT}/${imagePath}`;
+  };
 
   const nextSlide = useCallback(() => {
     if (content.length > 0) {
@@ -76,7 +93,7 @@ const AutoSlider = () => {
         <AnimatePresence mode="wait">
           <motion.img
             key={currentIndex}
-            src={`${API_BASE_URL}${content[currentIndex].image}`}
+            src={getImageUrl(content[currentIndex].image)}
             alt={content[currentIndex].title}
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
@@ -86,7 +103,7 @@ const AutoSlider = () => {
             onError={(e) => {
               console.error('Image failed to load:', e.target.src);
               e.target.onerror = null;
-              e.target.src = '/placeholder-image.jpg';
+              e.target.src = 'https://via.placeholder.com/400x300?text=Content+Image';
             }}
           />
         </AnimatePresence>

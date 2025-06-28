@@ -28,14 +28,14 @@ const HomeService = () => {
             if (response.data && Array.isArray(response.data.data)) {
                 const services = response.data.data.map(service => ({
                     ...service,
-                    image: service.image || '/placeholder-service.jpg'
+                    image: service.image || 'https://via.placeholder.com/400x300?text=Service+Image'
                 }));
                 console.log('Processed services:', services);
                 setServices(services);
             } else if (response.data && Array.isArray(response.data)) {
                 const services = response.data.map(service => ({
                     ...service,
-                    image: service.image || '/placeholder-service.jpg'
+                    image: service.image || 'https://via.placeholder.com/400x300?text=Service+Image'
                 }));
                 console.log('Processed services:', services);
                 setServices(services);
@@ -292,7 +292,7 @@ const HomeService = () => {
                     let imageUrl;
                     try {
                         if (!service.image) {
-                            imageUrl = `${API_BASE_URL}/placeholder-service.jpg`;
+                            imageUrl = 'https://via.placeholder.com/400x300?text=Service+Image';
                         } else if (service.image.startsWith('http')) {
                             imageUrl = service.image;
                         } else if (service.image.startsWith('/')) {
@@ -302,7 +302,7 @@ const HomeService = () => {
                         }
                     } catch (error) {
                         console.error('Error processing image URL:', error);
-                        imageUrl = `${API_BASE_URL}/placeholder-service.jpg`;
+                        imageUrl = 'https://via.placeholder.com/400x300?text=Service+Image';
                     }
                     
                     console.log(`Rendering service ${index + 1}:`, {
@@ -330,7 +330,7 @@ const HomeService = () => {
                                                 error: e.error
                                             });
                                             e.target.onerror = null;
-                                            e.target.src = `${API_BASE_URL}/placeholder-service.jpg`;
+                                            e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
                                         }}
                                         onLoad={() => {
                                             console.log('Image loaded successfully:', {

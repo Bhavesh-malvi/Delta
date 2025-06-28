@@ -31,7 +31,7 @@ const corsOptions = {
         const allowedOrigins = [
             'http://localhost:5173',
             'https://delta-teal.vercel.app',
-            'https://delta-teal-frontend.vercel.app',
+            'https://delta-frco.vercel.app',
             'https://modified-delta.vercel.app'
         ];
         

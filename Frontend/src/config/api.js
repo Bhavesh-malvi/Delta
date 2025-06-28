@@ -1,10 +1,6 @@
 // API Configuration
-const isDevelopment = window.location.hostname === 'localhost';
-
-// Base URLs
-export const API_BASE_URL = isDevelopment 
-    ? 'http://localhost:5000'
-    : 'https://delta-teal.vercel.app';
+// Base URLs - Always use Vercel URL
+export const API_BASE_URL = 'https://delta-teal.vercel.app';
 
 // Timeout configuration
 export const API_TIMEOUT = 60000; // 60 seconds
@@ -53,8 +49,7 @@ import axios from 'axios';
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: API_TIMEOUT,
-    headers: DEFAULT_HEADERS,
-    withCredentials: isDevelopment // Only use credentials in development
+    headers: DEFAULT_HEADERS
 });
 
 // Add response interceptor for error handling

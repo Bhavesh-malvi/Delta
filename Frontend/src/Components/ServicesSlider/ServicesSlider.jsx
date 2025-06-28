@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesSlider.css';
-import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
 
 function ServicesSlider() {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -33,6 +33,23 @@ function ServicesSlider() {
 
         fetchContent();
     }, []);
+
+    const getImageUrl = (imagePath) => {
+        if (!imagePath) return 'https://via.placeholder.com/400x300?text=Content+Image';
+        
+        // If the image path already contains the full URL, use it as is
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        
+        // If it starts with a slash, it's a relative path from the API base
+        if (imagePath.startsWith('/')) {
+            return `https://delta-teal.vercel.app${imagePath}`;
+        }
+        
+        // If it's just a filename, construct the full URL
+        return `${UPLOAD_URLS.HOME_CONTENT}/${imagePath}`;
+    };
 
     useEffect(() => {
         let interval;
@@ -122,12 +139,12 @@ function ServicesSlider() {
                         >
                             <div className="slide-content">
                                 <img 
-                                    src={`${API_BASE_URL}${slide.image}`} 
+                                    src={getImageUrl(slide.image)} 
                                     alt={slide.title} 
                                     onError={(e) => {
                                         console.error('Image failed to load:', e.target.src);
                                         e.target.onerror = null;
-                                        e.target.src = '/placeholder-image.jpg';
+                                        e.target.src = 'https://via.placeholder.com/400x300?text=Content+Image';
                                     }}
                                 />
                                 <h3>{slide.title}</h3>

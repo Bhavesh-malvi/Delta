@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
 import './HomeServiceSection.css';
 
 const HomeServiceSection = () => {
@@ -31,11 +31,11 @@ const HomeServiceSection = () => {
     }, []);
 
     const getImageUrl = (image) => {
-        if (!image) return '/placeholder-service.jpg';
+        if (!image) return 'https://via.placeholder.com/400x300?text=Service+Image';
         // If it's already a full URL (Cloudinary)
         if (image.startsWith('http')) return image;
         // If it's just a filename, construct the full path
-        return `${API_BASE_URL}/uploads/services/${image}`;
+        return `${UPLOAD_URLS.SERVICES}/${image}`;
     };
 
     if (loading) {
@@ -76,7 +76,7 @@ const HomeServiceSection = () => {
                                 onError={(e) => {
                                     console.error('Image failed to load:', e.target.src);
                                     e.target.onerror = null;
-                                    e.target.src = '/placeholder-service.jpg';
+                                    e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
                                 }}
                                 loading="lazy"
                             />

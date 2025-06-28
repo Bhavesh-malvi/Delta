@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './CareerCoursesSection.css';
-import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
 
 function CareerCoursesSection() {
     const [expandedCards, setExpandedCards] = useState({});
@@ -44,6 +44,23 @@ function CareerCoursesSection() {
         return text.slice(0, maxLength).trim() + '...';
     };
 
+    const getImageUrl = (imagePath) => {
+        if (!imagePath) return 'https://via.placeholder.com/400x300?text=Career+Image';
+        
+        // If the image path already contains the full URL, use it as is
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        
+        // If it starts with a slash, it's a relative path from the API base
+        if (imagePath.startsWith('/')) {
+            return `https://delta-teal.vercel.app${imagePath}`;
+        }
+        
+        // If it's just a filename, construct the full URL
+        return `${UPLOAD_URLS.CAREERS}/${imagePath}`;
+    };
+
     if (loading) return <div className="loading">Loading careers...</div>;
     if (error) return <div className="error">{error}</div>;
     if (!careers.length) return <div className="no-data">No career opportunities available</div>;
@@ -62,12 +79,12 @@ function CareerCoursesSection() {
                         <div className="course-content">
                             <div className="career-image">
                                 <img 
-                                    src={`${API_BASE_URL}/uploads/careers/${career.image}`} 
+                                    src={getImageUrl(career.image)} 
                                     alt={career.title}
                                     onError={(e) => {
                                         console.error('Image failed to load:', e.target.src);
                                         e.target.onerror = null;
-                                        e.target.src = '/placeholder-career.jpg';
+                                        e.target.src = 'https://via.placeholder.com/400x300?text=Career+Image';
                                     }}
                                 />
                             </div>

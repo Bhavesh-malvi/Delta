@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesContent.css';
 import { motion } from 'framer-motion';
-import axiosInstance, { ENDPOINTS, API_BASE_URL } from '../../config/api';
+import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
 
 const ServicesContent = () => {
     const [content, setContent] = useState([]);
@@ -31,6 +31,18 @@ const ServicesContent = () => {
 
         fetchContent();
     }, []);
+
+    const getImageUrl = (imagePath) => {
+        if (!imagePath) return 'https://via.placeholder.com/400x300?text=Service+Image';
+        
+        // If the image path already contains the full URL, use it as is
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        
+        // If it's just a filename, construct the full URL
+        return `${UPLOAD_URLS.SERVICES}/${imagePath}`;
+    };
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -93,13 +105,13 @@ const ServicesContent = () => {
                     >
                         <div className="service-image-container">
                             <img 
-                                src={`${API_BASE_URL}/uploads/services/${service.image}`} 
+                                src={getImageUrl(service.image)} 
                                 alt={service.title} 
                                 className="service-image"
                                 onError={(e) => {
                                     console.error('Image failed to load:', e.target.src);
                                     e.target.onerror = null;
-                                    e.target.src = '/placeholder-service.jpg';
+                                    e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
                                 }}
                             />
                         </div>

@@ -63,7 +63,7 @@ const ServicesCourse = () => {
                                 onError={(e) => {
                                     console.error('Image failed to load:', e.target.src);
                                     e.target.onerror = null;
-                                    e.target.src = '/placeholder-image.jpg';
+                                    e.target.src = 'https://via.placeholder.com/400x300?text=Client+Image';
                                 }}
                             />
                         </div>
