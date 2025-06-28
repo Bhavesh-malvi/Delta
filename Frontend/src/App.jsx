@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Home from './Pages/Home/Home';
 import About from './Pages/About/About';
@@ -21,6 +21,13 @@ const AppLayout = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/deltaAdmin');
   const [showLanding, setShowLanding] = useState(true);
+
+  useEffect(() => {
+    // Handle direct navigation to admin routes
+    if (isAdminRoute && location.pathname === '/deltaAdmin') {
+      window.location.href = '/deltaAdmin/login';
+    }
+  }, [location.pathname, isAdminRoute]);
 
   const handleLandingComplete = () => {
     setShowLanding(false);
