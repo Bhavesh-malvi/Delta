@@ -19,23 +19,28 @@ import './index.css';
 // Component to handle conditional rendering of Navbar and Footer
 const AppLayout = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.toLowerCase().includes('/deltaadmin');
   const [showLanding, setShowLanding] = useState(true);
+  
+  // Check if current path is an admin route
+  const isAdminRoute = React.useMemo(() => {
+    const path = location.pathname.toLowerCase();
+    return path.startsWith('/deltaadmin');
+  }, [location.pathname]);
 
   useEffect(() => {
     // Handle direct navigation to admin routes
     if (location.pathname.toLowerCase() === '/deltaadmin') {
-      window.location.href = '/deltaadmin/login';
+      window.location.replace('/deltaadmin/login');
     }
-  }, [location.pathname]);
+    
+    // Debug logging
+    console.log('📍 Current pathname:', location.pathname);
+    console.log('🔐 Is admin route:', isAdminRoute);
+  }, [location.pathname, isAdminRoute]);
 
   const handleLandingComplete = () => {
     setShowLanding(false);
   };
-
-  // Debug logging
-  console.log('📍 Current pathname:', location.pathname);
-  console.log('🔐 Is admin route:', isAdminRoute);
 
   return (
     <>
@@ -56,42 +61,7 @@ const AppLayout = () => {
         <Route path="/deltaadmin/login" element={<LoginForm />} />
         
         {/* Protected Admin Routes */}
-        <Route path="/deltaadmin/dashboard" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        } />
-        <Route path="/deltaadmin/home-content" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        } />
-        <Route path="/deltaadmin/home-courses" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        } />
-        <Route path="/deltaadmin/home-services" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        } />
-        <Route path="/deltaadmin/service-content" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        } />
-        <Route path="/deltaadmin/career" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        } />
-        <Route path="/deltaadmin/contact-data" element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        } />
-        <Route path="/deltaadmin/enroll-data" element={
+        <Route path="/deltaadmin/*" element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
