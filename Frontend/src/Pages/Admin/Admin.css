@@ -214,4 +214,29 @@
         padding: 0.5rem;
         border-radius: 8px;
     }
-} 
+}
+
+/* Add new media query for 475-485px range */
+@media screen and (min-width: 475px) and (max-width: 485px) {
+    .admin-main {
+        margin-left: 50px;
+        padding: 0.4rem;
+    }
+    
+    .admin-content {
+        padding: 0.4rem;
+    }
+    
+    .career-container {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        margin-left: 5px;
+    }
+    
+    .form-control, .form-select, .btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.6rem;
+    }
+}

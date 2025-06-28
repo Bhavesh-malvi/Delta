@@ -126,4 +126,29 @@
     .sidebar-logo h2 {
         font-size: 1.2rem;
     }
-} 
+}
+
+/* Add new media query for 475-485px range */
+@media screen and (min-width: 475px) and (max-width: 485px) {
+    .sidebar {
+        width: 50px;
+        padding: 0.6rem;
+        z-index: 900; /* Lower z-index to prevent overlapping with form */
+    }
+    
+    .admin-main {
+        margin-left: 50px;
+    }
+    
+    .sidebar-nav a {
+        padding: 0.5rem;
+    }
+    
+    .sidebar-logo h2 {
+        font-size: 1rem;
+    }
+    
+    .sidebar-nav a i {
+        font-size: 1.1rem;
+    }
+}

@@ -269,10 +269,11 @@ const HomeContent = () => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-success">
-                                Upload Image {!editingId && <span className="text-danger">*</span>}
-                            </Form.Label>
-                            <div className="image-upload-container bg-dark border border-success rounded p-3">
+                            <div className="image-upload-container bg-dark border border-success rounded p-3"
+                                onClick={handleContainerClick}
+                                onDrop={handleDrop}
+                                onDragOver={handleDragOver}
+                            >
                                 <Form.Control
                                     type="file"
                                     onChange={handleImageChange}
@@ -393,4 +394,28 @@ const HomeContent = () => {
     );
 };
 
-export default HomeContent; 
+export default HomeContent;
+
+// Add these functions here, outside of the JSX
+const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+        handleImageChange({ target: { files: [file] } });
+    }
+};
+
+const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+};
+
+const handleContainerClick = (e) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => handleImageChange(e);
+    input.click();
+};
