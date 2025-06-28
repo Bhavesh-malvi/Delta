@@ -15,12 +15,9 @@
 }
 
 .service-content-container {
-    padding: 2rem;
-    color: #fff;
-    max-width: 100%;
-    overflow-x: hidden;
+    padding: 20px;
+    background-color: #f8f9fa;
     min-height: 100vh;
-    background-color: #0a0a0a;
 }
 
 .service-content-container h2 {
@@ -99,24 +96,22 @@
 
 /* Image Upload Styles */
 .image-upload-container {
-    width: 100%;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #fff;
     min-height: 200px;
-    max-height: 300px;
-    border: 1px solid var(--primary-color);
-    border-radius: 4px;
-    background: var(--darker-bg) !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 2rem;
-    overflow: hidden;
-    position: relative;
 }
 
 .image-upload-container:hover {
-    box-shadow: 0 0 0 1px var(--primary-color);
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
 }
 
 .image-input {
@@ -129,20 +124,12 @@
 }
 
 .upload-label {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    cursor: pointer;
-    background-color: var(--darker-bg) !important;
+    color: #6c757d;
 }
 
 .upload-label i {
-    font-size: 2.5rem;
-    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 10px;
 }
 
 .upload-label p {
@@ -379,84 +366,23 @@
     color: var(--danger-color);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .service-content-container {
-        padding: 1rem;
-    }
-
-    .services-list {
-        grid-template-columns: 1fr;
-    }
-
-    .form-buttons {
-        flex-direction: column;
-    }
-
-    .submit-btn,
-    .cancel-btn {
-        max-width: 100%;
-    }
-
-    .image-upload-container {
-        min-height: 150px;
-        max-height: 250px;
-        padding: 1rem;
-    }
-
-    .image-preview img {
-        max-height: 150px;
-    }
-
-    .point-input-container {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .point-input-container input {
-        width: 100%;
-    }
-
-    .remove-point-btn,
-    .add-point-btn {
-        width: 100%;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        font-size: 16px; /* Prevents zoom on mobile */
-        padding: 0.5rem;
+        padding: 15px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
     .service-content-container {
-        padding: 0.5rem;
+        padding: 10px;
     }
 
-    .image-upload-container {
-        min-height: 120px;
-        max-height: 200px;
-        padding: 0.5rem;
+    .points-container {
+        gap: 5px;
     }
 
-    .upload-label i {
-        font-size: 2rem;
-    }
-
-    .upload-label p {
-        font-size: 0.9rem;
-    }
-
-    .image-preview img {
-        max-height: 120px;
-    }
-
-    .form-group {
-        margin-bottom: 1rem;
-    }
-
-    .form-group label {
-        font-size: 0.9rem;
+    .card-img-wrapper {
+        height: 150px;
     }
 }
 
@@ -464,11 +390,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: 5px;
-    background-color: var(--darker-bg) !important;
-    padding: 15px;
-    border-radius: 4px;
-    border: 1px solid var(--primary-color);
 }
 
 .points-container .form-control {
@@ -991,4 +912,67 @@ select.form-select {
     display: flex;
     gap: 0.75rem;
     justify-content: flex-end;
+}
+
+.content-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.content-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-wrapper {
+    height: 200px;
+    overflow: hidden;
+}
+
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.points-list {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.points-list ul {
+    margin: 10px 0 0;
+    padding-left: 20px;
+}
+
+.points-list li {
+    margin-bottom: 5px;
+    color: #666;
+}
+
+/* Form Styling */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
 }

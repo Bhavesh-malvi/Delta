@@ -14,14 +14,18 @@
     --text-light: #888888;
 }
 
-.career-admin-container {
-    padding: 20px;
-    background-color: #f8f9fa;
+.career-container {
+    padding: 2rem;
+    color: #fff;
+    max-width: 100%;
+    overflow-x: hidden;
     min-height: 100vh;
+    background-color: #0a0a0a;
 }
 
 .career-container h2 {
-    color: #00ff87;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
     text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
 }
 
@@ -67,8 +71,7 @@
 }
 
 .form-group input,
-.form-group textarea,
-.form-control {
+.form-group textarea {
     width: 100%;
     padding: 0.75rem;
     background: var(--darker-bg);
@@ -80,8 +83,7 @@
 }
 
 .form-group input:focus,
-.form-group textarea:focus,
-.form-control:focus {
+.form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 1px var(--primary-color);
@@ -95,17 +97,24 @@
 
 /* Image Upload Styles */
 .image-upload-container {
-    border: 2px dashed #ccc;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background-color: #fff;
+    width: 100%;
     min-height: 200px;
+    max-height: 300px;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    background: var(--darker-bg) !important;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 2rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.image-upload-container:hover {
+    box-shadow: 0 0 0 1px var(--primary-color);
 }
 
 .image-input {
@@ -189,6 +198,9 @@
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+.remove-point-btn {
     background: rgba(255, 68, 68, 0.1);
     color: #ff4444;
     border: 1px solid rgba(255, 68, 68, 0.2);
@@ -198,17 +210,6 @@
     background-color: var(--primary-color);
     color: black;
     border: none;
-    border-radius: 4px;
-    padding: 10px;
-    margin-top: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s ease;
 }
 
 .remove-point-btn:hover {
@@ -217,8 +218,6 @@
 
 .add-point-btn:hover {
     background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 255, 135, 0.2);
 }
 
 .form-buttons {
@@ -228,37 +227,39 @@
 }
 
 .submit-btn {
-    background: var(--primary-color);
-    color: var(--darker-bg);
-    border: none;
+    flex: 1;
     padding: 0.75rem 1.5rem;
-    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: black;
+    border: none;
+    border-radius: 6px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: 100%;
-    margin-top: 1rem;
 }
 
 .submit-btn:hover:not(:disabled) {
-    background: var(--primary-dark);
-    transform: translateY(-1px);
+    background-color: var(--primary-dark);
 }
 
 .submit-btn:disabled {
-    background: var(--secondary-color);
     opacity: 0.7;
     cursor: not-allowed;
 }
 
 .cancel-btn {
-    background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
-    border: 1px solid rgba(255, 68, 68, 0.2);
+    padding: 0.75rem 1.5rem;
+    background-color: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--text-light);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .cancel-btn:hover {
-    background: rgba(255, 68, 68, 0.2);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .existing-courses {
@@ -267,126 +268,152 @@
 
 .existing-courses h3 {
     color: var(--primary-color);
-    margin-bottom: 1.5rem;
-    text-align: center;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
 }
 
-.courses-list {
+.careers-list {
     display: grid;
-    gap: 1.5rem;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
 }
 
-.course-item {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1.5rem;
-    transition: transform 0.3s ease;
-}
-
-.course-item:hover {
-    transform: translateY(-5px);
-}
-
-.course-content h4 {
-    color: #00ff87;
-    margin-bottom: 1rem;
-}
-
-.course-image-container {
-    margin: 1rem 0;
+.career-item {
+    background: var(--darker-bg);
+    border: 1px solid var(--primary-color);
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid rgba(0, 255, 135, 0.2);
+    transition: all 0.3s ease;
 }
 
-.course-image {
+.career-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 255, 135, 0.2);
+}
+
+.career-image-container {
     width: 100%;
     height: 200px;
+    overflow: hidden;
+}
+
+.career-image {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
 }
 
-.course-image:hover {
-    transform: scale(1.05);
+.career-image:hover {
+    transform: scale(1.1);
 }
 
-.course-content p {
+.career-content {
+    padding: 1.5rem;
+}
+
+.career-content h4 {
+    color: var(--primary-color);
     margin-bottom: 1rem;
-    color: rgba(255, 255, 255, 0.8);
 }
 
-.course-content ul {
+.career-content p {
+    color: var(--text-light);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.career-content ul {
     list-style: none;
     padding: 0;
-    margin: 0 0 1rem 0;
+    margin: 1rem 0;
 }
 
-.course-content li {
+.career-content li {
+    color: var(--text-light);
     margin-bottom: 0.5rem;
     padding-left: 1.5rem;
     position: relative;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
 }
 
-.course-content li:before {
+.career-content li:before {
     content: "•";
-    color: #00ff87;
+    color: var(--primary-color);
     position: absolute;
     left: 0;
+    font-size: 1.2rem;
 }
 
-.course-actions {
+.career-actions {
+    padding: 1rem 1.5rem;
     display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
     justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .action-btn {
     width: 36px;
     height: 36px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    background: transparent;
 }
 
 .action-btn.edit {
-    background: #00ff87;
-    color: #000;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
 }
 
 .action-btn.delete {
-    background: #ff4444;
-    color: #fff;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
 }
 
 .action-btn.edit:hover {
-    background: #00cc6a;
-    transform: scale(1.1);
+    background: var(--primary-color);
+    color: black;
 }
 
 .action-btn.delete:hover {
-    background: #ff3333;
-    transform: scale(1.1);
+    background: var(--danger-color);
+    color: white;
 }
 
 .action-btn i {
     font-size: 1rem;
 }
 
+.loading,
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-light);
+}
+
+.loading i {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.required {
+    color: var(--danger-color);
+    margin-left: 0.25rem;
+}
+
 @media (max-width: 768px) {
     .career-container {
-        padding: 10px;
+        padding: 1rem;
     }
 
-    .courses-list {
+    .careers-list {
         grid-template-columns: 1fr;
     }
 
@@ -401,767 +428,63 @@
 
     .image-upload-container {
         min-height: 150px;
+        max-height: 250px;
+        padding: 1rem;
     }
 
-    .course-item {
-        margin-bottom: 20px;
+    .image-preview img {
+        max-height: 150px;
     }
 
-    .course-image {
-        height: 150px;
-    }
-}
-
-@media (max-width: 576px) {
-    .btn {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
-    }
-
-    .course-image {
-        height: 120px;
-    }
-}
-
-.career-image-container {
-    margin: 1rem 0;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid rgba(0, 255, 135, 0.2);
-}
-
-.career-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.career-image:hover {
-    transform: scale(1.05);
-}
-
-.careers-list {
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-}
-
-.career-item {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    transition: all 0.3s ease;
-}
-
-.career-item:hover {
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    background: var(--darker-bg);
-}
-
-.career-content {
-    margin-bottom: 20px;
-}
-
-.career-content h4 {
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-}
-
-.career-content p {
-    color: var(--text-color);
-    margin-bottom: 1rem;
-}
-
-.career-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.edit-btn,
-.delete-btn {
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin: 0;
-}
-
-.edit-btn {
-    background: rgba(0, 255, 135, 0.1);
-    border: 1px solid rgba(0, 255, 135, 0.3);
-    color: #00ff87;
-}
-
-.delete-btn {
-    background: rgba(255, 59, 59, 0.1);
-    border: 1px solid rgba(255, 59, 59, 0.3);
-    color: #ff3b3b;
-}
-
-.edit-btn:hover {
-    background: rgba(0, 255, 135, 0.2);
-    border-color: #00ff87;
-    transform: scale(1.1);
-}
-
-.delete-btn:hover {
-    background: rgba(255, 59, 59, 0.2);
-    border-color: #ff3b3b;
-    transform: scale(1.1);
-}
-
-/* Points Container Styling */
-.points-container {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: rgba(0, 255, 135, 0.05);
-    border-radius: 8px;
-    border: 1px solid rgba(0, 255, 135, 0.2);
-}
-
-.points-container .form-control {
-    background-color: var(--darker-bg) !important;
-    border: 1px solid var(--primary-color) !important;
-    color: #ffffff !important;
-}
-
-.points-container .form-control:focus {
-    background-color: var(--darker-bg) !important;
-    border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 0.25rem rgba(0, 255, 135, 0.25) !important;
-    color: #ffffff !important;
-}
-
-.point-input-group {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.point-input-group .btn {
-    background-color: var(--darker-bg) !important;
-    border: 1px solid var(--primary-color) !important;
-    color: var(--primary-color) !important;
-}
-
-.point-input-group .btn:hover {
-    background-color: var(--primary-color) !important;
-    color: var(--darker-bg) !important;
-}
-
-.point-input-group .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* Hide the default file input button */
-input[type="file"] {
-    color: transparent;
-}
-
-input[type="file"]::-webkit-file-upload-button {
-    visibility: hidden;
-}
-
-/* Custom styles for the file input */
-input[type="file"]::before {
-    content: 'Select File';
-    display: inline-block;
-    background: var(--primary-color);
-    color: var(--text-light);
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.card-img-wrapper img {
-    transition: transform 0.3s ease;
-}
-
-.card-img-wrapper:hover img {
-    transform: scale(1.05);
-}
-
-/* Custom file input styling */
-.custom-file-input {
-    color: transparent;
-}
-
-.custom-file-input::-webkit-file-upload-button {
-    visibility: hidden;
-}
-
-.custom-file-input::before {
-    content: 'Select File';
-    display: inline-block;
-    background: var(--primary-color);
-    color: var(--text-light);
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.custom-file-input:hover::before {
-    background: var(--primary-dark);
-}
-
-.custom-file-button {
-    background-color: var(--primary-color);
-    color: black;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 15px;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.custom-file-button:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 255, 135, 0.2);
-}
-
-/* Card styling */
-.career-card {
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.career-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Custom button styling */
-.custom-btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    transition: all 0.3s ease;
-}
-
-.custom-btn-primary:hover:not(:disabled) {
-    background-color: var(--primary-dark);
-    border-color: var(--primary-dark);
-    transform: translateY(-1px);
-}
-
-/* Card styles for existing careers */
-.career-card {
-    background-color: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(0, 255, 135, 0.2);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 4px rgba(0, 255, 135, 0.1);
-    transition: all 0.3s ease;
-}
-
-.career-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 0 8px rgba(0, 255, 135, 0.2);
-    border: 1px solid rgba(0, 255, 135, 0.4);
-}
-
-.career-card .card-img-wrapper {
-    border-bottom: 1px solid rgba(0, 255, 135, 0.2);
-}
-
-.career-card .card-body {
-    color: var(--text-light);
-}
-
-.career-card .card-footer {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(0, 255, 135, 0.2);
-}
-
-.custom-btn-outline {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-    transition: all 0.3s ease;
-}
-
-.custom-btn-outline:hover:not(:disabled) {
-    background-color: var(--primary-color);
-    color: var(--text-light);
-    transform: translateY(-1px);
-}
-
-.custom-btn-danger {
-    background-color: var(--danger-color);
-    border-color: var(--danger-color);
-    transition: all 0.3s ease;
-}
-
-.custom-btn-danger:hover:not(:disabled) {
-    background-color: #bb2d3b;
-    border-color: #b02a37;
-    transform: translateY(-1px);
-}
-
-.custom-btn-light {
-    background-color: var(--text-light);
-    border-color: var(--text-light);
-    color: var(--primary-color);
-    transition: all 0.3s ease;
-}
-
-.custom-btn-light:hover:not(:disabled) {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: var(--darker-bg);
-    transform: translateY(-1px);
-}
-
-/* Form control styling */
-.form-control:focus {
-    border-color: var(--primary-light);
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-/* Override Bootstrap Form Control Styles */
-.form-control {
-    border: 1px solid rgba(0, 255, 135, 0.2);
-    background: rgba(0, 0, 0, 0.2);
-    color: #fff;
-}
-
-.form-control:focus {
-    background: rgba(0, 0, 0, 0.3);
-    border-color: #00ff87;
-    box-shadow: 0 0 0 2px rgba(0, 255, 135, 0.2);
-    color: #fff;
-}
-
-.form-select {
-    background-color: var(--darker-bg);
-    color: var(--text-color);
-    border: 1px solid var(--primary-color);
-    border-radius: 4px;
-    padding: 0.75rem;
-    width: 100%;
-    font-size: 1rem;
-}
-
-.form-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 1px var(--primary-color);
-}
-
-.form-select option {
-    background-color: var(--darker-bg);
-    color: var(--text-color);
-    padding: 0.75rem;
-}
-
-/* Override Bootstrap Button Styles */
-.btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: black;
-    font-weight: 500;
-}
-
-.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
-    background-color: var(--primary-dark) !important;
-    border-color: var(--primary-dark) !important;
-    color: black !important;
-    box-shadow: 0 4px 8px rgba(0, 255, 135, 0.2) !important;
-    transform: translateY(-2px);
-}
-
-.btn-success {
-    background-color: #00ff87 !important;
-    border-color: #00ff87 !important;
-    color: #000 !important;
-}
-
-.btn-success:hover {
-    background-color: #00cc6a !important;
-    border-color: #00cc6a !important;
-}
-
-.btn-outline-success {
-    color: #00ff87 !important;
-    border-color: #00ff87 !important;
-}
-
-.btn-outline-success:hover {
-    background-color: #00ff87 !important;
-    color: #000 !important;
-}
-
-.btn-outline-danger {
-    color: #ff4444 !important;
-    border-color: #ff4444 !important;
-}
-
-.btn-outline-danger:hover {
-    background-color: #ff4444 !important;
-    color: #fff !important;
-}
-
-.btn-danger {
-    background-color: var(--danger-color);
-    border-color: var(--danger-color);
-}
-
-.btn-danger:hover, .btn-danger:focus, .btn-danger:active {
-    background-color: #cc0000 !important;
-    border-color: #cc0000 !important;
-    box-shadow: 0 4px 8px rgba(255, 68, 68, 0.2) !important;
-    transform: translateY(-2px);
-}
-
-.btn-secondary {
-    background-color: rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active {
-    background-color: rgba(0, 0, 0, 0.6) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
-    transform: translateY(-2px);
-}
-
-/* Career details styling */
-.career-details {
-    background-color: var(--text-light);
-    border-radius: 4px;
-    padding: 0.5rem;
-    margin-top: 1rem;
-    border: 1px solid var(--primary-light);
-}
-
-.career-details strong {
-    color: var(--primary-color);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .career-container {
-        padding: 10px;
-    }
-}
-
-.required {
-    color: var(--primary-color);
-    margin-left: 4px;
-    }
-
-.card {
-    background-color: #070707 !important;
-    border: 1px solid #00ff87 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 135, 0.1);
-    transition: all 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 20px rgba(0, 255, 135, 0.2);
-}
-
-.form-control, .form-select {
-    background-color: #111 !important;
-    border: 1px solid #00ff87 !important;
-    color: white !important;
-}
-
-.form-control:focus, .form-select:focus {
-    box-shadow: 0 0 0 0.2rem rgba(0, 255, 135, 0.25);
-}
-
-.btn-success {
-    background-color: #00ff87 !important;
-    border-color: #00ff87 !important;
-    color: #000 !important;
-}
-
-.btn-success:hover {
-    background-color: #00cc6a !important;
-    border-color: #00cc6a !important;
-}
-
-.btn-outline-success {
-    color: #00ff87 !important;
-    border-color: #00ff87 !important;
-}
-
-.btn-outline-success:hover {
-    background-color: #00ff87 !important;
-    color: #000 !important;
-}
-
-.btn-outline-danger {
-    color: #ff4444 !important;
-    border-color: #ff4444 !important;
-}
-
-.btn-outline-danger:hover {
-    background-color: #ff4444 !important;
-    color: #fff !important;
-}
-
-.image-upload-container {
-    border: 2px dashed #00ff87;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    background-color: rgba(0, 255, 135, 0.05);
-    transition: all 0.3s ease;
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.image-upload-container:hover {
-    background-color: rgba(0, 255, 135, 0.1);
-    border-color: #00cc6a;
-}
-
-.upload-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #00ff87;
-}
-
-.upload-icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
-}
-
-.preview-container {
-    width: 100%;
-    max-height: 300px;
-    overflow: hidden;
-    border-radius: 8px;
-}
-
-.preview-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.career-image {
-    height: 200px;
-    object-fit: cover;
-}
-
-.points-list {
-    list-style-type: none;
-    padding-left: 0;
-    margin-top: 10px;
-    margin-bottom: 0;
-}
-
-.points-list li {
-    padding: 5px 0;
-    color: #fff;
-    position: relative;
-    padding-left: 20px;
-}
-
-.points-list li::before {
-    content: "•";
-    color: #00ff87;
-    position: absolute;
-    left: 0;
-    font-size: 1.2em;
-}
-
-.alert-success {
-    background-color: rgba(0, 255, 135, 0.1) !important;
-    border-color: #00ff87 !important;
-    color: #00ff87 !important;
-}
-
-.alert-danger {
-    background-color: rgba(255, 68, 68, 0.1) !important;
-    border-color: #ff4444 !important;
-    color: #ff4444 !important;
-}
-
-/* Text Colors */
-.card-title, 
-.card-text, 
-.form-label,
-p,
-h1, h2, h3, h4, h5, h6,
-.btn-link {
-    color: #ffffff !important;
-}
-
-.text-muted {
-    color: rgba(255, 255, 255, 0.6) !important;
-}
-
-/* Textarea specific */
-textarea.form-control {
-    background-color: var(--darker-bg) !important;
-    color: #ffffff !important;
-}
-
-/* Select specific */
-select.form-select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300ff87' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
-}
-
-/* Table text colors if any */
-.table {
-    color: #ffffff !important;
-}
-
-.table td, 
-.table th {
-    color: #ffffff !important;
-}
-
-/* Alert text colors */
-.alert {
-    background-color: var(--darker-bg) !important;
-    border-color: var(--primary-color) !important;
-    color: #ffffff !important;
-}
-
-.alert-success {
-    background-color: rgba(0, 255, 135, 0.1) !important;
-    border-color: var(--primary-color) !important;
-    color: #ffffff !important;
-}
-
-.alert-danger {
-    background-color: rgba(255, 59, 59, 0.1) !important;
-    border-color: #ff3b3b !important;
-    color: #ffffff !important;
-}
-
-.card-footer .btn i {
-    font-weight: 900;
-    font-size: 1rem;
-}
-
-.card-footer .btn-primary i {
-    color: #ffffff;
-}
-
-.card-footer .btn-danger i {
-    color: #ffffff;
-}
-
-.btn-primary {
-    color: #000 !important;
-    font-weight: 600;
-}
-
-.btn-primary:hover {
-    color: #000 !important;
-    background-color: rgba(0, 255, 135, 0.8) !important;
-}
-
-.career-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-.career-card {
-    height: 100%;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.career-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.career-card .card-img-top {
-    height: 200px;
-    object-fit: cover;
-}
-
-.points-list {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-}
-
-.points-list ul {
-    margin: 10px 0 0;
-    padding-left: 20px;
-}
-
-.points-list li {
-    margin-bottom: 5px;
-    color: #666;
-}
-
-/* Form Styling */
-.form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-.btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-
-.btn-danger:hover {
-    background-color: #bb2d3b;
-    border-color: #b02a37;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 992px) {
-    .career-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
-}
-
-@media (max-width: 576px) {
-    .career-admin-container {
-        padding: 10px;
-    }
-
-    .career-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .point-input-group {
+    .point-input-container {
         flex-direction: column;
+        gap: 0.5rem;
     }
 
-    .point-actions {
+    .point-input-container input {
         width: 100%;
-        justify-content: flex-end;
+    }
+
+    .remove-point-btn,
+    .add-point-btn {
+        width: 100%;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px; /* Prevents zoom on mobile */
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .career-container {
+        padding: 0.5rem;
+    }
+
+    .image-upload-container {
+        min-height: 120px;
+        max-height: 200px;
+        padding: 0.5rem;
+    }
+
+    .upload-label i {
+        font-size: 2rem;
+    }
+
+    .upload-label p {
+        font-size: 0.9rem;
+    }
+
+    .image-preview img {
+        max-height: 120px;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
     }
 }

@@ -31,7 +31,7 @@ const ServiceContent = () => {
             }
         } catch (err) {
             console.error('Error fetching contents:', err);
-            setError(err.userMessage || 'Failed to fetch contents');
+            setError(err.response?.data?.message || 'Failed to fetch contents');
         } finally {
             setLoading(false);
         }
@@ -47,6 +47,8 @@ const ServiceContent = () => {
             ...prev,
             [name]: value
         }));
+        // Clear error when user starts typing
+        setError(null);
     };
 
     const compressImage = async (file) => {
@@ -98,6 +100,7 @@ const ServiceContent = () => {
                 const compressedFile = await compressImage(file);
                 setFormData(prev => ({ ...prev, image: compressedFile }));
                 setPreviewImage(URL.createObjectURL(compressedFile));
+                setError(null);
             } catch (error) {
                 console.error('Error processing image:', error);
                 setError('Error processing image. Please try again.');
@@ -105,7 +108,6 @@ const ServiceContent = () => {
         }
     };
 
-    // Helper functions for drag and drop
     const handleDrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -121,7 +123,7 @@ const ServiceContent = () => {
         e.stopPropagation();
     };
 
-    const handleContainerClick = (e) => {
+    const handleContainerClick = () => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
@@ -133,13 +135,16 @@ const ServiceContent = () => {
         const newPoints = [...formData.points];
         newPoints[index] = value;
         setFormData(prev => ({ ...prev, points: newPoints }));
+        setError(null);
     };
 
     const addNewPoint = () => {
-        setFormData(prev => ({
-            ...prev,
-            points: [...prev.points, '']
-        }));
+        if (formData.points.length < 10) {
+            setFormData(prev => ({
+                ...prev,
+                points: [...prev.points, '']
+            }));
+        }
     };
 
     const deletePoint = (indexToDelete) => {
@@ -166,17 +171,31 @@ const ServiceContent = () => {
     const handleEdit = (content) => {
         setEditingId(content._id);
         setFormData({
-            title: content.title,
-            description: content.description,
+            title: content.title || '',
+            description: content.description || '',
             image: null,
-            points: content.points || ['', '', '', ''] // Handle existing points
+            points: Array.isArray(content.points) && content.points.length >= 4 ? 
+                content.points : ['', '', '', '']
         });
-        setPreviewImage(content.image.startsWith('http') ? content.image : `${UPLOAD_URLS.SERVICES}/${content.image}`);
+        setPreviewImage(getImageUrl(content.image));
+        setError(null);
         window.scrollTo(0, 0);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Validate form data
+        if (!formData.title?.trim()) {
+            setError('Title is required');
+            return;
+        }
+
+        if (!formData.description?.trim()) {
+            setError('Description is required');
+            return;
+        }
+
         if (!editingId && !formData.image) {
             setError('Please select an image');
             return;
@@ -194,15 +213,16 @@ const ServiceContent = () => {
 
         try {
             // Create FormData object
-            const formDataToSend = new FormData();
-            formDataToSend.append('title', formData.title);
-            formDataToSend.append('description', formData.description);
+            const data = new FormData();
+            data.append('title', formData.title.trim());
+            data.append('description', formData.description.trim());
             
-            // Append points as a JSON string
-            formDataToSend.append('points', JSON.stringify(formData.points.filter(point => point.trim() !== '')));
+            // Filter out empty points and append
+            data.append('points', JSON.stringify(validPoints));
             
+            // Only append image if it exists (required for new content or optional for edit)
             if (formData.image) {
-                formDataToSend.append('image', formData.image);
+                data.append('image', formData.image);
             }
 
             const config = {
@@ -211,63 +231,66 @@ const ServiceContent = () => {
                 }
             };
 
+            let response;
             if (editingId) {
-                // Update existing content
-                await axiosInstance.put(
+                response = await axiosInstance.put(
                     `${ENDPOINTS.SERVICE_CONTENT}/${editingId}`, 
-                    formDataToSend, 
+                    data,
                     config
                 );
-                setError({ text: 'Content updated successfully!', type: 'success' });
+                console.log('Content updated successfully:', response.data);
             } else {
-                // Create new content
-                await axiosInstance.post(
+                response = await axiosInstance.post(
                     ENDPOINTS.SERVICE_CONTENT, 
-                    formDataToSend, 
+                    data,
                     config
                 );
-                setError({ text: 'Content added successfully!', type: 'success' });
+                console.log('Content created successfully:', response.data);
             }
 
-            // Reset form
+            // Reset form and refresh list
             resetForm();
+            await fetchContents();
             
-            // Refresh contents list
-            fetchContents();
+            // Show success message
+            setError({
+                type: 'success',
+                text: `Content ${editingId ? 'updated' : 'added'} successfully!`
+            });
         } catch (err) {
-            console.error(editingId ? 'Error updating content:' : 'Error adding content:', err);
-            setError(err.userMessage || (editingId ? 'Failed to update content' : 'Failed to add content'));
+            console.error('Error submitting content:', err);
+            setError(
+                err.response?.data?.message || 
+                err.message || 
+                `Failed to ${editingId ? 'update' : 'add'} content`
+            );
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this content?')) {
-            try {
-                setLoading(true);
-                await axiosInstance.delete(`${ENDPOINTS.SERVICE_CONTENT}/${id}`);
-                setError({ text: 'Content deleted successfully!', type: 'success' });
-                fetchContents();
-            } catch (err) {
-                console.error('Error deleting content:', err);
-                setError(err.userMessage || 'Failed to delete content');
-            } finally {
-                setLoading(false);
-            }
+        if (!window.confirm('Are you sure you want to delete this content?')) return;
+        
+        try {
+            setLoading(true);
+            await axiosInstance.delete(`${ENDPOINTS.SERVICE_CONTENT}/${id}`);
+            await fetchContents();
+            setError({
+                type: 'success',
+                text: 'Content deleted successfully!'
+            });
+        } catch (err) {
+            console.error('Error deleting content:', err);
+            setError(err.response?.data?.message || 'Failed to delete content');
+        } finally {
+            setLoading(false);
         }
     };
 
     const getImageUrl = (imagePath) => {
         if (!imagePath) return 'https://via.placeholder.com/400x300?text=Service+Image';
-        
-        // If the image path already contains the full URL, use it as is
-        if (imagePath.startsWith('http')) {
-            return imagePath;
-        }
-        
-        // If it's just a filename, construct the full URL
-        return `${UPLOAD_URLS.SERVICES}/${imagePath}`;
+        return imagePath.startsWith('http') ? imagePath : `${UPLOAD_URLS.SERVICES}/${imagePath}`;
     };
 
     return (
@@ -354,10 +377,10 @@ const ServiceContent = () => {
                                             value={point}
                                             onChange={(e) => handlePointChange(index, e.target.value)}
                                             placeholder={`Point ${index + 1}`}
-                                            required
+                                            required={index < 4}
                                             disabled={loading}
                                         />
-                                        {formData.points.length > 4 && (
+                                        {index >= 4 && (
                                             <Button
                                                 variant="danger"
                                                 onClick={() => deletePoint(index)}
@@ -369,23 +392,26 @@ const ServiceContent = () => {
                                         )}
                                     </div>
                                 ))}
-                                <Button
-                                    variant="success"
-                                    onClick={addNewPoint}
-                                    disabled={loading}
-                                    className="mt-2"
-                                >
-                                    <i className="fas fa-plus me-2"></i>
-                                    Add More Point
-                                </Button>
+                                {formData.points.length < 10 && (
+                                    <Button
+                                        variant="success"
+                                        onClick={addNewPoint}
+                                        disabled={loading}
+                                        className="mt-2"
+                                    >
+                                        <i className="fas fa-plus me-2"></i>
+                                        Add More Point
+                                    </Button>
+                                )}
                             </div>
                         </Form.Group>
 
                         <div className="d-flex gap-2">
                             <Button 
                                 type="submit" 
-                                style={{ backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)', color: '#000' }}
+                                variant="primary"
                                 disabled={loading}
+                                className="flex-grow-1"
                             >
                                 {loading ? (
                                     <>
@@ -395,13 +421,12 @@ const ServiceContent = () => {
                                             size="sm"
                                             className="me-2"
                                         />
-                                        Processing...
+                                        {editingId ? 'Updating...' : 'Creating...'}
                                     </>
                                 ) : (
-                                    editingId ? 'Update Content' : 'Add Content'
+                                    editingId ? 'Update Content' : 'Create Content'
                                 )}
                             </Button>
-
                             {editingId && (
                                 <Button 
                                     variant="secondary"
@@ -417,65 +442,65 @@ const ServiceContent = () => {
             </Card>
 
             <Card>
-                <Card.Header className="d-flex justify-content-between align-items-center">
-                    <h3 className="mb-0">Existing Content</h3>
-                    <Button 
-                        style={{ backgroundColor: 'var(--primary-color)', borderColor: 'var(--primary-color)', color: '#000' }}
-                        onClick={fetchContents}
-                        disabled={loading}
-                    >
-                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
-                    </Button>
+                <Card.Header>
+                    <h4 className="mb-0">Service Contents</h4>
                 </Card.Header>
                 <Card.Body>
-                    {loading ? (
-                        <div className="text-center py-5">
-                            <Spinner animation="border" variant="primary" />
-                            <p className="mt-2">Loading contents...</p>
+                    {loading && !contents.length ? (
+                        <div className="text-center py-4">
+                            <Spinner animation="border" />
                         </div>
                     ) : contents.length === 0 ? (
-                        <div className="text-center py-5 text-muted">
-                            <i className="fas fa-inbox fa-3x mb-3"></i>
-                            <p>No contents available</p>
+                        <div className="text-center py-4">
+                            <p className="mb-0">No service contents found</p>
                         </div>
                     ) : (
                         <Row xs={1} md={2} lg={3} className="g-4">
                             {contents.map(content => (
                                 <Col key={content._id}>
-                                    <Card className="h-100 service-content-card">
-                                        <div className="card-img-wrapper" style={{ height: '200px', overflow: 'hidden' }}>
-                                            <Card.Img
-                                                variant="top"
+                                    <Card className="h-100 content-card">
+                                        <div className="card-img-wrapper">
+                                            <Card.Img 
+                                                variant="top" 
                                                 src={getImageUrl(content.image)}
                                                 alt={content.title}
                                                 onError={(e) => {
                                                     e.target.onerror = null;
                                                     e.target.src = 'https://via.placeholder.com/400x300?text=Service+Image';
                                                 }}
-                                                style={{ height: '100%', objectFit: 'cover' }}
                                             />
                                         </div>
                                         <Card.Body>
                                             <Card.Title>{content.title}</Card.Title>
                                             <Card.Text>{content.description}</Card.Text>
+                                            {Array.isArray(content.points) && content.points.length > 0 && (
+                                                <div className="points-list">
+                                                    <strong>Points:</strong>
+                                                    <ul>
+                                                        {content.points.map((point, index) => (
+                                                            <li key={index}>{point}</li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </Card.Body>
                                         <Card.Footer className="d-flex justify-content-end gap-2">
-                                            <button
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
                                                 onClick={() => handleEdit(content)}
-                                                className="action-btn edit"
-                                                title="Edit"
                                                 disabled={loading}
                                             >
-                                                <i className="fas fa-edit"></i>
-                                            </button>
-                                            <button
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                size="sm"
                                                 onClick={() => handleDelete(content._id)}
-                                                className="action-btn delete"
-                                                title="Delete"
                                                 disabled={loading}
                                             >
-                                                <i className="fas fa-trash"></i>
-                                            </button>
+                                                Delete
+                                            </Button>
                                         </Card.Footer>
                                     </Card>
                                 </Col>
