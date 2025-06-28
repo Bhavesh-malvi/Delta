@@ -134,27 +134,16 @@
 }
 
 .contact-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    color: #ffffff;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.contact-item:hover {
-    color: #00ff87;
+    transition: all 0.3s ease ;
+    position: relative;
+    display: flex ;
+    gap: 1.5rem ;
 }
 
 .contact-item i {
     color: #00ff87;
     font-size: 1.2rem;
     margin-top: 4px;
-}
-
-.contact-item.address {
-    max-width: 300px;
-    line-height: 1.6;
 }
 
 .footer-bottom {
@@ -218,11 +207,6 @@
         font-size: 1.4rem;
     }
 
-    .contact-item.address {
-        max-width: 250px;
-        margin: 0 auto;
-    }
-
     .footer-bottom {
         flex-direction: column-reverse;
         gap: 20px;
@@ -238,9 +222,4 @@
     .footer-title {
         font-size: 28px;
     }
-
-    .contact-item.address {
-        max-width: 100%;
-        padding: 0 10px;
-    }
-} 
+}

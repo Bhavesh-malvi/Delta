@@ -33,18 +33,18 @@ const Footer = () => {
                 <div className="footer-right">
                     <h3>Reach Us</h3>
                     <div className="contact-info">
-                        <a href="mailto:info@deltawaresolution.com" className="contact-item">
+                        <p className="contact-item1">
                             <i className="fas fa-envelope"></i>
                             info@deltawaresolution.com
-                        </a>
-                        <div className="contact-item address">
+                        </p>
+                        <p className="contact-item1">
                             <i className="fas fa-map-marker-alt"></i>
                             Kalu kuwan, Infront of natraj gali, Banda, Uttar Pradesh 210001
-                        </div>
-                        <a href="tel:+919250534906" className="contact-item">
+                        </p>
+                        <p className="contact-item1">
                             <i className="fas fa-phone"></i>
                             +91 9250534906
-                        </a>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -57,4 +57,4 @@ const Footer = () => {
     );
 };
 
-export default Footer; 
+export default Footer;
