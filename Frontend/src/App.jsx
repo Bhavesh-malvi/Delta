@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Home from './Pages/Home/Home';
 import About from './Pages/About/About';
@@ -12,6 +12,7 @@ import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute';
 import Navbar from './Components/Navbar/Navbar';
 import Footer from './Components/Footer/Footer';
 import ScrollToTop from './Components/ScrollToTop/ScrollToTop';
+import LandingPage from './Components/LandingPage/LandingPage';
 import { API_BASE_URL } from './config/api';
 import './index.css';
 
@@ -62,15 +63,24 @@ const AppLayout = () => {
 };
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true);
+
   // Log the API configuration for verification
   console.log('🚀 Frontend deployed to: https://delta-frco.vercel.app');
   console.log('🔗 Backend API URL: ', API_BASE_URL);
   console.log('✅ API Configuration loaded successfully');
 
+  const handleLandingComplete = () => {
+    setShowLanding(false);
+  };
+
   return (
-    <Router>
-      <AppLayout />
-    </Router>
+    <>
+      {showLanding && <LandingPage onComplete={handleLandingComplete} />}
+      <Router>
+        <AppLayout />
+      </Router>
+    </>
   );
 }
 
