@@ -57,22 +57,36 @@ if (hasIssues) {
 }
 
 // Configure Cloudinary
+let cloudinaryConfigured = false;
+
 try {
+    // Check if all required variables are present
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        throw new Error('Missing required Cloudinary environment variables');
+    }
+
     cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME.trim(),
+        api_key: process.env.CLOUDINARY_API_KEY.trim(),
+        api_secret: process.env.CLOUDINARY_API_SECRET.trim()
     });
     
     // Test the configuration
-    cloudinary.api.ping()
-        .then(() => console.log('✅ Cloudinary connection test successful'))
-        .catch(error => console.error('❌ Cloudinary connection test failed:', error.message));
+    cloudinaryConfigured = true;
+    console.log('✅ Cloudinary configured successfully');
 } catch (error) {
     console.error('❌ Error configuring Cloudinary:', error.message);
+    console.error('Current environment variables:');
+    console.error('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Not Set');
+    console.error('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? 'Set' : 'Not Set');
+    console.error('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Not Set');
 }
 
 export const uploadToCloudinary = async (buffer, folder = 'delta/services') => {
+    if (!cloudinaryConfigured) {
+        throw new Error('Cloudinary is not properly configured. Please check environment variables.');
+    }
+
     if (!buffer) {
         throw new Error('No buffer provided for upload');
     }
@@ -82,21 +96,45 @@ export const uploadToCloudinary = async (buffer, folder = 'delta/services') => {
         const b64 = Buffer.from(buffer).toString('base64');
         const dataURI = `data:image/jpeg;base64,${b64}`;
         
-        const result = await cloudinary.uploader.upload(dataURI, {
+        const uploadOptions = {
             folder: folder,
-            resource_type: 'auto'
-        });
+            resource_type: 'auto',
+            timeout: 60000 // 60 seconds timeout
+        };
+
+        console.log('Attempting to upload to Cloudinary...');
+        const result = await cloudinary.uploader.upload(dataURI, uploadOptions);
         
-        console.log('Cloudinary upload successful. URL:', result.secure_url);
+        if (!result || !result.secure_url) {
+            throw new Error('Upload successful but no URL returned');
+        }
+
+        console.log('✅ Cloudinary upload successful:', {
+            publicId: result.public_id,
+            url: result.secure_url,
+            format: result.format,
+            size: result.bytes
+        });
+
         return result.secure_url;
     } catch (error) {
-        console.error('Error uploading to Cloudinary:', error);
-        console.error('Error details:', {
+        console.error('❌ Error uploading to Cloudinary:', {
             name: error.name,
             message: error.message,
-            code: error.http_code
+            code: error.http_code,
+            stack: error.stack
         });
-        throw new Error(`Cloudinary upload failed: ${error.message}`);
+
+        // Provide more specific error messages
+        if (error.http_code === 401) {
+            throw new Error('Authentication failed. Please check Cloudinary credentials.');
+        } else if (error.http_code === 403) {
+            throw new Error('Permission denied. Please check Cloudinary account permissions.');
+        } else if (error.message.includes('timeout')) {
+            throw new Error('Upload timed out. Please try again.');
+        } else {
+            throw new Error(`Cloudinary upload failed: ${error.message}`);
+        }
     }
 };
 
