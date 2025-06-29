@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { homeContent2 } from "../../assets/assets.js";
 import "./StatsSection.css";
 import { FaProjectDiagram, FaSmile } from "react-icons/fa";
-import axiosInstance from '../../config/api';
+import axiosInstance, { ENDPOINTS } from '../../config/api';
 
 const StatsSection = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -16,7 +16,7 @@ const StatsSection = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await axiosInstance.get('/stats');
+                const response = await axiosInstance.get(ENDPOINTS.STATS);
                 if (response.data && response.data.success) {
                     setRealCustomerCount(response.data.data.displayedCount);
                 }

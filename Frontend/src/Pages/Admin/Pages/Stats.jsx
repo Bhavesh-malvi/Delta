@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../../config/api';
+import axiosInstance, { ENDPOINTS } from '../../../config/api';
 import './Stats.css';
 
 const Stats = () => {
@@ -16,38 +16,33 @@ const Stats = () => {
     const fetchStats = async () => {
         try {
             setLoading(true);
-            const response = await axiosInstance.get('/stats');
+            const response = await axiosInstance.get(ENDPOINTS.STATS);
             if (response.data.success) {
                 setStats(response.data.data);
             }
         } catch (error) {
-            setError('Failed to fetch stats');
-            console.error('Error fetching stats:', error);
+            console.error("Error fetching stats:", error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleUpdateStats = async (e) => {
-        e.preventDefault();
+    const handleUpdate = async () => {
         try {
-            setLoading(true);
-            const response = await axiosInstance.put('/stats/update', {
-                customerCount: parseInt(newCount)
+            const response = await axiosInstance.put(`${ENDPOINTS.STATS}/update`, {
+                displayedCount: parseInt(newCount)
             });
-            
             if (response.data.success) {
                 setStats(response.data.data);
-                setSuccessMessage('Stats updated successfully!');
                 setNewCount('');
+                setSuccessMessage('Stats updated successfully');
                 setTimeout(() => setSuccessMessage(''), 3000);
             }
         } catch (error) {
-            setError('Failed to update stats');
-            console.error('Error updating stats:', error);
-            setTimeout(() => setError(null), 3000);
-        } finally {
-            setLoading(false);
+            console.error("Error updating stats:", error);
+            setError(error.message);
+            setTimeout(() => setError(''), 3000);
         }
     };
 
@@ -69,7 +64,7 @@ const Stats = () => {
                 <p>Last Updated: {stats?.lastManualUpdate ? new Date(stats.lastManualUpdate).toLocaleString() : 'Never'}</p>
             </div>
 
-            <form onSubmit={handleUpdateStats} className="stats-admin-form">
+            <form onSubmit={handleUpdate} className="stats-admin-form">
                 <h3>Update Customer Count</h3>
                 <div className="form-group">
                     <label htmlFor="customerCount">New Customer Count:</label>

@@ -8,7 +8,7 @@
     ],
     "routes": [
         {
-            "src": "/api/(.*)",
+            "src": "/api/v1/(.*)",
             "methods": ["OPTIONS"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
@@ -21,7 +21,7 @@
             "continue": true
         },
         {
-            "src": "/api/(.*)",
+            "src": "/api/v1/(.*)",
             "dest": "index.js",
             "headers": {
                 "Access-Control-Allow-Origin": "*",

@@ -2,8 +2,8 @@
 // Frontend URL: https://deltawaresolution.com
 // Backend URL: https://delta-teal.vercel.app
 export const API_BASE_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://delta-teal.vercel.app'  // Updated to the correct Vercel backend URL
-    : 'http://localhost:5000';
+    ? 'https://delta-teal.vercel.app'  // Production URL
+    : 'http://localhost:5001';  // Updated local development port
 
 // Timeout configuration
 export const API_TIMEOUT = 60000; // 60 seconds
@@ -17,15 +17,16 @@ export const RETRY_CONFIG = {
 
 // API endpoints
 export const ENDPOINTS = {
-    HOME_CONTENT: '/api/homeContent',
-    HOME_COURSE: '/api/homeCourse',
-    HOME_SERVICE: '/api/homeService',
-    SERVICE_CONTENT: '/api/serviceContent',
-    CAREER: '/api/career',
-    CONTACT: '/api/contact',
-    ENROLL: '/api/enroll',
-    HEALTH: '/api/health',
-    ENROLL_COURSE: '/api/enrollCourse'
+    HOME_CONTENT: '/api/v1/homeContent',
+    HOME_COURSE: '/api/v1/homeCourse',
+    HOME_SERVICE: '/api/v1/homeService',
+    SERVICE_CONTENT: '/api/v1/serviceContent',
+    CAREER: '/api/v1/career',
+    CONTACT: '/api/v1/contact',
+    ENROLL: '/api/v1/enroll',
+    HEALTH: '/health',
+    ENROLL_COURSE: '/api/v1/enrollCourse',
+    STATS: '/api/v1/stats'
 };
 
 // Error messages
