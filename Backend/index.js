@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import multer from 'multer';
 import './config/env.js';
 import './config/cloudinary.js';
+import dotenv from 'dotenv';
 
 // Import routes
 import homeContentRoutes from './Routes/homeContentRoutes.js';
@@ -25,6 +26,9 @@ const log = debug('app:server');
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
@@ -280,7 +284,7 @@ app.use('*', (req, res) => {
 });
 
 // Start server
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`\nServer is running on port ${PORT}`);
     console.log(`- Local: http://localhost:${PORT}`);

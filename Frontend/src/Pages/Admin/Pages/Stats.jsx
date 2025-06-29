@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Stats.css';
-import { API_BASE_URL } from '../../../config/api';
+import { API_BASE_URL, ENDPOINTS } from '../../../config/api';
 
 const Stats = () => {
     const [stats, setStats] = useState({
@@ -20,7 +20,7 @@ const Stats = () => {
 
     const fetchStats = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/stats`);
+            const response = await axios.get(`${API_BASE_URL}${ENDPOINTS.STATS}`);
             setStats(response.data);
             setFormData({
                 totalProjects: response.data.totalProjects || ''
@@ -43,7 +43,7 @@ const Stats = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`${API_BASE_URL}/api/stats`, formData);
+            await axios.put(`${API_BASE_URL}${ENDPOINTS.STATS}`, formData);
             setSuccess('Stats updated successfully');
             fetchStats();
             setTimeout(() => setSuccess(null), 3000);

@@ -3,7 +3,7 @@ import { homeContent2 } from "../../assets/assets.js";
 import "./StatsSection.css";
 import { FaProjectDiagram, FaSmile } from "react-icons/fa";
 import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, ENDPOINTS } from '../../config/api';
 
 const StatsSection = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -21,11 +21,11 @@ const StatsSection = () => {
         const fetchStats = async () => {
             try {
                 // Fetch total enrollments
-                const enrollResponse = await axios.get(`${API_BASE_URL}/api/enroll/count`);
-                const totalEnrollments = enrollResponse.data.count;
+                const enrollResponse = await axios.get(`${API_BASE_URL}${ENDPOINTS.ENROLL_COUNT}`);
+                const totalEnrollments = enrollResponse.data.count || 0;
 
                 // Fetch stats for total projects
-                const statsResponse = await axios.get(`${API_BASE_URL}/api/stats`);
+                const statsResponse = await axios.get(`${API_BASE_URL}${ENDPOINTS.STATS}`);
                 const totalProjects = statsResponse.data.totalProjects || 0;
 
                 setStats({
