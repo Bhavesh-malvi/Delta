@@ -43,7 +43,7 @@ const corsOptions = {
 // Configure multer for handling file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, 'uploads/services'));
+        cb(null, path.join('/tmp', 'uploads/services'));
     },
     filename: function (req, file, cb) {
         const uniqueName = `image-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
@@ -73,48 +73,19 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Debug middleware to log all requests
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    console.log('Request Body:', req.body);
-    console.log('Request Files:', req.files);
     console.log('Request Headers:', req.headers);
     next();
 });
 
-// Static folder for uploaded images
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Routes
-app.use('/api/v1', homeContentRoutes);
-app.use('/api/v1', homeCourseRoutes);
-app.use('/api/v1', homeServiceRoutes);
-app.use('/api/v1', serviceContentRoutes);
-app.use('/api/v1', careerRoutes);
-app.use('/api/v1', contactRoutes);
-app.use('/api/v1', enrollRoutes);
-app.use('/api/v1', enrollCourseRoutes);
-app.use('/api/v1', statsRoutes);
-
-// Root
-app.get('/', (req, res) => {
-    res.json({message: 'Welcome to the Delta API'});
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        message: 'Server is running',
-        dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-    });
-});
-
-// Test endpoint
-app.post('/api/test', (req, res) => {
-    console.log('Test endpoint hit:', req.body);
-    res.json({success: true, message: 'Test endpoint working', data: req.body});
-});
-
 // Initialize database connection
-const initializeDB = async () => {
+let isConnected = false;
+
+const connectToDatabase = async () => {
+    if (isConnected) {
+        console.log('Using existing database connection');
+        return;
+    }
+
     try {
         // Check all required environment variables
         const requiredEnvVars = [
@@ -140,9 +111,9 @@ const initializeDB = async () => {
         });
         
         console.log('MongoDB connected successfully');
+        isConnected = true;
         
-        // Initialize stats
-        console.log('Initializing stats...');
+        // Initialize stats if needed
         const Stats = (await import('./models/Stats.js')).default;
         const stats = await Stats.findOne();
         
@@ -152,39 +123,60 @@ const initializeDB = async () => {
                 displayedCount: 21
             });
             console.log('Stats initialized successfully');
-        } else {
-            console.log('Stats already exist');
         }
     } catch (error) {
-        console.error('Failed to initialize:', error);
-        throw error; // Let the error propagate up
+        console.error('Failed to connect to database:', error);
+        throw error;
     }
 };
 
-// Initialize database and stats
-initializeDB().then(() => {
-    // Mount routes after DB initialization
-    app.use('/api/v1', homeContentRoutes);
-    app.use('/api/v1', homeCourseRoutes);
-    app.use('/api/v1', homeServiceRoutes);
-    app.use('/api/v1', serviceContentRoutes);
-    app.use('/api/v1', careerRoutes);
-    app.use('/api/v1', contactRoutes);
-    app.use('/api/v1', enrollRoutes);
-    app.use('/api/v1', enrollCourseRoutes);
-    app.use('/api/v1/stats', statsRoutes);
-
-    // Start server
-    const PORT = process.env.PORT || 5001;
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-    });
-}).catch(error => {
-    console.error('Failed to start server:', error);
-    // Don't exit the process in production, let the error handler handle it
-    if (process.env.NODE_ENV !== 'production') {
-        process.exit(1);
+// Routes
+app.use('/api/v1', async (req, res, next) => {
+    try {
+        await connectToDatabase();
+        next();
+    } catch (error) {
+        next(error);
     }
+});
+
+app.use('/api/v1', homeContentRoutes);
+app.use('/api/v1', homeCourseRoutes);
+app.use('/api/v1', homeServiceRoutes);
+app.use('/api/v1', serviceContentRoutes);
+app.use('/api/v1', careerRoutes);
+app.use('/api/v1', contactRoutes);
+app.use('/api/v1', enrollRoutes);
+app.use('/api/v1', enrollCourseRoutes);
+app.use('/api/v1/stats', statsRoutes);
+
+// Root
+app.get('/', (req, res) => {
+    res.json({message: 'Welcome to the Delta API'});
+});
+
+// Health check endpoint
+app.get('/health', async (req, res) => {
+    try {
+        await connectToDatabase();
+        res.json({
+            status: 'ok',
+            message: 'Server is running',
+            dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
+// Test endpoint
+app.post('/api/test', (req, res) => {
+    console.log('Test endpoint hit:', req.body);
+    res.json({success: true, message: 'Test endpoint working', data: req.body});
 });
 
 // Error handling middleware
@@ -192,14 +184,11 @@ app.use((err, req, res, next) => {
     console.error('Error:', err);
     console.error('Stack:', err.stack);
     
-    // Check if headers have already been sent
     if (res.headersSent) {
         return next(err);
     }
     
-    // Check database connection
     const dbStatus = mongoose.connection.readyState;
-    console.log('Database connection state:', dbStatus);
     
     // Handle specific error types
     if (err.name === 'MongoServerSelectionError') {
@@ -220,7 +209,6 @@ app.use((err, req, res, next) => {
         });
     }
 
-    // Handle missing environment variables
     if (err.message && err.message.includes('Missing required environment variables')) {
         return res.status(500).json({
             success: false,
@@ -230,7 +218,6 @@ app.use((err, req, res, next) => {
         });
     }
     
-    // Send appropriate error response
     res.status(err.status || 500).json({
         success: false,
         message: err.message || 'Internal Server Error',
