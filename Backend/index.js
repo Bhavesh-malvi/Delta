@@ -116,13 +116,28 @@ app.post('/api/test', (req, res) => {
 // Initialize database connection
 const initializeDB = async () => {
     try {
-        const mongoURI = process.env.MONGODB_URI;
-        if (!mongoURI) {
-            throw new Error('MONGODB_URI environment variable is not set');
+        // Check all required environment variables
+        const requiredEnvVars = [
+            'MONGODB_URI',
+            'CLOUDINARY_CLOUD_NAME',
+            'CLOUDINARY_API_KEY',
+            'CLOUDINARY_API_SECRET'
+        ];
+
+        const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+        
+        if (missingEnvVars.length > 0) {
+            throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
         }
 
         console.log('Connecting to MongoDB...');
-        await mongoose.connect(mongoURI);
+        await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 30000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 30000,
+            keepAlive: true,
+            keepAliveInitialDelay: 300000
+        });
         
         console.log('MongoDB connected successfully');
         
@@ -142,7 +157,7 @@ const initializeDB = async () => {
         }
     } catch (error) {
         console.error('Failed to initialize:', error);
-        process.exit(1);
+        throw error; // Let the error propagate up
     }
 };
 
@@ -166,7 +181,10 @@ initializeDB().then(() => {
     });
 }).catch(error => {
     console.error('Failed to start server:', error);
-    process.exit(1);
+    // Don't exit the process in production, let the error handler handle it
+    if (process.env.NODE_ENV !== 'production') {
+        process.exit(1);
+    }
 });
 
 // Error handling middleware
@@ -198,6 +216,16 @@ app.use((err, req, res, next) => {
             success: false,
             message: 'Validation error',
             error: process.env.NODE_ENV === 'development' ? err.message : 'Invalid data provided',
+            dbConnected: dbStatus === 1
+        });
+    }
+
+    // Handle missing environment variables
+    if (err.message && err.message.includes('Missing required environment variables')) {
+        return res.status(500).json({
+            success: false,
+            message: 'Server configuration error',
+            error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
             dbConnected: dbStatus === 1
         });
     }
