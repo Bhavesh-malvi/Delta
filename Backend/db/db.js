@@ -17,9 +17,12 @@ const connectDB = async () => {
         console.log("Attempting to connect to MongoDB...");
         
         await mongoose.connect(mongoURI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
-            connectTimeoutMS: 10000
+            connectTimeoutMS: 10000,
+            family: 4  // Force IPv4
         });
         
         console.log("MongoDB connected successfully");
@@ -29,7 +32,11 @@ const connectDB = async () => {
             // Try to reconnect
             setTimeout(() => {
                 console.log('Attempting to reconnect to MongoDB...');
-                mongoose.connect(mongoURI).catch(err => {
+                mongoose.connect(mongoURI, {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true,
+                    family: 4
+                }).catch(err => {
                     console.error('Reconnection failed:', err);
                 });
             }, 5000);
@@ -40,7 +47,11 @@ const connectDB = async () => {
             // Try to reconnect
             setTimeout(() => {
                 console.log('Attempting to reconnect to MongoDB...');
-                mongoose.connect(mongoURI).catch(err => {
+                mongoose.connect(mongoURI, {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true,
+                    family: 4
+                }).catch(err => {
                     console.error('Reconnection failed:', err);
                 });
             }, 5000);

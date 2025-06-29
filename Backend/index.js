@@ -1,7 +1,13 @@
+// Load environment variables first
+import './config/env.js';
+
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
+
+// Import cloudinary config after env vars are loaded
+import './config/cloudinary.js';
 
 // Import routes
 import enrollRoutes from './Routes/enrollRoutes.js';
@@ -16,10 +22,6 @@ import statsRoutes from './Routes/statsRoutes.js';
 
 // Import database connection
 import connectDB from './db/db.js';
-
-// Load environment variables and configurations
-import './config/env.js';
-import './config/cloudinary.js';
 
 const app = express();
 
