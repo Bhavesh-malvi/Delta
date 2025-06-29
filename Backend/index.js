@@ -49,15 +49,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Mount routes
-app.use('/api/enroll', enrollRoutes);
-app.use('/api/homeContent', homeContentRoutes);
-app.use('/api/homeCourse', homeCourseRoutes);
-app.use('/api/homeService', homeServiceRoutes);
-app.use('/api/serviceContent', serviceContentRoutes);
-app.use('/api/career', careerRoutes);
-app.use('/api/contact', contactRoutes);
-app.use('/api/enrollCourse', enrollCourseRoutes);
-app.use('/api/stats', statsRoutes);
+app.use('/api/v1/enroll', enrollRoutes);
+app.use('/api/v1/homeContent', homeContentRoutes);
+app.use('/api/v1/homeCourse', homeCourseRoutes);
+app.use('/api/v1/homeService', homeServiceRoutes);
+app.use('/api/v1/serviceContent', serviceContentRoutes);
+app.use('/api/v1/career', careerRoutes);
+app.use('/api/v1/contact', contactRoutes);
+app.use('/api/v1/enrollCourse', enrollCourseRoutes);
+app.use('/api/v1/stats', statsRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
