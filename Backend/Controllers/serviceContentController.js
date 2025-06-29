@@ -199,78 +199,102 @@ export const updateServiceContent = async (req, res) => {
 // Get all service contents
 export const getAllServiceContents = async (req, res) => {
     try {
-        const contents = await ServiceContent.find().sort({ createdAt: -1 });
-        res.status(200).json({ 
-            success: true, 
+        console.log('Fetching all service contents...');
+        
+        // Check database connection
+        if (!ServiceContent.db.readyState) {
+            console.error('Database not connected. ReadyState:', ServiceContent.db.readyState);
+            return res.status(500).json({
+                success: false,
+                message: 'Database connection error. Please try again later.'
+            });
+        }
+
+        const contents = await ServiceContent.find()
+            .select('title description image points createdAt')
+            .sort({ createdAt: -1 });
+
+        console.log(`Found ${contents.length} service contents`);
+
+        if (!contents.length) {
+            return res.status(200).json({
+                success: true,
+                message: 'No service contents found',
+                data: []
+            });
+        }
+
+        res.status(200).json({
+            success: true,
             count: contents.length,
-            data: contents 
+            data: contents
         });
     } catch (error) {
         console.error('Error fetching service contents:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error fetching service contents',
-            error: error.message 
+        console.error('Error stack:', error.stack);
+        
+        // Handle mongoose errors
+        if (error.name === 'MongooseError' || error.name === 'MongoError') {
+            return res.status(500).json({
+                success: false,
+                message: 'Database error. Please try again later.'
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch service contents',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
 };
 
-// Get single content
+// Get single service content
 export const getServiceContent = async (req, res) => {
     try {
         const content = await ServiceContent.findById(req.params.id);
         if (!content) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Service content not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Service content not found'
             });
         }
-        res.status(200).json({ 
-            success: true, 
-            data: content 
+
+        res.status(200).json({
+            success: true,
+            data: content
         });
     } catch (error) {
         console.error('Error fetching service content:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error fetching service content',
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch service content',
+            error: error.message
         });
     }
 };
 
-// Delete content
+// Delete service content
 export const deleteServiceContent = async (req, res) => {
     try {
-        const content = await ServiceContent.findById(req.params.id);
+        const content = await ServiceContent.findByIdAndDelete(req.params.id);
         if (!content) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Service content not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Service content not found'
             });
         }
 
-        const imagePath = path.join('uploads/services', content.image);
-        if (content.image && fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-        }
-
-        await content.deleteOne();
-
-        console.log('Deleted service content:', {
-            id: req.params.id
-        });
-
-        res.status(200).json({ 
-            success: true, 
-            message: 'Service content deleted successfully' 
+        res.status(200).json({
+            success: true,
+            message: 'Service content deleted successfully'
         });
     } catch (error) {
         console.error('Error deleting service content:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error deleting service content',
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete service content',
+            error: error.message
         });
     }
 };
