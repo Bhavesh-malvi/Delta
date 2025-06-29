@@ -39,9 +39,9 @@ export const createEnroll = async (req, res) => {
         console.log('Creating enrollment with data:', { name, email, phone, course, message });
         
         try {
-            const enroll = new Enroll({ name, email, phone, course, message });
-            await enroll.save();
-            console.log('Enrollment saved successfully:', enroll);
+            const newEnroll = new Enroll({ name, email, phone, course, message });
+            await newEnroll.save();
+            console.log('Enrollment saved successfully:', newEnroll);
 
             // Increment customer count in stats
             let stats = await Stats.findOne();
@@ -54,7 +54,7 @@ export const createEnroll = async (req, res) => {
             res.status(201).json({
                 success: true,
                 message: 'Enrollment submitted successfully',
-                data: enroll
+                data: newEnroll
             });
         } catch (dbError) {
             console.error('Database error while saving enrollment:', dbError);
@@ -123,7 +123,7 @@ export const deleteEnroll = async (req, res) => {
     }
 };
 
-const getEnrollCount = async (req, res) => {
+export const getEnrollCount = async (req, res) => {
     try {
         const count = await Enroll.countDocuments();
         res.json({ success: true, count });
@@ -131,11 +131,4 @@ const getEnrollCount = async (req, res) => {
         console.error('Error getting enroll count:', error);
         res.status(500).json({ success: false, message: 'Error getting enroll count' });
     }
-};
-
-module.exports = {
-    createEnroll,
-    getAllEnrolls,
-    deleteEnroll,
-    getEnrollCount
 };
