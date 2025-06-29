@@ -2,51 +2,60 @@
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
+    color: #fff;
 }
 
 .stats-admin-container h2 {
-    color: #333;
+    color: #00ff87;
     margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
 }
 
 .stats-admin-loading {
     text-align: center;
     padding: 20px;
     font-size: 1.2em;
+    color: #00ff87;
 }
 
 .stats-admin-error {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 10px;
-    border-radius: 4px;
+    background: rgba(255, 59, 59, 0.1);
+    color: #ff3b3b;
+    padding: 15px;
+    border-radius: 8px;
     margin-bottom: 20px;
+    border: 1px solid rgba(255, 59, 59, 0.2);
+    backdrop-filter: blur(10px);
 }
 
 .stats-admin-success {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    padding: 10px;
-    border-radius: 4px;
+    background: rgba(0, 255, 135, 0.1);
+    color: #00ff87;
+    padding: 15px;
+    border-radius: 8px;
     margin-bottom: 20px;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    backdrop-filter: blur(10px);
 }
 
 .stats-admin-info {
-    background-color: #fff;
+    background: rgba(10, 10, 10, 0.95);
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 255, 135, 0.1);
     margin-bottom: 30px;
+    backdrop-filter: blur(10px);
 }
 
 .stats-admin-info h3 {
-    color: #444;
+    color: #00ff87;
     margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
 }
 
 .stats-admin-info p {
     margin: 10px 0;
-    color: #666;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .stats-grid {
@@ -57,34 +66,41 @@
 }
 
 .stat-item {
-    background-color: #00ff87;
-    padding: 15px;
-    border-radius: 6px;
+    background: linear-gradient(135deg, rgba(0, 255, 135, 0.15), rgba(0, 255, 135, 0.05));
+    padding: 20px;
+    border-radius: 12px;
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    backdrop-filter: blur(10px);
 }
 
 .stat-item:hover {
     transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.15);
+    border: 1px solid rgba(0, 255, 135, 0.3);
 }
 
 .stat-item label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #000;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .stat-item span {
-    font-size: 1.5em;
-    color: #000;
+    font-size: 2em;
+    color: #00ff87;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
+    font-weight: 600;
 }
 
 .stats-admin-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: rgba(10, 10, 10, 0.95);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 255, 135, 0.1);
+    backdrop-filter: blur(10px);
 }
 
 .form-grid {
@@ -100,48 +116,61 @@
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-weight: 500;
-    color: #000;
+    color: #00ff87;
 }
 
 .form-group input {
     width: 100%;
-    padding: 8px;
-    border: 2px solid #00ff87;
-    border-radius: 4px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    border-radius: 8px;
     font-size: 1em;
+    color: #fff;
     transition: all 0.3s ease;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #00cc6a;
-    box-shadow: 0 0 0 2px rgba(0, 255, 135, 0.2);
+    border-color: #00ff87;
+    box-shadow: 0 0 15px rgba(0, 255, 135, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
 }
 
 button {
-    background-color: #00ff87;
-    color: #000;
+    background: linear-gradient(135deg, rgba(0, 255, 135, 0.2), rgba(0, 255, 135, 0.1));
+    color: #00ff87;
     padding: 12px 24px;
-    border: none;
-    border-radius: 4px;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    border-radius: 8px;
     cursor: pointer;
     font-size: 1em;
-    font-weight: bold;
+    font-weight: 600;
     width: 100%;
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
 button:hover {
-    background-color: #00cc6a;
+    background: linear-gradient(135deg, rgba(0, 255, 135, 0.3), rgba(0, 255, 135, 0.15));
     transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.15);
+    border-color: rgba(0, 255, 135, 0.3);
 }
 
 button:disabled {
-    background-color: #ccc;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 @media (max-width: 768px) {

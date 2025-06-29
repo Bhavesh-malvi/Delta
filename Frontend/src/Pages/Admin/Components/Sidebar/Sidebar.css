@@ -1,45 +1,214 @@
 .sidebar {
-    width: 250px;
+    width: 280px;
     height: 100vh;
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 1rem 2rem;
+    border-right: 1px solid rgba(0, 255, 135, 0.1);
     position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.3s ease;
     overflow-y: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
-.sidebar-links {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
+/* Hide scrollbar for Chrome, Safari and Opera */
+.sidebar::-webkit-scrollbar {
+    display: none;
 }
 
-.sidebar-link {
+.sidebar-logo {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 255, 135, 0.1);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.sidebar-logo h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    text-align: center;
+    color: #00ff87;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin: 0.8rem 0;
+}
+
+.sidebar-nav a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
     display: flex;
     align-items: center;
-    padding: 10px;
-    color: #333;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-    margin-bottom: 5px;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, rgba(0, 255, 135, 0.05) 0%, rgba(0, 255, 135, 0.02) 100%);
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
 }
 
-.sidebar-link:hover {
-    background-color: #00ff87;
-    color: #000;
+.sidebar-nav a i {
+    margin-right: 1rem;
+    font-size: 1.2rem;
+    min-width: 24px;
+    text-align: center;
+    color: rgba(0, 255, 135, 0.8);
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
 }
 
-.sidebar-link.active {
-    background-color: #00ff87;
-    color: #000;
+.sidebar-nav a:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 135, 0.1), rgba(0, 255, 135, 0.03));
+    transform: translateX(5px);
+    box-shadow: 0 0 15px rgba(0, 255, 135, 0.1);
+    border: 1px solid rgba(0, 255, 135, 0.2);
 }
 
-@media (max-width: 768px) {
+.sidebar-nav a.active {
+    background: linear-gradient(135deg, rgba(0, 255, 135, 0.15), rgba(0, 255, 135, 0.05));
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.15);
+    border: 1px solid rgba(0, 255, 135, 0.3);
+    color: #00ff87;
+}
+
+.sidebar-nav a.active i {
+    color: #00ff87;
+    text-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
+        width: 80px;
+        padding: 0.5rem;
+    }
+
+    .sidebar-logo {
+        padding: 0.5rem 0;
+    }
+
+    .sidebar-logo h2 {
+        font-size: 1.5rem;
+    }
+
+    .sidebar-nav a {
+        padding: 0.8rem;
+        justify-content: center;
+    }
+
+    .sidebar-nav a span {
+        display: none;
+    }
+
+    .sidebar-nav a i {
+        margin: 0;
+        font-size: 1.3rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .sidebar {
+        width: 60px;
+        padding: 0.8rem;
+    }
+
+    .sidebar-nav a {
+        padding: 0.6rem;
+    }
+
+    .sidebar-logo h2 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Add new media query for 475-485px range */
+@media screen and (min-width: 475px) and (max-width: 485px) {
+    .sidebar {
+        width: 50px;
+        padding: 0.6rem;
+        z-index: 900; /* Lower z-index to prevent overlapping with form */
+    }
+    
+    .admin-main {
+        margin-left: 50px;
+    }
+    
+    .sidebar-nav a {
+        padding: 0.5rem;
+    }
+    
+    .sidebar-logo h2 {
+        font-size: 1rem;
+    }
+    
+    .sidebar-nav a i {
+        font-size: 1.1rem;
+    }
+}
+
+/* Add media query for 335x735 screen size */
+@media screen and (max-width: 335px) {
+    .sidebar {
+        width: 40px;
+        padding: 0.4rem;
+        z-index: 900;
+    }
+    
+    .sidebar-logo {
+        padding: 0.5rem 0;
+    }
+    
+    .sidebar-logo h2 {
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-nav a {
+        padding: 0.4rem;
+        border-radius: 8px;
+    }
+    
+    .sidebar-nav a i {
+        font-size: 1rem;
+    }
+}
+
+/* Add media query for 485x735 screen size */
+@media screen and (min-width: 336px) and (max-width: 485px) {
+    .sidebar {
+        width: 60px;
+        padding: 0.5rem;
+        z-index: 900;
+    }
+    
+    .sidebar-logo {
+        padding: 0.8rem 0;
+    }
+    
+    .sidebar-logo h2 {
+        font-size: 1.1rem;
+    }
+    
+    .sidebar-nav a {
+        padding: 0.5rem;
+        border-radius: 10px;
+    }
+    
+    .sidebar-nav a i {
+        font-size: 1.2rem;
     }
 }
