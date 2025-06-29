@@ -1,28 +1,29 @@
 import Stats from '../models/Stats.js';
+import initializeStats from '../init-stats.js';
 
-// Initialize stats if not exists
-const initializeStats = async () => {
-    try {
-        return await Stats.initializeStats();
-    } catch (error) {
-        console.error('Error initializing stats:', error);
-        throw error;
-    }
-};
-
-// Call initialization
-initializeStats().catch(console.error);
+// Initialize stats
+try {
+    await initializeStats();
+} catch (error) {
+    console.error('Error initializing stats:', error);
+}
 
 // Get stats
 export const getStats = async (req, res) => {
     try {
-        let stats = await Stats.findOne().maxTimeMS(5000);
+        const stats = await Stats.findOne({});
         if (!stats) {
-            stats = await Stats.create({});
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Stats not found' 
+            });
         }
-        res.status(200).json({ success: true, data: stats });
+        res.status(200).json({ 
+            success: true, 
+            data: stats 
+        });
     } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error('Error getting stats:', error);
         res.status(503).json({ 
             success: false, 
             message: 'Service temporarily unavailable',
@@ -31,47 +32,37 @@ export const getStats = async (req, res) => {
     }
 };
 
-// Update customer count (called when enroll form is submitted)
-export const incrementCustomerCount = async (req, res) => {
-    try {
-        let stats = await Stats.findOne().maxTimeMS(5000);
-        if (!stats) {
-            stats = await Stats.create({});
-        }
-        
-        stats.customerCount += 1;
-        await stats.save();
-        
-        res.status(200).json({ success: true, data: stats });
-    } catch (error) {
-        console.error('Error incrementing customer count:', error);
-        res.status(503).json({ 
-            success: false, 
-            message: 'Service temporarily unavailable',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Please try again later'
-        });
-    }
-};
-
-// Admin manual update
+// Update stats
 export const updateStats = async (req, res) => {
     try {
-        const { customerCount } = req.body;
+        const updates = req.body;
         
-        if (typeof customerCount !== 'number' || customerCount < 0) {
-            return res.status(400).json({ success: false, message: 'Invalid customer count' });
+        // Validate updates
+        for (const [key, value] of Object.entries(updates)) {
+            if (typeof value !== 'number' || value < 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Invalid value for ${key}. Must be a non-negative number.` 
+                });
+            }
         }
 
-        let stats = await Stats.findOne().maxTimeMS(5000);
+        let stats = await Stats.findOne({});
         if (!stats) {
-            stats = await Stats.create({ customerCount });
+            stats = await Stats.create(updates);
         } else {
-            stats.customerCount = customerCount;
-            stats.lastManualUpdate = Date.now();
+            Object.keys(updates).forEach(key => {
+                if (stats[key] !== undefined) {
+                    stats[key] = updates[key];
+                }
+            });
             await stats.save();
         }
 
-        res.status(200).json({ success: true, data: stats });
+        res.status(200).json({ 
+            success: true, 
+            data: stats 
+        });
     } catch (error) {
         console.error('Error updating stats:', error);
         res.status(503).json({ 

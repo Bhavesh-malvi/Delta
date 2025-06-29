@@ -1,53 +1,31 @@
 import mongoose from 'mongoose';
 
 const statsSchema = new mongoose.Schema({
-    customerCount: {
+    totalEnrollments: {
         type: Number,
-        default: 21,
-        min: [0, 'Customer count cannot be negative']
+        default: 0
     },
-    displayedCount: {
+    totalCourses: {
         type: Number,
-        default: 21,
-        min: [0, 'Displayed count cannot be negative']
+        default: 0
     },
-    lastManualUpdate: {
-        type: Date,
-        default: Date.now
+    totalServices: {
+        type: Number,
+        default: 0
+    },
+    totalCareers: {
+        type: Number,
+        default: 0
+    },
+    totalContacts: {
+        type: Number,
+        default: 0
     }
-}, { 
+}, {
     timestamps: true,
-    // Add timeout options
-    writeConcern: {
-        w: 'majority',
-        j: true,
-        wtimeout: 5000
-    }
+    collection: 'stats'
 });
-
-// Middleware to update displayedCount based on customerCount
-statsSchema.pre('save', function(next) {
-    if (this.customerCount >= 21) {
-        this.displayedCount = this.customerCount;
-    } else {
-        this.displayedCount = 21;
-    }
-    next();
-});
-
-// Add static method for safe initialization
-statsSchema.statics.initializeStats = async function() {
-    try {
-        let stats = await this.findOne().maxTimeMS(5000);
-        if (!stats) {
-            stats = await this.create({});
-        }
-        return stats;
-    } catch (error) {
-        console.error('Error initializing stats:', error);
-        throw error;
-    }
-};
 
 const Stats = mongoose.model('Stats', statsSchema);
+
 export default Stats; 

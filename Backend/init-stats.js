@@ -1,50 +1,34 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import Stats from './models/Stats.js';
-
-dotenv.config();
+import connectDB from './db/db.js';
+import './config/env.js';
 
 const initializeStats = async () => {
     try {
-        console.log('Connecting to MongoDB...');
-        await mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 30000
-        });
+        console.log('Connecting to database...');
+        await connectDB();
         
-        console.log('Connected to MongoDB successfully');
-        
-        // Check if stats document exists
         console.log('Checking for existing stats...');
-        const existingStats = await Stats.findOne();
+        const existingStats = await Stats.findOne({});
         
         if (!existingStats) {
-            console.log('No stats found. Creating initial stats...');
-            const newStats = await Stats.create({
-                customerCount: 21,
-                displayedCount: 21
+            console.log('No stats found, creating initial stats...');
+            const initialStats = new Stats({
+                totalEnrollments: 0,
+                totalCourses: 0,
+                totalServices: 0,
+                totalCareers: 0,
+                totalContacts: 0
             });
-            console.log('Initial stats created:', newStats);
+            
+            await initialStats.save();
+            console.log('Initial stats created successfully');
         } else {
-            console.log('Existing stats found:', existingStats);
+            console.log('Stats already exist:', existingStats);
         }
-        
-        console.log('Stats initialization completed successfully!');
     } catch (error) {
-        console.error('Error during stats initialization:', error);
-    } finally {
-        await mongoose.connection.close();
-        console.log('Database connection closed');
+        console.error('Error initializing stats:', error);
+        throw error;
     }
 };
 
-// Run the initialization
-console.log('Starting stats initialization...');
-initializeStats().then(() => {
-    console.log('Initialization script completed');
-    process.exit(0);
-}).catch(error => {
-    console.error('Initialization script failed:', error);
-    process.exit(1);
-}); 
+export default initializeStats; 

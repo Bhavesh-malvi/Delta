@@ -1,37 +1,41 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import './config/env.js';
 
 const testConnection = async () => {
     try {
         console.log('Testing MongoDB connection...');
-        console.log('MongoDB URI:', process.env.MONGODB_URI);
+        console.log('Connection string:', process.env.MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//<credentials>@'));
         
         await mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 10000
         });
         
-        console.log('Successfully connected to MongoDB!');
+        console.log('✅ MongoDB connected successfully');
         
-        // Try to create a test document
-        const TestModel = mongoose.model('Test', new mongoose.Schema({ test: String }));
-        await TestModel.create({ test: 'test' });
-        console.log('Successfully created test document!');
+        // Test database operations
+        const collections = await mongoose.connection.db.collections();
+        console.log('\nAvailable collections:');
+        for (let collection of collections) {
+            console.log(`- ${collection.collectionName}`);
+        }
         
-        // Cleanup
-        await TestModel.deleteMany({});
+        // Close connection
         await mongoose.connection.close();
-        console.log('Test completed successfully!');
-        
+        console.log('\nConnection closed successfully');
     } catch (error) {
-        console.error('Connection test failed:', error);
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
+        console.error('❌ Connection failed:', error);
+        if (error.name === 'MongoServerSelectionError') {
+            console.error('\nPossible issues:');
+            console.error('1. MongoDB server is not running');
+            console.error('2. Network connectivity issues');
+            console.error('3. IP address not whitelisted in MongoDB Atlas');
+            console.error('4. Invalid connection string');
+        }
+    } finally {
+        process.exit();
     }
-    process.exit();
 };
 
 testConnection(); 

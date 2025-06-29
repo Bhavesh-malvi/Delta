@@ -1,5 +1,4 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -7,6 +6,7 @@ import connectDB from './db/db.js';
 import debug from 'debug';
 import mongoose from 'mongoose';
 import multer from 'multer';
+import './config/env.js';
 import './config/cloudinary.js';
 
 // Import routes
@@ -19,8 +19,6 @@ import contactRoutes from './Routes/contactRoutes.js';
 import enrollRoutes from './Routes/enrollRoutes.js';
 import enrollCourseRoutes from './Routes/enrollCourseRoutes.js';
 import statsRoutes from './Routes/statsRoutes.js';
-
-dotenv.config();
 
 const log = debug('app:server');
 
@@ -80,6 +78,12 @@ app.use((req, res, next) => {
 // Initialize database connection
 let isConnected = false;
 
+const validateMongoURI = (uri) => {
+    if (!uri) return false;
+    const mongoURIPattern = /^mongodb(\+srv)?:\/\/[^:]+:[^@]+@[^/]+\/[^?]+(\?.*)?$/;
+    return mongoURIPattern.test(uri);
+};
+
 const connectToDatabase = async () => {
     if (isConnected) {
         console.log('Using existing database connection');
@@ -101,13 +105,22 @@ const connectToDatabase = async () => {
             throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
         }
 
+        // Validate MongoDB URI
+        if (!validateMongoURI(process.env.MONGODB_URI)) {
+            throw new Error('Invalid MongoDB URI format. Expected format: mongodb+srv://username:password@cluster.xxxxx.mongodb.net/database');
+        }
+
         console.log('Connecting to MongoDB...');
+        console.log('Connection string format:', process.env.MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//<credentials>@'));
+        
         await mongoose.connect(process.env.MONGODB_URI, {
             serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
             connectTimeoutMS: 30000,
             keepAlive: true,
-            keepAliveInitialDelay: 300000
+            keepAliveInitialDelay: 300000,
+            retryWrites: true,
+            w: 'majority'
         });
         
         console.log('MongoDB connected successfully');
@@ -126,6 +139,13 @@ const connectToDatabase = async () => {
         }
     } catch (error) {
         console.error('Failed to connect to database:', error);
+        if (error.name === 'MongoServerSelectionError') {
+            console.error('Could not connect to MongoDB server. Please check:');
+            console.error('1. MongoDB connection string is correct');
+            console.error('2. MongoDB server is running and accessible');
+            console.error('3. Network allows connection to MongoDB port');
+            console.error('4. IP address is whitelisted in MongoDB Atlas');
+        }
         throw error;
     }
 };
