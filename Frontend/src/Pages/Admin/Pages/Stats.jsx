@@ -3,6 +3,9 @@ import axios from 'axios';
 import './Stats.css';
 import { API_BASE_URL, ENDPOINTS } from '../../../config/api';
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
 const Stats = () => {
     const [stats, setStats] = useState({
         totalEnrollments: 0,
@@ -21,12 +24,16 @@ const Stats = () => {
         totalCareers: '',
         totalContacts: ''
     });
+    const [retryCount, setRetryCount] = useState(0);
+    const [isRetrying, setIsRetrying] = useState(false);
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     useEffect(() => {
         fetchStats();
     }, []);
 
-    const fetchStats = async () => {
+    const fetchStats = async (retryAttempt = 0) => {
         try {
             const response = await axios.get(`${API_BASE_URL}${ENDPOINTS.STATS}`);
             if (response.data.success) {
@@ -38,11 +45,20 @@ const Stats = () => {
                     totalCareers: response.data.data.totalCareers || '',
                     totalContacts: response.data.data.totalContacts || ''
                 });
+                setError(null);
             }
             setLoading(false);
         } catch (err) {
-            setError('Failed to fetch stats');
+            console.error('Error fetching stats:', err);
+            if (retryAttempt < MAX_RETRIES && err.response?.status === 503) {
+                setIsRetrying(true);
+                setError(`Service temporarily unavailable. Retrying... (${retryAttempt + 1}/${MAX_RETRIES})`);
+                await sleep(RETRY_DELAY);
+                return fetchStats(retryAttempt + 1);
+            }
+            setError('Failed to fetch stats. Please try again later.');
             setLoading(false);
+            setIsRetrying(false);
         }
     };
 
@@ -56,34 +72,61 @@ const Stats = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            // Convert form values to numbers and handle empty strings
-            const processedData = {
-                totalEnrollments: Number(formData.totalEnrollments) || 0,
-                totalCourses: Number(formData.totalCourses) || 0,
-                totalServices: Number(formData.totalServices) || 0,
-                totalCareers: Number(formData.totalCareers) || 0,
-                totalContacts: Number(formData.totalContacts) || 0
-            };
+        setLoading(true);
+        setRetryCount(0);
+        
+        const updateWithRetry = async (attempt = 0) => {
+            try {
+                // Convert form values to numbers and handle empty strings
+                const processedData = {
+                    totalEnrollments: Number(formData.totalEnrollments) || 0,
+                    totalCourses: Number(formData.totalCourses) || 0,
+                    totalServices: Number(formData.totalServices) || 0,
+                    totalCareers: Number(formData.totalCareers) || 0,
+                    totalContacts: Number(formData.totalContacts) || 0
+                };
 
-            const response = await axios.put(`${API_BASE_URL}${ENDPOINTS.STATS}`, processedData);
-            if (response.data.success) {
-                setSuccess('Stats updated successfully');
-                fetchStats();
+                const response = await axios.put(`${API_BASE_URL}${ENDPOINTS.STATS}`, processedData);
+                if (response.data.success) {
+                    setSuccess('Stats updated successfully');
+                    setError(null);
+                    await fetchStats();
+                }
+                setLoading(false);
+                setIsRetrying(false);
+            } catch (err) {
+                console.error('Error updating stats:', err);
+                if (attempt < MAX_RETRIES && err.response?.status === 503) {
+                    setIsRetrying(true);
+                    setRetryCount(attempt + 1);
+                    setError(`Update failed. Retrying... (${attempt + 1}/${MAX_RETRIES})`);
+                    await sleep(RETRY_DELAY);
+                    return updateWithRetry(attempt + 1);
+                }
+                setError(err.response?.data?.message || 'Failed to update stats. Please try again.');
+                setLoading(false);
+                setIsRetrying(false);
             }
-            setTimeout(() => setSuccess(null), 3000);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update stats');
-            setTimeout(() => setError(null), 3000);
-        }
+        };
+
+        await updateWithRetry();
+        setTimeout(() => {
+            setSuccess(null);
+            setError(null);
+        }, 3000);
     };
 
-    if (loading) return <div className="stats-admin-loading">Loading...</div>;
+    if (loading && !isRetrying) return <div className="stats-admin-loading">Loading...</div>;
 
     return (
         <div className="stats-admin-container">
             {error && <div className="stats-admin-error">{error}</div>}
             {success && <div className="stats-admin-success">{success}</div>}
+            {isRetrying && (
+                <div className="stats-admin-retrying">
+                    Retrying... Attempt {retryCount} of {MAX_RETRIES}
+                </div>
+            )}
 
             <div className="stats-admin-info">
                 <h2>Current Stats</h2>
@@ -123,6 +166,7 @@ const Stats = () => {
                             value={formData.totalEnrollments}
                             onChange={handleInputChange}
                             min="0"
+                            disabled={loading || isRetrying}
                         />
                     </div>
                     <div className="form-group">
@@ -134,6 +178,7 @@ const Stats = () => {
                             value={formData.totalCourses}
                             onChange={handleInputChange}
                             min="0"
+                            disabled={loading || isRetrying}
                         />
                     </div>
                     <div className="form-group">
@@ -145,6 +190,7 @@ const Stats = () => {
                             value={formData.totalServices}
                             onChange={handleInputChange}
                             min="0"
+                            disabled={loading || isRetrying}
                         />
                     </div>
                     <div className="form-group">
@@ -156,6 +202,7 @@ const Stats = () => {
                             value={formData.totalCareers}
                             onChange={handleInputChange}
                             min="0"
+                            disabled={loading || isRetrying}
                         />
                     </div>
                     <div className="form-group">
@@ -167,10 +214,13 @@ const Stats = () => {
                             value={formData.totalContacts}
                             onChange={handleInputChange}
                             min="0"
+                            disabled={loading || isRetrying}
                         />
                     </div>
                 </div>
-                <button type="submit">Update Stats</button>
+                <button type="submit" disabled={loading || isRetrying}>
+                    {loading || isRetrying ? 'Updating...' : 'Update Stats'}
+                </button>
             </form>
         </div>
     );
