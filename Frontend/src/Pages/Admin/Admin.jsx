@@ -28,8 +28,8 @@ const Admin = () => {
                 <Header />
                 <div className="admin-content">
                     <Routes>
-                        <Route index element={<HomeContent />} />
-                        <Route path="dashboard" element={<HomeContent />} />
+                        <Route index element={<Navigate to="/deltaadmin/home-content" replace />} />
+                        <Route path="dashboard" element={<Navigate to="/deltaadmin/home-content" replace />} />
                         <Route path="home-services" element={<HomeService />} />
                         <Route path="home-content" element={<HomeContent />} />
                         <Route path="home-courses" element={<HomeCourses />} />
@@ -39,7 +39,7 @@ const Admin = () => {
                         <Route path="enroll-data" element={<EnrollData />} />
                         <Route path="courses" element={<Courses />} />
                         <Route path="stats" element={<Stats />} />
-                        <Route path="*" element={<Navigate to="/deltaadmin/courses" replace />} />
+                        <Route path="*" element={<Navigate to="/deltaadmin/home-content" replace />} />
                     </Routes>
                 </div>
             </div>
