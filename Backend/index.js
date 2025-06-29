@@ -29,27 +29,12 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-    origin: function (origin, callback) {
-        const allowedOrigins = [
-            'http://localhost:3000',
-            'http://localhost:5173',
-            'https://deltawaresolution.com',
-            'https://www.deltawaresolution.com'
-        ];
-        
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, origin);
-        } else {
-            console.log('CORS blocked origin:', origin);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: false,
-    optionsSuccessStatus: 204,
+    origin: ['https://deltawaresolution.com', 'https://www.deltawaresolution.com', 'http://localhost:3000', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
-    exposedHeaders: ['Content-Range', 'X-Content-Range']
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    credentials: true,
+    optionsSuccessStatus: 204
 };
 
 // Configure multer for handling file uploads
@@ -148,6 +133,25 @@ app.use((err, req, res, next) => {
     // Check database connection
     const dbStatus = mongoose.connection.readyState;
     console.log('Database connection state:', dbStatus);
+    
+    // Handle specific error types
+    if (err.name === 'MongoServerSelectionError') {
+        return res.status(503).json({
+            success: false,
+            message: 'Database connection error. Please try again later.',
+            error: process.env.NODE_ENV === 'development' ? err.message : 'Database connection error',
+            dbConnected: false
+        });
+    }
+    
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation error',
+            error: process.env.NODE_ENV === 'development' ? err.message : 'Invalid data provided',
+            dbConnected: dbStatus === 1
+        });
+    }
     
     // Send appropriate error response
     res.status(err.status || 500).json({

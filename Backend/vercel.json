@@ -15,11 +15,11 @@
             "src": "/api/(.*)",
             "methods": ["OPTIONS"],
             "headers": {
-                "Access-Control-Allow-Origin": "https://deltawaresolution.com",
+                "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, X-Requested-With",
-                "Access-Control-Max-Age": "86400",
-                "Vary": "Origin"
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "86400"
             },
             "status": 204,
             "continue": true
@@ -38,8 +38,10 @@
             "src": "/api/(.*)",
             "dest": "/index.js",
             "headers": {
-                "Access-Control-Allow-Origin": "https://deltawaresolution.com",
-                "Vary": "Origin"
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, X-Requested-With",
+                "Access-Control-Allow-Credentials": "true"
             }
         },
         {

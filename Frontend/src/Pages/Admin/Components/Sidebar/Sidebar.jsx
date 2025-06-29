@@ -18,7 +18,7 @@ function Sidebar() {
 
     const menuItems = [
         {
-            path: '/admin/enroll-courses',
+            path: '/deltaadmin/enroll-courses',
             name: 'Enroll Courses',
             icon: <FaGraduationCap />
         },

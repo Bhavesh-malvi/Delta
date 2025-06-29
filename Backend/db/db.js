@@ -6,16 +6,26 @@ const log = debug("app:db");
 const connectDB = async (app) => {
     const mongoURI = process.env.MONGODB_URI;
     
+    if (!mongoURI) {
+        throw new Error('MONGODB_URI environment variable is not set');
+    }
+    
     console.log("Attempting to connect to MongoDB...");
     console.log("MongoDB URI:", mongoURI.replace(/\/\/[^:]+:[^@]+@/, '//*****:*****@')); // Log URI safely
     
+    const options = {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 10000, // 10 second timeout
+        socketTimeoutMS: 45000, // 45 second timeout
+        maxPoolSize: 10,
+        minPoolSize: 2,
+        retryWrites: true,
+        retryReads: true
+    };
+    
     try {
-        await mongoose.connect(mongoURI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000, // 5 second timeout
-            socketTimeoutMS: 45000, // 45 second timeout
-        });
+        await mongoose.connect(mongoURI, options);
         console.log("MongoDB connected successfully");
         
         // Set the database connection flag
@@ -61,6 +71,11 @@ mongoose.connection.on('error', (err) => {
 
 mongoose.connection.on('disconnected', () => {
     console.log('Mongoose disconnected from MongoDB');
+    // Attempt to reconnect
+    setTimeout(() => {
+        console.log('Attempting to reconnect to MongoDB...');
+        connectDB();
+    }, 5000);
 });
 
 // Handle process termination
