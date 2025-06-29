@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesContent.css';
 import { motion } from 'framer-motion';
-import axiosInstance, { ENDPOINTS, UPLOAD_URLS } from '../../config/api';
+import axiosInstance, { ENDPOINTS, getImageUrl } from '../../config/api';
 import logo1 from '../../assets/img/logo1.jpg';
 
 const ServicesContent = () => {
@@ -26,23 +26,6 @@ const ServicesContent = () => {
 
         fetchContent();
     }, []);
-
-    const getImageUrl = (imagePath) => {
-        if (!imagePath) return logo1;
-        
-        // If it's already a full URL (including Cloudinary), use it as is
-        if (imagePath.startsWith('http')) {
-            return imagePath;
-        }
-        
-        // If it's a relative path, assume it's from the current domain and needs to be fixed
-        if (imagePath.startsWith('/')) {
-            return `${process.env.REACT_APP_BACKEND_URL || 'https://delta-teal.vercel.app'}${imagePath}`;
-        }
-        
-        // If it's just a filename, assume it's from the current domain and needs to be fixed
-        return `${process.env.REACT_APP_BACKEND_URL || 'https://delta-teal.vercel.app'}/${imagePath}`;
-    };
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -105,7 +88,7 @@ const ServicesContent = () => {
                     >
                         <div className="service-image-container">
                             <img 
-                                src={getImageUrl(service.image)} 
+                                src={getImageUrl(service.image, logo1)} 
                                 alt={service.title} 
                                 className="service-image"
                                 onError={(e) => {

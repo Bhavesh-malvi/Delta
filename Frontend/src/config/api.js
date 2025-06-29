@@ -1,9 +1,7 @@
 // API Configuration
 // Frontend URL: https://deltawaresolution.com
 // Backend URL: https://delta-teal.vercel.app
-export const API_BASE_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://delta-teal.vercel.app'  // Production URL
-    : 'http://localhost:5001';  // Updated local development port
+export const API_BASE_URL = 'https://delta-teal.vercel.app';  // Always use Vercel URL
 
 // Timeout configuration
 export const API_TIMEOUT = 60000; // 60 seconds
@@ -27,6 +25,22 @@ export const ENDPOINTS = {
     HEALTH: '/health',
     ENROLL_COURSE: '/api/v1/enrollCourse',
     STATS: '/api/v1/stats'
+};
+
+// Utility function for handling image URLs
+export const getImageUrl = (imagePath, fallbackImage = null) => {
+    if (!imagePath) return fallbackImage;
+    
+    // If it's already a full URL, return as is
+    if (imagePath.startsWith('http')) {
+        return imagePath;
+    }
+    
+    // Remove any leading slashes
+    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+    
+    // Construct the full URL
+    return `${API_BASE_URL}/${cleanPath}`;
 };
 
 // Error messages

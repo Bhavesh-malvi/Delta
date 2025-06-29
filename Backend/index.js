@@ -27,7 +27,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-    origin: ['https://deltawaresolution.com', 'http://localhost:5173'],
+    origin: ['https://deltawaresolution.com', 'http://localhost:5173', 'http://localhost:3000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204,

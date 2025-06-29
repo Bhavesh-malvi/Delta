@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'development';
 process.env.PORT = '5001';
 
 // MongoDB connection string (updated format)
-process.env.MONGODB_URI = 'mongodb+srv://bhaveshmalviya335:Bhavesh@cluster0.hljx43v.mongodb.net/?retryWrites=true&w=majority/delta';
+process.env.MONGODB_URI = 'mongodb+srv://bhaveshmalviya335:Bhavesh@cluster0.hljx43v.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 // Cloudinary credentials
 process.env.CLOUDINARY_CLOUD_NAME = 'do98lw5ja';
