@@ -184,45 +184,55 @@ app.use('*', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
+// Initialize database connection
+let dbInitialized = false;
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
+const initializeDB = async () => {
+    if (!dbInitialized) {
+        try {
+            console.log('Initializing database connection...');
+            await connectDB(app);
+            dbInitialized = true;
+            console.log('Database initialized successfully');
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
-});
-
-// Initialize server with database connection
-const startServer = async () => {
-    try {
-        // Initialize app.locals.dbConnected as false
-        app.locals.dbConnected = false;
-        
-        // Connect to database with app instance
-        await connectDB(app);
-        
-        const server = app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-            console.log('Environment:', process.env.NODE_ENV);
-            console.log('MongoDB connection state:', mongoose.connection.readyState);
-            console.log('Database connected:', app.locals.dbConnected);
-        });
-
-        // Handle server errors
-        server.on('error', (error) => {
-            console.error('Server error:', error);
-        });
-    } catch (error) {
-        console.error('Failed to start server:', error);
-        process.exit(1);
+            // Initialize stats after DB connection
+            try {
+                const Stats = (await import('./models/Stats.js')).default;
+                const stats = await Stats.findOne();
+                if (!stats) {
+                    await Stats.create({});
+                    console.log('Stats initialized successfully');
+                }
+            } catch (error) {
+                console.error('Error initializing stats:', error);
+                // Don't throw here, just log the error
+            }
+        } catch (error) {
+            console.error('Failed to initialize database:', error);
+            throw error;
+        }
     }
 };
 
-startServer();
+// Middleware to ensure database is connected
+app.use(async (req, res, next) => {
+    try {
+        if (!dbInitialized) {
+            await initializeDB();
+        }
+        next();
+    } catch (error) {
+        console.error('Database initialization error:', error);
+        res.status(503).json({
+            success: false,
+            message: 'Database connection error',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Service temporarily unavailable'
+        });
+    }
+});
+
+// Remove the startServer function and export the app
+export default app;
 
 
 

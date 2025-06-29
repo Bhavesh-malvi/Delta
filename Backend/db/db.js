@@ -3,7 +3,14 @@ import debug from "debug";
 
 const log = debug("app:db");
 
+let isConnected = false;
+
 const connectDB = async (app) => {
+    if (isConnected) {
+        console.log('Using existing database connection');
+        return true;
+    }
+
     const mongoURI = process.env.MONGODB_URI;
     
     if (!mongoURI) {
@@ -16,16 +23,28 @@ const connectDB = async (app) => {
     const options = {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 10000, // 10 second timeout
-        socketTimeoutMS: 45000, // 45 second timeout
+        serverSelectionTimeoutMS: 30000, // Increased timeout to 30 seconds
+        socketTimeoutMS: 45000,
         maxPoolSize: 10,
         minPoolSize: 2,
         retryWrites: true,
-        retryReads: true
+        retryReads: true,
+        bufferCommands: false, // Disable mongoose buffering
+        autoIndex: true, // Build indexes
+        maxConnecting: 10,
+        connectTimeoutMS: 30000, // Connection timeout also increased to 30 seconds
+        heartbeatFrequencyMS: 10000 // Check connection status every 10 seconds
     };
     
     try {
+        // Clear any existing connections
+        if (mongoose.connection.readyState !== 0) {
+            await mongoose.connection.close();
+        }
+
+        // Connect to MongoDB
         await mongoose.connect(mongoURI, options);
+        isConnected = true;
         console.log("MongoDB connected successfully");
         
         // Set the database connection flag
@@ -33,6 +52,31 @@ const connectDB = async (app) => {
             app.locals.dbConnected = true;
             console.log("Database connection flag set to true");
         }
+
+        // Handle connection events
+        mongoose.connection.on('connected', () => {
+            console.log('Mongoose connected to MongoDB');
+            isConnected = true;
+        });
+
+        mongoose.connection.on('error', (err) => {
+            console.error('Mongoose connection error:', err);
+            console.error('Error name:', err.name);
+            console.error('Error code:', err.code);
+            console.error('Error message:', err.message);
+            isConnected = false;
+            if (app) {
+                app.locals.dbConnected = false;
+            }
+        });
+
+        mongoose.connection.on('disconnected', () => {
+            console.log('Mongoose disconnected from MongoDB');
+            isConnected = false;
+            if (app) {
+                app.locals.dbConnected = false;
+            }
+        });
         
         return true;
     } catch (error) {
@@ -46,6 +90,8 @@ const connectDB = async (app) => {
             console.log("Database connection flag set to false");
         }
         
+        isConnected = false;
+        
         // Check specific error types
         if (error.name === 'MongoServerSelectionError') {
             console.error("Failed to reach MongoDB server. Please check if the connection string is correct and the server is running.");
@@ -53,30 +99,9 @@ const connectDB = async (app) => {
             console.error("Invalid MongoDB connection string. Please check the format of MONGODB_URI.");
         }
         
-        throw error; // Re-throw to be handled by the global error handler
+        throw error;
     }
 };
-
-// Handle connection events
-mongoose.connection.on('connected', () => {
-    console.log('Mongoose connected to MongoDB');
-});
-
-mongoose.connection.on('error', (err) => {
-    console.error('Mongoose connection error:', err);
-    console.error('Error name:', err.name);
-    console.error('Error code:', err.code);
-    console.error('Error message:', err.message);
-});
-
-mongoose.connection.on('disconnected', () => {
-    console.log('Mongoose disconnected from MongoDB');
-    // Attempt to reconnect
-    setTimeout(() => {
-        console.log('Attempting to reconnect to MongoDB...');
-        connectDB();
-    }, 5000);
-});
 
 // Handle process termination
 process.on('SIGINT', async () => {

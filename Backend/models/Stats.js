@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const statsSchema = new mongoose.Schema({
     customerCount: {
@@ -25,4 +25,5 @@ statsSchema.pre('save', function(next) {
     next();
 });
 
-module.exports = mongoose.model('Stats', statsSchema); 
+const Stats = mongoose.model('Stats', statsSchema);
+export default Stats; 
