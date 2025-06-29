@@ -122,3 +122,20 @@ export const deleteEnroll = async (req, res) => {
         });
     }
 };
+
+const getEnrollCount = async (req, res) => {
+    try {
+        const count = await Enroll.countDocuments();
+        res.json({ success: true, count });
+    } catch (error) {
+        console.error('Error getting enroll count:', error);
+        res.status(500).json({ success: false, message: 'Error getting enroll count' });
+    }
+};
+
+module.exports = {
+    createEnroll,
+    getAllEnrolls,
+    deleteEnroll,
+    getEnrollCount
+};

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance, { ENDPOINTS } from '../../../config/api';
+import axios from 'axios';
 import './Stats.css';
+import { API_BASE_URL } from '../../../config/api';
 
 const Stats = () => {
-    const [stats, setStats] = useState(null);
-    const [newCount, setNewCount] = useState('');
+    const [stats, setStats] = useState({
+        totalProjects: 0
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [successMessage, setSuccessMessage] = useState('');
+    const [success, setSuccess] = useState(null);
+    const [formData, setFormData] = useState({
+        totalProjects: ''
+    });
 
     useEffect(() => {
         fetchStats();
@@ -15,71 +20,72 @@ const Stats = () => {
 
     const fetchStats = async () => {
         try {
-            setLoading(true);
-            const response = await axiosInstance.get(ENDPOINTS.STATS);
-            if (response.data.success) {
-                setStats(response.data.data);
-            }
-        } catch (error) {
-            console.error("Error fetching stats:", error);
-            setError(error.message);
-        } finally {
+            const response = await axios.get(`${API_BASE_URL}/api/stats`);
+            setStats(response.data);
+            setFormData({
+                totalProjects: response.data.totalProjects || ''
+            });
+            setLoading(false);
+        } catch (err) {
+            setError('Failed to fetch stats');
             setLoading(false);
         }
     };
 
-    const handleUpdate = async () => {
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
-            const response = await axiosInstance.put(`${ENDPOINTS.STATS}/update`, {
-                displayedCount: parseInt(newCount)
-            });
-            if (response.data.success) {
-                setStats(response.data.data);
-                setNewCount('');
-                setSuccessMessage('Stats updated successfully');
-                setTimeout(() => setSuccessMessage(''), 3000);
-            }
-        } catch (error) {
-            console.error("Error updating stats:", error);
-            setError(error.message);
-            setTimeout(() => setError(''), 3000);
+            await axios.put(`${API_BASE_URL}/api/stats`, formData);
+            setSuccess('Stats updated successfully');
+            fetchStats();
+            setTimeout(() => setSuccess(null), 3000);
+        } catch (err) {
+            setError('Failed to update stats');
+            setTimeout(() => setError(null), 3000);
         }
     };
 
-    if (loading && !stats) {
-        return <div className="stats-admin-loading">Loading...</div>;
-    }
+    if (loading) return <div className="stats-admin-loading">Loading...</div>;
 
     return (
         <div className="stats-admin-container">
-            <h2>Manage Statistics</h2>
-            
             {error && <div className="stats-admin-error">{error}</div>}
-            {successMessage && <div className="stats-admin-success">{successMessage}</div>}
-            
+            {success && <div className="stats-admin-success">{success}</div>}
+
             <div className="stats-admin-info">
-                <h3>Current Stats</h3>
-                <p>Total Customer Count: {stats?.customerCount || 0}</p>
-                <p>Displayed Count: {stats?.displayedCount || 21}</p>
-                <p>Last Updated: {stats?.lastManualUpdate ? new Date(stats.lastManualUpdate).toLocaleString() : 'Never'}</p>
+                <h2>Current Stats</h2>
+                <div className="stats-grid">
+                    <div className="stat-item">
+                        <label>Total Projects</label>
+                        <span>{stats.totalProjects || 0}</span>
+                    </div>
+                </div>
             </div>
 
-            <form onSubmit={handleUpdate} className="stats-admin-form">
-                <h3>Update Customer Count</h3>
-                <div className="form-group">
-                    <label htmlFor="customerCount">New Customer Count:</label>
-                    <input
-                        type="number"
-                        id="customerCount"
-                        value={newCount}
-                        onChange={(e) => setNewCount(e.target.value)}
-                        min="0"
-                        required
-                    />
+            <form onSubmit={handleSubmit} className="stats-admin-form">
+                <h2>Update Stats</h2>
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label htmlFor="totalProjects">Total Projects</label>
+                        <input
+                            type="number"
+                            id="totalProjects"
+                            name="totalProjects"
+                            value={formData.totalProjects}
+                            onChange={handleInputChange}
+                            min="0"
+                        />
+                    </div>
                 </div>
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Updating...' : 'Update Count'}
-                </button>
+                <button type="submit">Update Stats</button>
             </form>
         </div>
     );

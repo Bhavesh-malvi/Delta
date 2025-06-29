@@ -84,6 +84,12 @@ function Sidebar() {
                             <span>Courses</span>
                         </NavLink>
                     </li>
+                    <li>
+                        <NavLink to="/deltaadmin/stats">
+                            <i className="fas fa-chart-line"></i>
+                            <span>Stats</span>
+                        </NavLink>
+                    </li>
                 </ul>
             </nav>
         </div>
