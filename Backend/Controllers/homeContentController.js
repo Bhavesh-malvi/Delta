@@ -23,11 +23,31 @@ const upload = multer({
 }).single('image');
 
 // Helper function to check MongoDB connection
-const checkDbConnection = () => {
+const checkDbConnection = async () => {
     const state = mongoose.connection.readyState;
     const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
     console.log(`MongoDB connection state: ${states[state]}`);
-    if (state !== 1) {
+    
+    if (state === 2) { // connecting
+        // Wait for connection to establish
+        await new Promise((resolve) => {
+            const checkConnection = setInterval(() => {
+                const currentState = mongoose.connection.readyState;
+                if (currentState === 1) {
+                    clearInterval(checkConnection);
+                    resolve();
+                }
+            }, 100);
+            
+            // Timeout after 5 seconds
+            setTimeout(() => {
+                clearInterval(checkConnection);
+                resolve();
+            }, 5000);
+        });
+    }
+    
+    if (mongoose.connection.readyState !== 1) {
         throw new Error(`Database connection is not ready. Current state: ${states[state]}`);
     }
 };
@@ -39,11 +59,11 @@ const handleError = (error, res, operation) => {
     console.error('MongoDB connection state:', mongoose.connection.readyState);
     
     // Check for specific error types
-    if (error.name === 'MongoServerSelectionError') {
-        return res.status(500).json({
+    if (error.name === 'MongoServerSelectionError' || error.message.includes('Database connection is not ready')) {
+        return res.status(503).json({
             success: false,
             message: 'Database connection error',
-            error: 'Failed to connect to database. Please try again later.',
+            error: 'Service temporarily unavailable. Please try again later.',
             dbState: mongoose.connection.readyState
         });
     }
@@ -69,7 +89,7 @@ const handleError = (error, res, operation) => {
 export const getAllHomeContent = async (req, res) => {
     try {
         console.log('Attempting to fetch all home content...');
-        checkDbConnection();
+        await checkDbConnection();
         
         const data = await HomeContent.find().sort({ createdAt: -1 });
         console.log(`Successfully found ${data.length} home content items`);

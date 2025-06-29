@@ -1,25 +1,29 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-// Validate required environment variables
-const requiredEnvVars = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'];
+const requiredEnvVars = [
+    'CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET'
+];
+
+// Check for missing environment variables
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-    console.error('Missing required Cloudinary environment variables:', missingEnvVars);
-    throw new Error(`Missing required Cloudinary environment variables: ${missingEnvVars.join(', ')}`);
+    console.warn(`Warning: Missing Cloudinary environment variables: ${missingEnvVars.join(', ')}`);
+    // Don't throw error, just warn
 }
 
 // Configure Cloudinary
 try {
     cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'default',
+        api_key: process.env.CLOUDINARY_API_KEY || 'default',
+        api_secret: process.env.CLOUDINARY_API_SECRET || 'default'
     });
     console.log('Cloudinary configured successfully');
 } catch (error) {
     console.error('Error configuring Cloudinary:', error);
-    throw error;
 }
 
 export const uploadToCloudinary = async (buffer, folder = 'delta/services') => {

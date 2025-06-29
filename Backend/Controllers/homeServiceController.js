@@ -32,11 +32,32 @@ const upload = multer({
 });
 
 // Helper function to check MongoDB connection
-const checkDbConnection = () => {
+const checkDbConnection = async () => {
     const state = mongoose.connection.readyState;
-    console.log('MongoDB connection state:', state);
-    if (state !== 1) {
-        throw new Error('Database connection is not ready. Current state: ' + state);
+    const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+    console.log(`MongoDB connection state: ${states[state]}`);
+    
+    if (state === 2) { // connecting
+        // Wait for connection to establish
+        await new Promise((resolve) => {
+            const checkConnection = setInterval(() => {
+                const currentState = mongoose.connection.readyState;
+                if (currentState === 1) {
+                    clearInterval(checkConnection);
+                    resolve();
+                }
+            }, 100);
+            
+            // Timeout after 5 seconds
+            setTimeout(() => {
+                clearInterval(checkConnection);
+                resolve();
+            }, 5000);
+        });
+    }
+    
+    if (mongoose.connection.readyState !== 1) {
+        throw new Error(`Database connection is not ready. Current state: ${states[state]}`);
     }
 };
 
@@ -63,7 +84,7 @@ const validateServiceData = (title, description) => {
 // Get all home services
 export const getAllHomeServices = async (req, res) => {
     try {
-        checkDbConnection();
+        await checkDbConnection();
         console.log('Fetching all home services...');
         
         const homeServices = await HomeService.find().sort({ position: 1, createdAt: -1 });
@@ -77,6 +98,15 @@ export const getAllHomeServices = async (req, res) => {
     } catch (error) {
         console.error('Error in getAllHomeServices:', error);
         console.error('Stack trace:', error.stack);
+        
+        if (error.message.includes('Database connection is not ready')) {
+            return res.status(503).json({
+                success: false,
+                message: 'Service temporarily unavailable',
+                error: 'Please try again later',
+                dbState: mongoose.connection.readyState
+            });
+        }
         
         res.status(500).json({
             success: false,
