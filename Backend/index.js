@@ -80,8 +80,12 @@ let isConnected = false;
 
 const validateMongoURI = (uri) => {
     if (!uri) return false;
-    const mongoURIPattern = /^mongodb(\+srv)?:\/\/[^:]+:[^@]+@[^/]+\/[^?]+(\?.*)?$/;
-    return mongoURIPattern.test(uri);
+    try {
+        const parsed = new URL(uri);
+        return parsed.protocol === 'mongodb+srv:' || parsed.protocol === 'mongodb:';
+    } catch (error) {
+        return false;
+    }
 };
 
 const connectToDatabase = async () => {
@@ -160,14 +164,15 @@ app.use('/api/v1', async (req, res, next) => {
     }
 });
 
-app.use('/api/v1', homeContentRoutes);
-app.use('/api/v1', homeCourseRoutes);
-app.use('/api/v1', homeServiceRoutes);
-app.use('/api/v1', serviceContentRoutes);
-app.use('/api/v1', careerRoutes);
-app.use('/api/v1', contactRoutes);
-app.use('/api/v1', enrollRoutes);
-app.use('/api/v1', enrollCourseRoutes);
+// Mount routes with proper paths
+app.use('/api/v1/homeContent', homeContentRoutes);
+app.use('/api/v1/homeCourse', homeCourseRoutes);
+app.use('/api/v1/homeService', homeServiceRoutes);
+app.use('/api/v1/serviceContent', serviceContentRoutes);
+app.use('/api/v1/career', careerRoutes);
+app.use('/api/v1/contact', contactRoutes);
+app.use('/api/v1/enroll', enrollRoutes);
+app.use('/api/v1/enrollCourse', enrollCourseRoutes);
 app.use('/api/v1/stats', statsRoutes);
 
 // Root
@@ -266,6 +271,15 @@ app.use('*', (req, res) => {
             'GET /api/v1/stats'
         ]
     });
+});
+
+// Start server
+const PORT = 5001;
+app.listen(PORT, () => {
+    console.log(`\nServer is running on port ${PORT}`);
+    console.log(`- Local: http://localhost:${PORT}`);
+    console.log(`- Health check: http://localhost:${PORT}/health`);
+    console.log(`- API base URL: http://localhost:${PORT}/api/v1`);
 });
 
 export default app;

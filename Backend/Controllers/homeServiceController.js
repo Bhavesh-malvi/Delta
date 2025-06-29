@@ -84,13 +84,25 @@ const validateServiceData = (title, description) => {
 // Get all home services
 export const getAllHomeServices = async (req, res) => {
     try {
-        await checkDbConnection();
-        console.log('Fetching all home services...');
+        // Check database connection
+        if (mongoose.connection.readyState !== 1) {
+            console.log('Database not connected. Current state:', mongoose.connection.readyState);
+            await mongoose.connect(process.env.MONGODB_URI, {
+                serverSelectionTimeoutMS: 5000,
+                socketTimeoutMS: 45000,
+                connectTimeoutMS: 10000
+            });
+        }
         
-        const homeServices = await HomeService.find().sort({ position: 1, createdAt: -1 });
+        console.log('Fetching all home services...');
+        const homeServices = await HomeService.find()
+            .select('title description image position isActive')
+            .sort({ position: 1, createdAt: -1 })
+            .lean();
+            
         console.log(`Found ${homeServices.length} home services`);
         
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             count: homeServices.length,
             data: homeServices
@@ -99,20 +111,19 @@ export const getAllHomeServices = async (req, res) => {
         console.error('Error in getAllHomeServices:', error);
         console.error('Stack trace:', error.stack);
         
-        if (error.message.includes('Database connection is not ready')) {
+        // Check if it's a connection error
+        if (error.name === 'MongoServerSelectionError') {
             return res.status(503).json({
                 success: false,
-                message: 'Service temporarily unavailable',
-                error: 'Please try again later',
-                dbState: mongoose.connection.readyState
+                message: 'Database connection failed',
+                error: 'Please try again later'
             });
         }
         
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: 'Error fetching home services',
-            error: error.message,
-            dbState: mongoose.connection.readyState
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
 };
