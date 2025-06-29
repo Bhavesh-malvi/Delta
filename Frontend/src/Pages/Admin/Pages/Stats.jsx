@@ -8,55 +8,45 @@ const RETRY_DELAY = 1000; // 1 second
 
 const Stats = () => {
     const [stats, setStats] = useState({
-        totalEnrollments: 0,
-        totalCourses: 0,
-        totalServices: 0,
-        totalCareers: 0,
-        totalContacts: 0
+        totalCourses: 0
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [formData, setFormData] = useState({
-        totalEnrollments: '',
-        totalCourses: '',
-        totalServices: '',
-        totalCareers: '',
-        totalContacts: ''
+        totalCourses: ''
     });
     const [updateStatus, setUpdateStatus] = useState('');
 
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     useEffect(() => {
+        const fetchStats = async (retryAttempt = 0) => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}${ENDPOINTS.STATS}`);
+                if (response.data.success) {
+                    // Only extract totalCourses from the response
+                    const totalCourses = response.data.data?.totalCourses || 0;
+                    setStats({ totalCourses });
+                    setFormData({
+                        totalCourses: totalCourses || ''
+                    });
+                    setError(null);
+                }
+                setLoading(false);
+            } catch (err) {
+                console.error('Error fetching stats:', err);
+                if (retryAttempt < MAX_RETRIES && err.response?.status === 503) {
+                    await sleep(RETRY_DELAY);
+                    return fetchStats(retryAttempt + 1);
+                }
+                setError('Failed to fetch stats. Please try again later.');
+                setLoading(false);
+            }
+        };
+
         fetchStats();
     }, []);
-
-    const fetchStats = async (retryAttempt = 0) => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}${ENDPOINTS.STATS}`);
-            if (response.data.success) {
-                setStats(response.data.data);
-                setFormData({
-                    totalEnrollments: response.data.data.totalEnrollments || '',
-                    totalCourses: response.data.data.totalCourses || '',
-                    totalServices: response.data.data.totalServices || '',
-                    totalCareers: response.data.data.totalCareers || '',
-                    totalContacts: response.data.data.totalContacts || ''
-                });
-                setError(null);
-            }
-            setLoading(false);
-        } catch (err) {
-            console.error('Error fetching stats:', err);
-            if (retryAttempt < MAX_RETRIES && err.response?.status === 503) {
-                await sleep(RETRY_DELAY);
-                return fetchStats(retryAttempt + 1);
-            }
-            setError('Failed to fetch stats. Please try again later.');
-            setLoading(false);
-        }
-    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -75,11 +65,12 @@ const Stats = () => {
         const updateWithRetry = async (attempt = 0) => {
             try {
                 const processedData = {
-                    totalEnrollments: Number(formData.totalEnrollments) || 0,
                     totalCourses: Number(formData.totalCourses) || 0,
-                    totalServices: Number(formData.totalServices) || 0,
-                    totalCareers: Number(formData.totalCareers) || 0,
-                    totalContacts: Number(formData.totalContacts) || 0
+                    // Keep other fields unchanged by sending their current values
+                    totalEnrollments: stats.totalEnrollments,
+                    totalServices: stats.totalServices,
+                    totalCareers: stats.totalCareers,
+                    totalContacts: stats.totalContacts
                 };
 
                 const response = await axios.put(`${API_BASE_URL}${ENDPOINTS.STATS}`, processedData);
@@ -125,24 +116,8 @@ const Stats = () => {
                 <h2>Current Stats</h2>
                 <div className="stats-grid">
                     <div className="stat-item">
-                        <label>Total Enrollments</label>
-                        <span>{stats.totalEnrollments || 0}</span>
-                    </div>
-                    <div className="stat-item">
                         <label>Total Courses</label>
                         <span>{stats.totalCourses || 0}</span>
-                    </div>
-                    <div className="stat-item">
-                        <label>Total Services</label>
-                        <span>{stats.totalServices || 0}</span>
-                    </div>
-                    <div className="stat-item">
-                        <label>Total Careers</label>
-                        <span>{stats.totalCareers || 0}</span>
-                    </div>
-                    <div className="stat-item">
-                        <label>Total Contacts</label>
-                        <span>{stats.totalContacts || 0}</span>
                     </div>
                 </div>
             </div>
@@ -151,60 +126,12 @@ const Stats = () => {
                 <h2>Update Stats</h2>
                 <div className="form-grid">
                     <div className="form-group">
-                        <label htmlFor="totalEnrollments">Total Enrollments</label>
-                        <input
-                            type="number"
-                            id="totalEnrollments"
-                            name="totalEnrollments"
-                            value={formData.totalEnrollments}
-                            onChange={handleInputChange}
-                            min="0"
-                            disabled={loading}
-                        />
-                    </div>
-                    <div className="form-group">
                         <label htmlFor="totalCourses">Total Courses</label>
                         <input
                             type="number"
                             id="totalCourses"
                             name="totalCourses"
                             value={formData.totalCourses}
-                            onChange={handleInputChange}
-                            min="0"
-                            disabled={loading}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="totalServices">Total Services</label>
-                        <input
-                            type="number"
-                            id="totalServices"
-                            name="totalServices"
-                            value={formData.totalServices}
-                            onChange={handleInputChange}
-                            min="0"
-                            disabled={loading}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="totalCareers">Total Careers</label>
-                        <input
-                            type="number"
-                            id="totalCareers"
-                            name="totalCareers"
-                            value={formData.totalCareers}
-                            onChange={handleInputChange}
-                            min="0"
-                            disabled={loading}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="totalContacts">Total Contacts</label>
-                        <input
-                            type="number"
-                            id="totalContacts"
-                            name="totalContacts"
-                            value={formData.totalContacts}
                             onChange={handleInputChange}
                             min="0"
                             disabled={loading}
