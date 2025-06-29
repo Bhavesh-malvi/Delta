@@ -30,7 +30,13 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-    origin: ['https://deltawaresolution.com', 'https://www.deltawaresolution.com', 'http://localhost:3000', 'http://localhost:5173'],
+    origin: [
+        'https://deltawaresolution.com',
+        'https://www.deltawaresolution.com',
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://delta-teal.vercel.app'
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
