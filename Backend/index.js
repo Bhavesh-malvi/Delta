@@ -17,6 +17,7 @@ import careerRoutes from './Routes/careerRoutes.js';
 import contactRoutes from './Routes/contactRoutes.js';
 import enrollRoutes from './Routes/enrollRoutes.js';
 import enrollCourseRoutes from './Routes/enrollCourseRoutes.js';
+import statsRoutes from './Routes/statsRoutes.js';
 
 const log = debug('app:server');
 
@@ -102,6 +103,7 @@ app.use('/api/career', careerRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/enroll', enrollRoutes);
 app.use('/api/enrollCourse', enrollCourseRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Root
 app.get('/', (req, res) => {

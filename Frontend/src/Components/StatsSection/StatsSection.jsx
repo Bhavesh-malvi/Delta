@@ -2,13 +2,34 @@ import React, { useEffect, useRef, useState } from 'react';
 import { homeContent2 } from "../../assets/assets.js";
 import "./StatsSection.css";
 import { FaProjectDiagram, FaSmile } from "react-icons/fa";
+import axiosInstance from '../../config/api';
 
 const StatsSection = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [projectCount, setProjectCount] = useState(0);
     const [customerCount, setCustomerCount] = useState(0);
+    const [realCustomerCount, setRealCustomerCount] = useState(21);
     const sectionRef = useRef(null);
     const content = homeContent2[0];
+
+    // Fetch stats from backend
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await axiosInstance.get('/stats');
+                if (response.data && response.data.success) {
+                    setRealCustomerCount(response.data.data.displayedCount);
+                }
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        };
+
+        fetchStats();
+        // Fetch stats every 5 minutes
+        const interval = setInterval(fetchStats, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     const animateValue = (start, end, setter, duration) => {
         setter(start); // Reset to start value
@@ -45,7 +66,7 @@ const StatsSection = () => {
                     // Reset counts and start new animations
                     setTimeout(() => {
                         const timer1 = animateValue(0, parseInt(content.totalProjects), setProjectCount, 2000);
-                        const timer2 = animateValue(0, parseInt(content.happyCustomers), setCustomerCount, 2500);
+                        const timer2 = animateValue(0, realCustomerCount, setCustomerCount, 2500);
                         animationTimers.push(timer1, timer2);
                     }, 500);
                 } else {
@@ -70,7 +91,7 @@ const StatsSection = () => {
             // Clear any running animations on cleanup
             animationTimers.forEach(timer => clearInterval(timer));
         };
-    }, [content.totalProjects, content.happyCustomers]);
+    }, [content.totalProjects, realCustomerCount]);
 
     return (
         <section className="stats-section" ref={sectionRef}>

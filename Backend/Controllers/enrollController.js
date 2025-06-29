@@ -1,5 +1,6 @@
 import Enroll from '../models/Enroll.js';
 import mongoose from 'mongoose';
+import Stats from '../models/Stats.js';
 
 // ✅ Create new enrollment
 export const createEnroll = async (req, res) => {
@@ -41,6 +42,14 @@ export const createEnroll = async (req, res) => {
             const enroll = new Enroll({ name, email, phone, course, message });
             await enroll.save();
             console.log('Enrollment saved successfully:', enroll);
+
+            // Increment customer count in stats
+            let stats = await Stats.findOne();
+            if (!stats) {
+                stats = await Stats.create({});
+            }
+            stats.customerCount += 1;
+            await stats.save();
 
             res.status(201).json({
                 success: true,

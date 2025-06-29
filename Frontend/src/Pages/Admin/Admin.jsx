@@ -12,6 +12,7 @@ import Career from './Pages/Career';
 import ContactData from './Pages/ContactData';
 import EnrollData from './Pages/EnrollData';
 import Courses from './Pages/Courses';
+import Stats from './Pages/Stats';
 import ScrollToTop from '../../Components/ScrollToTop/ScrollToTop';
 
 const Admin = () => {
@@ -37,6 +38,7 @@ const Admin = () => {
                         <Route path="contact-data" element={<ContactData />} />
                         <Route path="enroll-data" element={<EnrollData />} />
                         <Route path="courses" element={<Courses />} />
+                        <Route path="stats" element={<Stats />} />
                         <Route path="*" element={<Navigate to="/deltaadmin/courses" replace />} />
                     </Routes>
                 </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css';
-import { FaGraduationCap } from 'react-icons/fa';
+import { FaGraduationCap, FaChartLine } from 'react-icons/fa';
 
 function Sidebar() {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -21,6 +21,11 @@ function Sidebar() {
             path: '/admin/enroll-courses',
             name: 'Enroll Courses',
             icon: <FaGraduationCap />
+        },
+        {
+            title: 'Stats',
+            path: '/deltaadmin/stats',
+            icon: <FaChartLine />
         },
     ];
 
