@@ -113,7 +113,7 @@ const Stats = () => {
             )}
 
             <div className="stats-admin-info">
-                <h2>Current Stats</h2>
+                <h3>Current Stats</h3>
                 <div className="stats-grid">
                     <div className="stat-item">
                         <label>Total Courses</label>
@@ -123,7 +123,7 @@ const Stats = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="stats-admin-form">
-                <h2>Update Stats</h2>
+                <h3>Update Stats</h3>
                 <div className="form-grid">
                     <div className="form-group">
                         <label htmlFor="totalCourses">Total Courses</label>
