@@ -14,11 +14,11 @@ const ServicesCourse = () => {
         },
         {
             title: "Healthcare Startups",
-            icon: who2Img
+            icon: who3Img
         },
         {
             title: "Students",
-            icon: who3Img
+            icon: who2Img
         }
     ];
 
@@ -45,6 +45,7 @@ const ServicesCourse = () => {
 
     return (
         <div className="services-course-container">
+            <h2 className="services-title">Who can use our Services</h2>
             <motion.div 
                 className="services-course-grid"
                 variants={containerVariants}

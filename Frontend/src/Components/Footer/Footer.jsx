@@ -11,7 +11,7 @@ const Footer = () => {
                     <div className="footer-brand">
                         <img src={logo} alt="DeltaWare Logo" className="footer-logo" />
                         <h2 className="footer-title">
-                            DELTA<span>WARE</span>
+                            Delta<span>ware</span>
                         </h2>
                     </div>
                     <p className="footer-tagline">

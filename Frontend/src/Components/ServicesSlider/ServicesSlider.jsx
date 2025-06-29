@@ -119,7 +119,7 @@ function ServicesSlider() {
 
     return (
         <div className="services-slider-container">
-            <h2 className="services-title">Service's</h2>
+            <h2 className="services-title">Services</h2>
             <div 
                 className="services-slider"
                 onMouseEnter={() => setIsHovered(true)}

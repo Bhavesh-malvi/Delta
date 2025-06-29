@@ -103,6 +103,7 @@
     transform: translateX(100px);
     opacity: 0;
     animation: slideInRight 0.5s forwards;
+    cursor: pointer;
 }
 
 .step-card:hover {

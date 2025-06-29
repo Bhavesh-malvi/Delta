@@ -36,6 +36,7 @@
 }
 
 .contact-card {
+    cursor: pointer;
     flex: 1;
     min-width: 300px;
     max-width: 500px;

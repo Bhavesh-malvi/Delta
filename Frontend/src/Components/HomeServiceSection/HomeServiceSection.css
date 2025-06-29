@@ -21,10 +21,10 @@
 }
 
 .service-title {
-    font-size: 3.5rem;
+    font-size: 3.5rem;  
     color: #00ff87;
     text-align: center;
-    margin-bottom: 60px;
+    margin-bottom: 80px !important;
     text-shadow: 0 0 10px rgba(0, 255, 135, 0.5),
                 0 0 20px rgba(0, 255, 135, 0.3),
                 0 0 30px rgba(0, 255, 135, 0.1);
@@ -59,6 +59,7 @@
     backdrop-filter: blur(10px);
     min-height: 450px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
 }
 
 .service-card:hover {
