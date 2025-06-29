@@ -20,31 +20,30 @@ const Stats = () => {
 
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    useEffect(() => {
-        const fetchStats = async (retryAttempt = 0) => {
-            try {
-                const response = await axios.get(`${API_BASE_URL}${ENDPOINTS.STATS}`);
-                if (response.data.success) {
-                    // Only extract totalCourses from the response
-                    const totalCourses = response.data.data?.totalCourses || 0;
-                    setStats({ totalCourses });
-                    setFormData({
-                        totalCourses: totalCourses || ''
-                    });
-                    setError(null);
-                }
-                setLoading(false);
-            } catch (err) {
-                console.error('Error fetching stats:', err);
-                if (retryAttempt < MAX_RETRIES && err.response?.status === 503) {
-                    await sleep(RETRY_DELAY);
-                    return fetchStats(retryAttempt + 1);
-                }
-                setError('Failed to fetch stats. Please try again later.');
-                setLoading(false);
+    const fetchStats = async (retryAttempt = 0) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}${ENDPOINTS.STATS}`);
+            if (response.data.success) {
+                const totalCourses = response.data.data?.totalCourses || 0;
+                setStats({ totalCourses });
+                setFormData({
+                    totalCourses: totalCourses || ''
+                });
+                setError(null);
             }
-        };
+            setLoading(false);
+        } catch (err) {
+            console.error('Error fetching stats:', err);
+            if (retryAttempt < MAX_RETRIES && err.response?.status === 503) {
+                await sleep(RETRY_DELAY);
+                return fetchStats(retryAttempt + 1);
+            }
+            setError('Failed to fetch stats. Please try again later.');
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchStats();
     }, []);
 
@@ -65,12 +64,7 @@ const Stats = () => {
         const updateWithRetry = async (attempt = 0) => {
             try {
                 const processedData = {
-                    totalCourses: Number(formData.totalCourses) || 0,
-                    // Keep other fields unchanged by sending their current values
-                    totalEnrollments: stats.totalEnrollments,
-                    totalServices: stats.totalServices,
-                    totalCareers: stats.totalCareers,
-                    totalContacts: stats.totalContacts
+                    totalCourses: Number(formData.totalCourses) || 0
                 };
 
                 const response = await axios.put(`${API_BASE_URL}${ENDPOINTS.STATS}`, processedData);
@@ -78,10 +72,11 @@ const Stats = () => {
                     setSuccess('Stats updated successfully');
                     setError(null);
                     setUpdateStatus('');
-                    await fetchStats();
+                    setStats(processedData); // Update local state immediately
                 }
                 setLoading(false);
             } catch (err) {
+                console.error('Update error:', err);
                 if (attempt < MAX_RETRIES && err.response?.status === 503) {
                     await sleep(RETRY_DELAY);
                     return updateWithRetry(attempt + 1);
