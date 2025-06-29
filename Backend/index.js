@@ -1,8 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import path from 'path';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 
@@ -17,16 +14,38 @@ import contactRoutes from './Routes/contactRoutes.js';
 import enrollCourseRoutes from './Routes/enrollCourseRoutes.js';
 import statsRoutes from './Routes/statsRoutes.js';
 
-// Load environment variables
+// Import database connection
+import connectDB from './db/db.js';
+
+// Load environment variables and configurations
 import './config/env.js';
 import './config/cloudinary.js';
 
 const app = express();
 
+// CORS configuration
+const corsOptions = {
+    origin: ['https://deltawaresolution.com', 'http://localhost:5173'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 204,
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Global error handler:', err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal server error',
+        error: process.env.NODE_ENV === 'development' ? err : {}
+    });
+});
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -48,6 +67,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
+
 // Mount routes
 app.use('/api/v1/enroll', enrollRoutes);
 app.use('/api/v1/homeContent', homeContentRoutes);
@@ -59,15 +83,30 @@ app.use('/api/v1/contact', contactRoutes);
 app.use('/api/v1/enrollCourse', enrollCourseRoutes);
 app.use('/api/v1/stats', statsRoutes);
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('MongoDB connection error:', err));
-
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
+    });
 });
+
+const startServer = async () => {
+    try {
+        // Connect to MongoDB
+        await connectDB();
+
+        const PORT = process.env.PORT || 5001;
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+
+startServer();
 
 
 

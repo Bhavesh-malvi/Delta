@@ -8,18 +8,31 @@ const __dirname = path.dirname(__filename);
 // Load environment variables from .env file
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
-// Default environment variables
-const defaultEnv = {
-    MONGODB_URI: 'mongodb+srv://bhaveshmalviya335:Bhavesh@cluster0.hljx43v.mongodb.net/delta?retryWrites=true&w=majority',
-    CLOUDINARY_CLOUD_NAME: 'do98lw5ja',
-    CLOUDINARY_API_KEY: '937151688518423',
-    CLOUDINARY_API_SECRET: 'W7n8ywPVSRxxh5BaFchK70_1mrM',
-    NODE_ENV: process.env.NODE_ENV || 'development',
+// Required environment variables
+const requiredEnvVars = [
+    'MONGODB_URI',
+    'CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET'
+];
+
+// Check for required environment variables
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+if (missingEnvVars.length > 0) {
+    console.error('\nMissing required environment variables:');
+    missingEnvVars.forEach(envVar => console.error(`- ${envVar}`));
+    console.error('\nPlease set these variables in your .env file');
+    process.exit(1);
+}
+
+// Set default values for optional environment variables
+const optionalEnvVars = {
+    NODE_ENV: 'development',
     PORT: '5001'
 };
 
-// Set environment variables if not already set
-Object.entries(defaultEnv).forEach(([key, value]) => {
+// Set optional environment variables if not already set
+Object.entries(optionalEnvVars).forEach(([key, value]) => {
     if (!process.env[key]) {
         process.env[key] = value;
     }
