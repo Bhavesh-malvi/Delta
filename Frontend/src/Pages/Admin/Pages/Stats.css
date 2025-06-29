@@ -189,6 +189,36 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.stats-admin-updating {
+    background-color: rgba(0, 255, 135, 0.1);
+    color: #00ff87;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid rgba(0, 255, 135, 0.2);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.update-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 255, 135, 0.3);
+    border-radius: 50%;
+    border-top-color: #00ff87;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 @media (max-width: 768px) {
     .stats-grid,
     .form-grid {

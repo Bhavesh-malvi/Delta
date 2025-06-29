@@ -24,8 +24,7 @@ const Stats = () => {
         totalCareers: '',
         totalContacts: ''
     });
-    const [retryCount, setRetryCount] = useState(0);
-    const [isRetrying, setIsRetrying] = useState(false);
+    const [updateStatus, setUpdateStatus] = useState('');
 
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -51,14 +50,11 @@ const Stats = () => {
         } catch (err) {
             console.error('Error fetching stats:', err);
             if (retryAttempt < MAX_RETRIES && err.response?.status === 503) {
-                setIsRetrying(true);
-                setError(`Service temporarily unavailable. Retrying... (${retryAttempt + 1}/${MAX_RETRIES})`);
                 await sleep(RETRY_DELAY);
                 return fetchStats(retryAttempt + 1);
             }
             setError('Failed to fetch stats. Please try again later.');
             setLoading(false);
-            setIsRetrying(false);
         }
     };
 
@@ -73,11 +69,11 @@ const Stats = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setRetryCount(0);
+        setError(null);
+        setUpdateStatus('Updating stats...');
         
         const updateWithRetry = async (attempt = 0) => {
             try {
-                // Convert form values to numbers and handle empty strings
                 const processedData = {
                     totalEnrollments: Number(formData.totalEnrollments) || 0,
                     totalCourses: Number(formData.totalCourses) || 0,
@@ -90,22 +86,18 @@ const Stats = () => {
                 if (response.data.success) {
                     setSuccess('Stats updated successfully');
                     setError(null);
+                    setUpdateStatus('');
                     await fetchStats();
                 }
                 setLoading(false);
-                setIsRetrying(false);
             } catch (err) {
-                console.error('Error updating stats:', err);
                 if (attempt < MAX_RETRIES && err.response?.status === 503) {
-                    setIsRetrying(true);
-                    setRetryCount(attempt + 1);
-                    setError(`Update failed. Retrying... (${attempt + 1}/${MAX_RETRIES})`);
                     await sleep(RETRY_DELAY);
                     return updateWithRetry(attempt + 1);
                 }
-                setError(err.response?.data?.message || 'Failed to update stats. Please try again.');
+                setError('Failed to update stats. Please try again.');
+                setUpdateStatus('');
                 setLoading(false);
-                setIsRetrying(false);
             }
         };
 
@@ -116,15 +108,16 @@ const Stats = () => {
         }, 3000);
     };
 
-    if (loading && !isRetrying) return <div className="stats-admin-loading">Loading...</div>;
+    if (loading && !updateStatus) return <div className="stats-admin-loading">Loading...</div>;
 
     return (
         <div className="stats-admin-container">
             {error && <div className="stats-admin-error">{error}</div>}
             {success && <div className="stats-admin-success">{success}</div>}
-            {isRetrying && (
-                <div className="stats-admin-retrying">
-                    Retrying... Attempt {retryCount} of {MAX_RETRIES}
+            {updateStatus && (
+                <div className="stats-admin-updating">
+                    <div className="update-spinner"></div>
+                    {updateStatus}
                 </div>
             )}
 
@@ -166,7 +159,7 @@ const Stats = () => {
                             value={formData.totalEnrollments}
                             onChange={handleInputChange}
                             min="0"
-                            disabled={loading || isRetrying}
+                            disabled={loading}
                         />
                     </div>
                     <div className="form-group">
@@ -178,7 +171,7 @@ const Stats = () => {
                             value={formData.totalCourses}
                             onChange={handleInputChange}
                             min="0"
-                            disabled={loading || isRetrying}
+                            disabled={loading}
                         />
                     </div>
                     <div className="form-group">
@@ -190,7 +183,7 @@ const Stats = () => {
                             value={formData.totalServices}
                             onChange={handleInputChange}
                             min="0"
-                            disabled={loading || isRetrying}
+                            disabled={loading}
                         />
                     </div>
                     <div className="form-group">
@@ -202,7 +195,7 @@ const Stats = () => {
                             value={formData.totalCareers}
                             onChange={handleInputChange}
                             min="0"
-                            disabled={loading || isRetrying}
+                            disabled={loading}
                         />
                     </div>
                     <div className="form-group">
@@ -214,12 +207,12 @@ const Stats = () => {
                             value={formData.totalContacts}
                             onChange={handleInputChange}
                             min="0"
-                            disabled={loading || isRetrying}
+                            disabled={loading}
                         />
                     </div>
                 </div>
-                <button type="submit" disabled={loading || isRetrying}>
-                    {loading || isRetrying ? 'Updating...' : 'Update Stats'}
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Updating...' : 'Update Stats'}
                 </button>
             </form>
         </div>
