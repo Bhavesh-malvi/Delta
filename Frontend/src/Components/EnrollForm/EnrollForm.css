@@ -68,24 +68,25 @@
     gap: 25px;
 }
 
-.form-group {
+.form-group1 {
+    max-width: 550px;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.form-group label {
+.form-group1 label {
     color: #00ffbb;
     font-size: 1rem;
     text-align: left;
     align-self: flex-start;
 }
 
-.form-group input[type="text"],
-.form-group input[type="tel"],
-.form-group input[type="email"],
-.form-group select,
-.form-group textarea {
+.form-group1 input[type="text"],
+.form-group1 input[type="tel"],
+.form-group1 input[type="email"],
+.form-group1 select,
+.form-group1 textarea {
     padding: 12px;
     border-radius: 8px;
     border: 1px solid rgba(0, 255, 187, 0.2);
@@ -96,7 +97,7 @@
     box-sizing: border-box;
 }
 
-.form-group select {
+.form-group1 select {
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
@@ -108,26 +109,26 @@
     padding-right: 40px;
 }
 
-.form-group select option {
+.form-group1 select option {
     background: rgba(0, 0, 0, 0.9);
     color: #fff;
     padding: 12px;
 }
 
-.form-group select:focus {
+.form-group1 select:focus {
     outline: none;
     border-color: #00ffbb;
     box-shadow: 0 0 10px rgba(0, 255, 187, 0.2);
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.form-group1 input:focus,
+.form-group1 textarea:focus {
     outline: none;
     border-color: #00ffbb;
     box-shadow: 0 0 10px rgba(0, 255, 187, 0.2);
 }
 
-.form-group textarea {
+.form-group1 textarea {
     min-height: 120px;
     resize: vertical;
 }
@@ -235,19 +236,19 @@
     transform: scale(1.1);
 }
 
-.modal-content .form-group {
+.modal-content .form-group1 {
     margin-bottom: 20px;
 }
 
-.modal-content .form-group label {
+.modal-content .form-group1 label {
     color: #00ffbb;
     font-size: 1rem;
     margin-bottom: 8px;
     display: block;
 }
 
-.modal-content .form-group input,
-.modal-content .form-group textarea {
+.modal-content .form-group1 input,
+.modal-content .form-group1 textarea {
     width: 100%;
     padding: 12px;
     border-radius: 8px;
@@ -257,14 +258,14 @@
     font-size: 1rem;
 }
 
-.modal-content .form-group input:focus,
-.modal-content .form-group textarea:focus {
+.modal-content .form-group1 input:focus,
+.modal-content .form-group1 textarea:focus {
     outline: none;
     border-color: #00ffbb;
     box-shadow: 0 0 10px rgba(0, 255, 187, 0.2);
 }
 
-.modal-content .form-group textarea {
+.modal-content .form-group1 textarea {
     min-height: 100px;
     resize: vertical;
 }

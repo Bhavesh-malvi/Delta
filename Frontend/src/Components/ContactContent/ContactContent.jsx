@@ -10,6 +10,7 @@ const ContactContent = () => {
         message: ''
     });
     const [status, setStatus] = useState({ type: '', message: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -21,14 +22,33 @@ const ContactContent = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
+        setStatus({ type: '', message: '' });
+
         try {
             const response = await axiosInstance.post(ENDPOINTS.CONTACT, formData);
             if (response.data.success) {
-                setStatus({ type: 'success', message: 'Message sent successfully!' });
-                setFormData({ name: '', email: '', phone: '', message: '' });
+                setStatus({
+                    type: 'success',
+                    message: 'Message sent successfully!'
+                });
+                setFormData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    message: ''
+                });
+            } else {
+                throw new Error(response.data.message || 'Failed to send message');
             }
         } catch (error) {
-            setStatus({ type: 'error', message: 'Failed to send message. Please try again.' });
+            console.error('Contact form error:', error);
+            setStatus({
+                type: 'error',
+                message: error.response?.data?.message || error.message || 'Failed to send message. Please try again.'
+            });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -87,7 +107,7 @@ const ContactContent = () => {
                             required
                         />
                     </div>
-                    <div className="form-group">
+                    <div className="form-row">
                         <textarea 
                             name="message"
                             placeholder="Message" 
@@ -96,7 +116,13 @@ const ContactContent = () => {
                             required
                         ></textarea>
                     </div>
-                    <button type="submit" className="submit-btn">Send Message</button>
+                    <button 
+                        type="submit" 
+                        className="submit-btn"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Sending...' : 'Send Message'}
+                    </button>
                 </form>
             </div>
 

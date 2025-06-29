@@ -97,7 +97,7 @@ const EnrollForm = () => {
                     )}
 
                     <form className="registration-form" onSubmit={handleSubmit}>
-                        <div className="form-group">
+                        <div className="form-group1">
                             <label>Name <span className="required">*</span></label>
                             <input
                                 type="text"
@@ -109,7 +109,7 @@ const EnrollForm = () => {
                             />
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group1">
                             <label>Email <span className="required">*</span></label>
                             <input
                                 type="email"
@@ -121,7 +121,7 @@ const EnrollForm = () => {
                             />
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group1">
                             <label>Phone <span className="required">*</span></label>
                             <input
                                 type="tel"
@@ -133,7 +133,7 @@ const EnrollForm = () => {
                             />
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group1">
                             <label>Course <span className="required">*</span></label>
                             <div className="course-select-container">
                                 <select
@@ -152,7 +152,7 @@ const EnrollForm = () => {
                             </div>
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group1">
                             <label>Message <span className="required">*</span></label>
                             <textarea
                                 name="message"
