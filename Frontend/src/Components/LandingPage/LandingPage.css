@@ -181,6 +181,13 @@
     .company-name {
         font-size: 3.5rem;
         letter-spacing: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .company-name span:last-child {
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
     }
     
     .subtitle {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axiosInstance, { ENDPOINTS } from '../../config/api';
 import './ContactContent.css';
+import { Link } from 'react-router-dom';
 
 const ContactContent = () => {
     const [formData, setFormData] = useState({

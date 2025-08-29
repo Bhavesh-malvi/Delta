@@ -99,7 +99,7 @@ const ServicesContent = () => {
                             />
                         </div>
                         <div className="service-info">
-                            <h2 className="service-title">{service.title}</h2>
+                            <h2 className="service-title service-title1">{service.title}</h2>
                             <p className="service-description">{service.description}</p>
                             <ul className="service-points">
                                 {service.points && service.points.map((point, index) => (

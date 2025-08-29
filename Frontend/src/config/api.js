@@ -8,9 +8,10 @@ export const API_TIMEOUT = 60000; // 60 seconds
 
 // Retry configuration
 export const RETRY_CONFIG = {
-    retries: 2,
-    initialDelayMs: 1000,
-    maxDelayMs: 5000
+    retries: 3, // Increased from 2 to 3
+    initialDelayMs: 2000, // Increased from 1000 to 2000
+    maxDelayMs: 10000, // Increased from 5000 to 10000
+    statusCodesToRetry: [500, 502, 503, 504] // Added specific status codes to retry
 };
 
 // API endpoints
@@ -53,7 +54,10 @@ export const ERROR_MESSAGES = {
     FORBIDDEN: 'Access forbidden.',
     VALIDATION_ERROR: 'Validation error occurred.',
     DEFAULT: 'An unexpected error occurred.',
-    RETRYING: 'Connection issue detected. Retrying...'
+    RETRYING: 'Connection issue detected. Retrying...',
+    SERVICE_UNAVAILABLE: 'Service temporarily unavailable. Retrying...',
+    STATUS_503: 'Service is starting up. Please wait...',
+    STATUS_500: 'Server encountered an error. Retrying...'
 };
 
 // Configure axios instance
@@ -74,7 +78,7 @@ const wait = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 const retryRequest = async (config, error) => {
     const retryCount = config.retryCount || 0;
     const shouldRetry = retryCount < RETRY_CONFIG.retries && 
-        (error.response?.status === 500 || !error.response);
+        (RETRY_CONFIG.statusCodesToRetry.includes(error.response?.status) || !error.response);
     
     if (!shouldRetry) {
         return Promise.reject(error);
@@ -86,8 +90,17 @@ const retryRequest = async (config, error) => {
         RETRY_CONFIG.maxDelayMs
     );
 
-    console.log(`🔄 Retrying request (${config.retryCount}/${RETRY_CONFIG.retries})`);
-    await wait(delay);
+    // Add jitter to prevent all retries happening at exactly the same time
+    const jitter = Math.random() * 1000;
+    const finalDelay = delay + jitter;
+
+    console.log(`🔄 Retrying request (${config.retryCount}/${RETRY_CONFIG.retries}) after ${Math.round(finalDelay)}ms`);
+    
+    if (error.response?.status === 503) {
+        console.log('Service unavailable, waiting for startup...');
+    }
+
+    await wait(finalDelay);
     return axiosInstance(config);
 };
 
@@ -127,16 +140,25 @@ axiosInstance.interceptors.response.use(
 
         // Handle final error
         if (error.response) {
+            const status = error.response.status;
             console.error('❌ API Error:', {
                 url: error.config.url,
                 method: error.config.method,
-                status: error.response.status,
+                status: status,
                 data: error.response.data,
                 retryCount: error.config.retryCount
             });
+
+            // Set user-friendly message based on status code
             error.userMessage = error.response.data?.message || 
-                ERROR_MESSAGES[`STATUS_${error.response.status}`] || 
-                ERROR_MESSAGES.DEFAULT;
+                ERROR_MESSAGES[`STATUS_${status}`] || 
+                (status >= 500 ? ERROR_MESSAGES.SERVER_ERROR : ERROR_MESSAGES.DEFAULT);
+
+            // Special handling for 503
+            if (status === 503) {
+                error.userMessage = ERROR_MESSAGES.SERVICE_UNAVAILABLE;
+                error.isStartupError = true;
+            }
         } else if (error.request) {
             console.error('🔍 Network Error:', error.message);
             error.userMessage = ERROR_MESSAGES.NETWORK_ERROR;

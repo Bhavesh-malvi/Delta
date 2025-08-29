@@ -136,8 +136,8 @@ const StatsSection = () => {
                 <div className="stats-side">
                     <div className="stat-box animate-in delay-1">
                         <div className="stat-number">{coursesCount}</div>
-                        <div className="stat-label">Total Courses</div>
-                        <FaGraduationCap className="stat-icon" />commit
+                        <div className="stat-label">Total Projects</div>
+                        <FaGraduationCap className="stat-icon" />
                     </div>
                     <div className="stat-box animate-in delay-2">
                         <div className="stat-number">{customerCount}</div>

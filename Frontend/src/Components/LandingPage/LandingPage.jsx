@@ -6,16 +6,16 @@ const LandingPage = ({ onComplete }) => {
     const [isBlurring, setIsBlurring] = useState(false);
 
     useEffect(() => {
-        // Start blur animation after 2.5 seconds
+        // Start blur animation after 3.5 seconds
         const blurTimer = setTimeout(() => {
             setIsBlurring(true);
-        }, 2500);
+        }, 3500);
 
-        // Hide component after 3 seconds
+        // Hide component after 4 seconds
         const hideTimer = setTimeout(() => {
             setIsVisible(false);
             onComplete();
-        }, 3000);
+        }, 4000);
 
         return () => {
             clearTimeout(blurTimer);
@@ -33,6 +33,7 @@ const LandingPage = ({ onComplete }) => {
                     <h1 className="company-name">
                         <span className="delta-text">Delta</span>
                         <span className="ware-text">ware</span>
+                        <span className="delta-text">&nbsp;Solution</span>
                     </h1>
                     <p className="subtitle">Where Innovation Meets Excellence</p>
                 </div>

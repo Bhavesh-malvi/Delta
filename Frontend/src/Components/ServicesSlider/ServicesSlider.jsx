@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesSlider.css';
-import axiosInstance, { ENDPOINTS } from '../../config/api';
+import axiosInstance, { ENDPOINTS, ERROR_MESSAGES } from '../../config/api';
 import logo1 from '../../assets/img/logo1.jpg';
 
 function ServicesSlider() {
@@ -10,10 +10,13 @@ function ServicesSlider() {
     const [content, setContent] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [retryCount, setRetryCount] = useState(0);
 
     useEffect(() => {
         const fetchContent = async () => {
             try {
+                setLoading(true);
+                setError(null);
                 const response = await axiosInstance.get(ENDPOINTS.HOME_CONTENT);
                 console.log('Fetched content:', response.data);
                 if (response.data && Array.isArray(response.data)) {
@@ -24,16 +27,25 @@ function ServicesSlider() {
                     console.error('Unexpected data format:', response.data);
                     setError('Invalid data format received');
                 }
-                setLoading(false);
             } catch (err) {
                 console.error('Error fetching content:', err);
-                setError('Failed to fetch content: ' + err.message);
+                // If it's a startup error (503), show a more friendly message
+                if (err.isStartupError) {
+                    setError(ERROR_MESSAGES.SERVICE_UNAVAILABLE);
+                    // Retry after a delay
+                    setTimeout(() => {
+                        setRetryCount(prev => prev + 1);
+                    }, 3000);
+                } else {
+                    setError(err.userMessage || 'Failed to fetch content');
+                }
+            } finally {
                 setLoading(false);
             }
         };
 
         fetchContent();
-    }, []);
+    }, [retryCount]); // Added retryCount as dependency
 
     const getImageUrl = (imagePath) => {
         if (!imagePath) return logo1;
@@ -96,7 +108,10 @@ function ServicesSlider() {
     if (loading) {
         return (
             <div className="services-slider-container">
-                <div className="loading-state">Loading content...</div>
+                <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <p>Loading content...</p>
+                </div>
             </div>
         );
     }
@@ -104,7 +119,15 @@ function ServicesSlider() {
     if (error) {
         return (
             <div className="services-slider-container">
-                <div className="error-state">{error}</div>
+                <div className="error-state">
+                    <p>{error}</p>
+                    {error === ERROR_MESSAGES.SERVICE_UNAVAILABLE && (
+                        <div className="retry-message">
+                            <div className="loading-spinner"></div>
+                            <p>Retrying automatically...</p>
+                        </div>
+                    )}
+                </div>
             </div>
         );
     }

@@ -14,7 +14,9 @@ import Footer from './Components/Footer/Footer';
 import ScrollToTop from './Components/ScrollToTop/ScrollToTop';
 import LandingPage from './Components/LandingPage/LandingPage';
 import { API_BASE_URL } from './config/api';
+import PolicyPage from './Pages/PolicyPage';
 import './index.css';
+import useLoadAdsScript from './hooks/useLoadAdsScript';
 
 // Component to handle conditional rendering of Navbar and Footer
 const AppLayout = () => {
@@ -26,6 +28,9 @@ const AppLayout = () => {
     const path = location.pathname.toLowerCase();
     return path.startsWith('/deltaadmin');
   }, [location.pathname]);
+
+  // Hide Navbar/Footer on Policy Page
+  const isPolicyPage = location.pathname === '/privacy-policy';
 
   // Only show landing effect on non-admin routes when first loading the site
   useEffect(() => {
@@ -58,7 +63,7 @@ const AppLayout = () => {
     <>
       {showLanding && !isAdminRoute && <LandingPage onComplete={handleLandingComplete} />}
       <ScrollToTop />
-      {!isAdminRoute && !showLanding && <Navbar />}
+      {!isAdminRoute && !showLanding && !isPolicyPage && <Navbar />}
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -67,6 +72,7 @@ const AppLayout = () => {
         <Route path="/career" element={<Career />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/enroll" element={<Enroll />} />
+        <Route path="/privacy-policy" element={<PolicyPage />} />
         
         {/* Admin Routes */}
         <Route path="/deltaadmin" element={<Navigate to="/deltaadmin/login" replace />} />
@@ -82,12 +88,13 @@ const AppLayout = () => {
         {/* Catch all route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {!isAdminRoute && !showLanding && <Footer />}
+      {!isAdminRoute && !showLanding && !isPolicyPage && <Footer />}
     </>
   );
 };
 
 function App() {
+  useLoadAdsScript();
   // Log the API configuration for verification
   console.log('🚀 Frontend deployed to: https://deltawaresolution.com');
   console.log('🔗 Backend API URL: ', API_BASE_URL);
